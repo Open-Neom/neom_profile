@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/auth/ui/login/login_controller.dart';
+import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/firestore/event_firestore.dart';
 import 'package:neom_commons/core/data/firestore/post_firestore.dart';
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
@@ -14,7 +15,6 @@ import 'package:neom_commons/core/domain/model/event.dart';
 import 'package:neom_commons/core/domain/model/post.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/core_utilities.dart';
@@ -69,6 +69,14 @@ class ProfileController extends GetxController implements ProfileService {
 
   TextEditingController nameController = TextEditingController();
   TextEditingController aboutMeController = TextEditingController();
+
+  String _profileName = "";
+  String _profileAboutMe = "";
+  bool _aboutMeValid=true;
+  bool _isValidName = true;
+
+  TextEditingController displayNameController = TextEditingController();
+  TextEditingController bioController = TextEditingController();
 
   @override
   void onInit() async {
@@ -135,13 +143,13 @@ class ProfileController extends GetxController implements ProfileService {
     update([AppPageIdConstants.profile]);
   }
 
-
   @override
   void getItemDetails(AppItem appItem){
     logger.d("getItemDetails for ${appItem.name}");
-    Get.toNamed(AppRouteConstants.itemDetails, arguments: [appItem]);
+    Get.toNamed(AppFlavour.getItemDetailsRoute(),
+        arguments: [appItem]
+    );
   }
-
 
   Future<void> getProfilePosts() async {
     logger.d("");
@@ -158,7 +166,6 @@ class ProfileController extends GetxController implements ProfileService {
     logger.d("${profilePosts.length} Total Posts for Profile");
     update([AppPageIdConstants.profile, AppPageIdConstants.profilePosts]);
   }
-
 
   @override
   void getTotalItems() {
@@ -202,15 +209,6 @@ class ProfileController extends GetxController implements ProfileService {
     logger.d("Location retrieved and updated successfully");
     update([AppPageIdConstants.profile]);
   }
-
-  String _profileName = "";
-  String _profileAboutMe = "";
-  bool _aboutMeValid=true;
-  bool _isValidName = true;
-
-  TextEditingController displayNameController = TextEditingController();
-  TextEditingController bioController = TextEditingController();
-
 
   @override
   Future<void> updateProfileData() async {

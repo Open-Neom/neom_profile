@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/domain/model/event.dart';
 import 'package:neom_commons/core/ui/widgets/event_tile.dart';
-import 'package:neom_commons/core/utils/constants/app_assets.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 
@@ -43,7 +43,9 @@ class MateEvents extends StatelessWidget {
               );
             }
         ) :
-        Image.asset(AppAssets.eventVector01, height: 150)
+        Image.asset(AppFlavour.getEventVector(),
+            height: 150
+        )
       );
     }
 }

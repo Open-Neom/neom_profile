@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/core/ui/static/genres_format.dart';
-import 'package:neom_commons/core/utils/app_color.dart';
-import 'package:neom_commons/core/utils/app_theme.dart';
-import 'package:neom_commons/core/utils/constants/app_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/enums/profile_type.dart';
+import 'package:neom_commons/neom_commons.dart';
 import 'package:readmore/readmore.dart';
 
 import 'mate_details_controller.dart';
@@ -26,11 +19,11 @@ class MateDetailsBody extends StatelessWidget {
       : Obx(()=> Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(_.mate.name.capitalize!, style: textTheme.headline5!.copyWith()),
+          Text(_.mate.name.capitalize!, style: textTheme.headlineSmall!.copyWith()),
           _.mate.type != ProfileType.fan ?
           Row(
             children: [
-              const Icon(FontAwesomeIcons.penFancy,
+              Icon(AppFlavour.getInstrumentIcon(),
                 size: 15.0),
               AppTheme.widthSpace5,
               Text(_.mate.mainFeature.tr.capitalize!,
@@ -60,7 +53,7 @@ class MateDetailsBody extends StatelessWidget {
               trimMode: TrimMode.Line,
               trimCollapsedText: '... ${AppTranslationConstants.readMore.tr}',
               textAlign: TextAlign.justify,
-              style: textTheme.bodyText2!.copyWith(color: Colors.white70, fontSize: 16.0),
+              style: textTheme.bodyMedium!.copyWith(color: Colors.white70, fontSize: 16.0),
               trimExpandedText: ' ${AppTranslationConstants.less.tr.capitalize!}',
             ),
           ),
@@ -79,12 +72,12 @@ class MateDetailsBody extends StatelessWidget {
           ),
           AppTheme.widthSpace5,
           Text(addressSimple.isEmpty ? AppTranslationConstants.notSpecified.tr : addressSimple,
-            style: textTheme.subtitle2!.copyWith(color: AppColor.white80),
+            style: textTheme.titleSmall!.copyWith(color: AppColor.white80),
           ),
           Container(
             padding: const EdgeInsets.only(left: 5.0),
             child: Text(distance == 0 ? "" : "- ${distance.ceil().toString()} ${AppConstants.km}",
-              style: textTheme.subtitle2!.copyWith(color: AppColor.white80),
+              style: textTheme.titleSmall!.copyWith(color: AppColor.white80),
             ),
           ),
         ],

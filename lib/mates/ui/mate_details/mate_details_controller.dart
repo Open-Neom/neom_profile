@@ -1,28 +1,5 @@
 import 'package:get/get.dart';
-import 'package:neom_commons/auth/ui/login/login_controller.dart';
-import 'package:neom_commons/core/data/firestore/activity_feed_firestore.dart';
-import 'package:neom_commons/core/data/firestore/event_firestore.dart';
-import 'package:neom_commons/core/data/firestore/inbox_firestore.dart';
-import 'package:neom_commons/core/data/firestore/instrument_firestore.dart';
-import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
-import 'package:neom_commons/core/data/firestore/post_firestore.dart';
-import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
-import 'package:neom_commons/core/data/implementations/geolocator_controller.dart';
-import 'package:neom_commons/core/data/implementations/user_controller.dart';
-import 'package:neom_commons/core/domain/model/activity_feed.dart';
-import 'package:neom_commons/core/domain/model/app_item.dart';
-import 'package:neom_commons/core/domain/model/app_profile.dart';
-import 'package:neom_commons/core/domain/model/event.dart';
-import 'package:neom_commons/core/domain/model/inbox.dart';
-import 'package:neom_commons/core/domain/model/item_list.dart';
-import 'package:neom_commons/core/domain/model/post.dart';
-import 'package:neom_commons/core/domain/use_cases/geolocator_service.dart';
-import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
-import 'package:neom_commons/core/utils/core_utilities.dart';
-import 'package:neom_commons/core/utils/enums/activity_feed_type.dart';
-import 'package:neom_commons/core/utils/enums/post_type.dart';
+import 'package:neom_commons/neom_commons.dart';
 
 import '../../../profile/ui/profile_controller.dart';
 import '../../domain/use_cases/mate_details_service.dart';
@@ -257,7 +234,9 @@ class MateDetailsController extends GetxController implements MateDetailsService
   @override
   void getItemDetails(AppItem appItem){
     logger.d("getItemDetails for ${appItem.name}");
-    Get.toNamed(AppRouteConstants.itemDetails, arguments: [appItem]);
+    Get.toNamed(AppFlavour.getItemDetailsRoute(),
+        arguments: [appItem]
+    );
   }
 
 

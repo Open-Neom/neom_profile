@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/app_flavour.dart';
 
 import 'package:neom_commons/core/ui/static/genres_format.dart';
 import 'package:neom_commons/core/ui/widgets/diagonally_cut_colored_image.dart';
@@ -11,7 +12,6 @@ import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/constants/url_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_file_from.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 import '../utils/profile_constants.dart';
@@ -20,7 +20,6 @@ import 'widgets/profile_widgets.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({Key? key}) : super(key: key);
-
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +42,7 @@ class ProfilePage extends StatelessWidget {
                     Image(
                       image: CachedNetworkImageProvider(_.profile.coverImgUrl.isNotEmpty
                           ? _.profile.coverImgUrl :_.profile.photoUrl.isNotEmpty
-                          ? _.profile.photoUrl : UrlConstants.noImageUrl),
+                          ? _.profile.photoUrl : AppFlavour.getNoImageUrl(),),
                       width: AppTheme.fullWidth(context),
                       height: 250,
                       fit: BoxFit.cover,
@@ -87,7 +86,7 @@ class ProfilePage extends StatelessWidget {
                         child: GestureDetector(
                           child: CircleAvatar(
                             backgroundImage: CachedNetworkImageProvider(_.profile.photoUrl.isNotEmpty
-                                ? _.profile.photoUrl : UrlConstants.noImageUrl),
+                                ? _.profile.photoUrl : AppFlavour.getNoImageUrl(),),
                             radius: 50.0,
                           ),
                           onTap: () => Get.toNamed(AppRouteConstants.profileEdit),
@@ -101,7 +100,7 @@ class ProfilePage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(_.profile.name.capitalize!,
-                              style: Theme.of(context).textTheme.headline6!
+                              style: Theme.of(context).textTheme.titleLarge!
                                   .copyWith(color: Colors.white
                               ),
                             ),
@@ -114,7 +113,7 @@ class ProfilePage extends StatelessWidget {
                             Row(
                               children: <Widget>[
                                 Text(_.location.isNotEmpty ? _.location : AppTranslationConstants.notSpecified.tr,
-                                  style: Theme.of(context).textTheme.subtitle1,
+                                  style: Theme.of(context).textTheme.titleMedium,
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.place,
@@ -127,7 +126,7 @@ class ProfilePage extends StatelessWidget {
                             ),
                             Text(_.profile.aboutMe.isEmpty
                                 ? AppTranslationConstants.noProfileDesc.tr : _.profile.aboutMe.capitalize!,
-                                style: Theme.of(context).textTheme.bodyText2!
+                                style: Theme.of(context).textTheme.bodyMedium!
                                     .copyWith(fontSize: 16),
                             ),
                           ],

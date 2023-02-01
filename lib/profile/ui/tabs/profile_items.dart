@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/app_flavour.dart';
 
 import 'package:neom_commons/core/domain/model/app_item.dart';
 import 'package:neom_commons/core/utils/constants/app_assets.dart';
 import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/url_constants.dart';
 import 'package:neom_commons/core/utils/core_utilities.dart';
 import '../profile_controller.dart';
 
@@ -55,7 +55,7 @@ class ProfileItems extends StatelessWidget {
                 leading: Hero(
                   tag: CoreUtilities.getAppItemHeroTag(index),
                   child: Image.network(appItem.albumImgUrl.isNotEmpty ? appItem.albumImgUrl
-                    : UrlConstants.noImageUrl, width: 50.0)
+                    : AppFlavour.getNoImageUrl(), width: 50.0)
                 ),
               ),
             );

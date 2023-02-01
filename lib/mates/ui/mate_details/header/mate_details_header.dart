@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 import 'package:neom_commons/core/domain/model/menu_three_dots.dart';
 import 'package:neom_commons/core/ui/reports/report_controller.dart';
@@ -20,6 +21,7 @@ import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/constants/url_constants.dart';
 import 'package:neom_commons/core/utils/core_utilities.dart';
+import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/reference_type.dart';
 import 'package:neom_commons/core/utils/enums/report_type.dart';
 import 'package:neom_commons/core/utils/enums/user_role.dart';
@@ -41,7 +43,7 @@ class MateDetailHeader extends StatelessWidget {
         FutureBuilder(
           future: CoreUtilities().isAvailableMediaUrl(_.mate.coverImgUrl.isNotEmpty ?
             _.mate.coverImgUrl : _.mate.photoUrl.isNotEmpty
-            ? _.mate.photoUrl : UrlConstants.noImageUrl),
+            ? _.mate.photoUrl : AppFlavour.getNoImageUrl()),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
                 return DiagonallyCutColoredImage(
@@ -50,11 +52,11 @@ class MateDetailHeader extends StatelessWidget {
                           (snapshot.data == true) ?
                           (_.mate.coverImgUrl.isNotEmpty ?
                       _.mate.coverImgUrl : _.mate.photoUrl.isNotEmpty
-                          ? _.mate.photoUrl : UrlConstants.noImageUrl) : UrlConstants.noImageUrl),
+                          ? _.mate.photoUrl : AppFlavour.getNoImageUrl()) : AppFlavour.getNoImageUrl(),),
                       width: MediaQuery.of(context).size.width,
                       height: 250.0,
                       fit: BoxFit.cover,
-                      errorBuilder:  (context, object, error) => Image.network(UrlConstants.noImageUrl)
+                      errorBuilder:  (context, object, error) => Image.network(AppFlavour.getNoImageUrl())
                   ),
                   color: AppColor.cutColoredImage,);
             } else {
@@ -71,14 +73,16 @@ class MateDetailHeader extends StatelessWidget {
                 tag: _.mate.name,
                 child: FutureBuilder(
                   future: CoreUtilities().isAvailableMediaUrl(_.mate.photoUrl.isNotEmpty
-                      ? _.mate.photoUrl : UrlConstants.noImageUrl),
+                      ? _.mate.photoUrl : AppFlavour.getNoImageUrl(),),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return CircleAvatar(
                         backgroundImage: NetworkImage((snapshot.data == true) ?
-                        (_.mate.photoUrl.isNotEmpty ? _.mate.photoUrl : UrlConstants.noImageUrl): UrlConstants.noImageUrl ),
+                        (_.mate.photoUrl.isNotEmpty ? _.mate.photoUrl : AppFlavour.getNoImageUrl())
+                            : AppFlavour.getNoImageUrl(),),
                         radius: 60.0,
-                        onBackgroundImageError: (object, error) => CachedNetworkImageProvider(_.mate.photoUrl.isNotEmpty ? _.mate.photoUrl : UrlConstants.noImageUrl),
+                        onBackgroundImageError: (object, error) => CachedNetworkImageProvider(_.mate.photoUrl.isNotEmpty ? _.mate.photoUrl
+                            : AppFlavour.getNoImageUrl(),),
                       );
                     } else {
                       return const CircleAvatar(
@@ -98,7 +102,8 @@ class MateDetailHeader extends StatelessWidget {
                 ]),
               ),
               AppTheme.heightSpace10,
-              _.mateBlogEntries.isEmpty ? Container() : TextButton(
+              AppFlavour.appInUse != AppInUse.emxi &&_.mateBlogEntries.isEmpty
+                  ? Container() : TextButton(
                 style: TextButton.styleFrom(
                   foregroundColor: AppColor.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
