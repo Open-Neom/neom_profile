@@ -33,11 +33,11 @@ import '../mate_details_controller.dart';
 class MateDetailHeader extends StatelessWidget {
   const MateDetailHeader({Key? key}) : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
     return GetBuilder<MateDetailsController>(
       id: AppPageIdConstants.mate,
+      init: MateDetailsController(),
       builder: (_) => Stack(
       children: <Widget>[
         FutureBuilder(
