@@ -102,7 +102,7 @@ class MateDetailHeader extends StatelessWidget {
                 ]),
               ),
               AppTheme.heightSpace10,
-              AppFlavour.appInUse != AppInUse.emxi &&_.mateBlogEntries.isEmpty
+              AppFlavour.appInUse != AppInUse.emxi || _.mateBlogEntries.isEmpty
                   ? Container() : TextButton(
                 style: TextButton.styleFrom(
                   foregroundColor: AppColor.white,

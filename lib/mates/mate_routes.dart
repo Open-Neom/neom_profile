@@ -16,11 +16,6 @@ class MatesRoutes {
       page: () => const MateDetailsPage(),
       transition: Transition.zoom,
     ),
-    GetPage(
-      name: AppRouteConstants.mateBlog,
-      page: () => const MateDetailsPage(),
-      transition: Transition.zoom,
-    ),
   ];
 
 }

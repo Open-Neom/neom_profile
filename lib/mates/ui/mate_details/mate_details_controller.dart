@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/neom_commons.dart';
 
@@ -18,7 +19,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
   AppProfile get mate => _mate.value;
   set mate(AppProfile mate) => _mate.value = mate;
 
-  AppProfile _profile = AppProfile();
+  AppProfile profile = AppProfile();
 
   final RxString _address = "".obs;
   String get address => _address.value;
@@ -80,12 +81,28 @@ class MateDetailsController extends GetxController implements MateDetailsService
     String itemmateId = Get.arguments ?? "";
 
     try {
-      _profile = userController.profile;
-      _blockedProfile.value = _profile.blockTo?.contains(itemmateId) ?? false;
+      profile = userController.profile;
+      _blockedProfile.value = profile.blockTo?.contains(itemmateId) ?? false;
 
       if(itemmateId.isNotEmpty && !blockedProfile) {
         await loadMate(itemmateId);
         await retrieveDetails();
+
+        if(mate.id.isNotEmpty && (userController.user!.userRole == UserRole.subscriber || kDebugMode)) {
+          FirebaseMessagingCalls.sendPrivatePushNotification(
+            toProfileId: mate.id,
+            fromProfile: profile,
+            notificationType: PushNotificationType.viewProfile,
+            referenceId: profile.id,
+          );
+
+          FirebaseMessagingCalls.sendGlobalPushNotification(
+            fromProfile: profile,
+            toProfile: mate,
+            notificationType: PushNotificationType.viewProfile,
+            referenceId: mate.id,
+          );
+        }
       } else {
         logger.i("Profile $itemmateId is blocked");
         isLoading = false;
@@ -116,7 +133,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
     try {
       mate = await ProfileFirestore().retrieve(itemmateId);
       if(mate.id.isNotEmpty) {
-        following = _profile.following!.contains(itemmateId);
+        following = profile.following!.contains(itemmateId);
       }
 
     } catch (e) {
@@ -192,7 +209,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
     try {
       if(mate.position!.latitude != 0 && mate.position!.longitude != 0) {
         address = await geoLocatorService.getAddressSimple(mate.position!);
-        distance = AppUtilities.distanceBetweenPositionsRounded(_profile.position!, mate.position!);
+        distance = AppUtilities.distanceBetweenPositionsRounded(profile.position!, mate.position!);
       }
     } catch (e) {
       logger.e(e.toString());
@@ -245,9 +262,9 @@ class MateDetailsController extends GetxController implements MateDetailsService
     logger.d("");
 
     try {
-      if(await ProfileFirestore().followProfile(profileId: _profile.id, followedProfileId:  mate.id)) {
+      if(await ProfileFirestore().followProfile(profileId: profile.id, followedProfileId:  mate.id)) {
         following = true;
-        mate.followers!.add(_profile.id);
+        mate.followers!.add(profile.id);
 
         try {
           Get.find<ProfileController>().addFollowing(mate.id);
@@ -257,13 +274,29 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
         ActivityFeed activityFeed = ActivityFeed();
         activityFeed.ownerId =  mate.id;
-        activityFeed.profileId = _profile.id;
+        activityFeed.profileId = profile.id;
         activityFeed.createdTime = DateTime.now().millisecondsSinceEpoch;
         activityFeed.activityFeedType = ActivityFeedType.follow;
-        activityFeed.profileName = _profile.name;
-        activityFeed.profileImgUrl = _profile.photoUrl;
-        activityFeed.activityReferenceId = _profile.id;
-        await ActivityFeedFirestore().insert(activityFeed);
+        activityFeed.profileName = profile.name;
+        activityFeed.profileImgUrl = profile.photoUrl;
+        activityFeed.activityReferenceId = profile.id;
+
+        ActivityFeedFirestore().insert(activityFeed);
+
+        FirebaseMessagingCalls.sendPrivatePushNotification(
+          toProfileId: mate.id,
+          fromProfile: profile,
+          notificationType: PushNotificationType.following,
+          referenceId: profile.id,
+        );
+
+        FirebaseMessagingCalls.sendGlobalPushNotification(
+          fromProfile: profile,
+          toProfile: mate,
+          notificationType: PushNotificationType.following,
+          referenceId: mate.id,
+        );
+
       }
 
     } catch (e) {
@@ -278,10 +311,10 @@ class MateDetailsController extends GetxController implements MateDetailsService
   Future<void> unfollow() async {
     logger.d("");
     try {
-      if (await ProfileFirestore().unfollowProfile(profileId: _profile.id,unfollowProfileId:  mate.id)) {
+      if (await ProfileFirestore().unfollowProfile(profileId: profile.id,unfollowProfileId:  mate.id)) {
         following = false;
         userController.profile.following!.remove(mate.id);
-        mate.followers!.remove(_profile.id,);
+        mate.followers!.remove(profile.id,);
         Get.find<ProfileController>().removeFollowing(mate.id);
       }
     } catch (e) {
@@ -297,12 +330,12 @@ class MateDetailsController extends GetxController implements MateDetailsService
     logger.d("");
     try {
       if (await ProfileFirestore().blockProfile(
-          profileId: _profile.id,
+          profileId: profile.id,
           profileToBlock: mate.id)) {
         following = false;
         userController.profile.following!.remove(mate.id);
-        mate.followers?.remove(_profile.id);
-        mate.blockedBy?.add(_profile.id);
+        mate.followers?.remove(profile.id);
+        mate.blockedBy?.add(profile.id);
 
         userController.profile.blockTo!.add(mate.id);
       } else {
@@ -325,7 +358,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
     try {
       if (await ProfileFirestore().unblockProfile(profileId: userController.profile.id, profileToUnblock:  blockedProfile.id)) {
         userController.profile.blockTo!.remove(blockedProfile.id);
-        blockedProfile.blockedBy!.remove(_profile.id);
+        blockedProfile.blockedBy!.remove(profile.id);
       } else {
         logger.i("Somethnig happened while unblocking profile");
       }
@@ -345,7 +378,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
     Inbox inbox = Inbox();
 
     try {
-      inbox = await InboxFirestore().getOrCreateInboxRoom(_profile, mate);
+      inbox = await InboxFirestore().getOrCreateInboxRoom(profile, mate);
 
       inbox.id.isNotEmpty ? Get.toNamed(AppRouteConstants.inboxRoom, arguments: [inbox])
         : Get.toNamed(AppRouteConstants.home);
