@@ -1,19 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/core/app_flavour.dart';
-
-import 'package:neom_commons/core/ui/static/genres_format.dart';
-import 'package:neom_commons/core/ui/widgets/diagonally_cut_colored_image.dart';
-import 'package:neom_commons/core/ui/widgets/position_back_button.dart';
-import 'package:neom_commons/core/utils/app_color.dart';
-import 'package:neom_commons/core/utils/app_theme.dart';
-import 'package:neom_commons/core/utils/constants/app_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/enums/app_file_from.dart';
-import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
+import 'package:neom_commons/neom_commons.dart';
 import '../utils/profile_constants.dart';
 import 'profile_controller.dart';
 import 'widgets/profile_widgets.dart';
@@ -61,14 +49,11 @@ class ProfilePage extends StatelessWidget {
                                 AppTranslationConstants.uploadImage.tr
                             ),
                             onPressed: () async {
-                              await _.handleAndUploadImage(AppFileFrom.gallery, UploadImageType.cover);
+                              await _.handleAndUploadImage(UploadImageType.cover);
                             }
-
                           ),
                           SimpleDialogOption(
-                            child: Text(
-                                AppTranslationConstants.cancel.tr
-                            ),
+                            child: Text(AppTranslationConstants.cancel.tr),
                             onPressed: () => Get.back()
                           ),
                         ],
@@ -93,9 +78,9 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ),
                       buildFollowerInfo(context, _.profile),
-                      AppTheme.heightSpace20,
+                      AppTheme.heightSpace10,
                       Container(
-                        padding: const EdgeInsets.all(AppTheme.padding25),
+                        padding: const EdgeInsets.all(AppTheme.padding20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -104,7 +89,7 @@ class ProfilePage extends StatelessWidget {
                                   .copyWith(color: Colors.white
                               ),
                             ),
-                            GenresFormat(
+                            GenresGridView(
                               _.profile.genres?.keys.toList() ?? [],
                               AppColor.white,
                               alignment: Alignment.centerLeft,
@@ -125,34 +110,38 @@ class ProfilePage extends StatelessWidget {
                               ],
                             ),
                             Text(_.profile.aboutMe.isEmpty
-                                ? AppTranslationConstants.noProfileDesc.tr : _.profile.aboutMe.capitalize!,
+                                ? AppTranslationConstants.noProfileDesc.tr : _.profile.aboutMe.capitalizeFirst!,
                                 style: Theme.of(context).textTheme.bodyMedium!
                                     .copyWith(fontSize: 16),
+                              textAlign: TextAlign.justify,
                             ),
                           ],
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.all(AppTheme.padding20),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: DefaultTabController(
                           length: AppConstants.profileTabs.length,
                           child: Obx(() => Column(
                             children: <Widget>[
                               TabBar(
-                                tabs: [Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${_.profile.posts?.length ?? 0})'),
-                                      Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${_.profile.appItems?.length ?? 0})'),
-                                      Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${_.profile.events?.length ?? 0})'),],
+                                tabs: [
+                                  Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${_.profile.posts?.length ?? 0})'),
+                                  Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${_.profile.appItems?.length ?? 0})'),
+                                  Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${_.profile.events?.length ?? 0})'),
+                                ],
                                 indicatorColor: Colors.white,
                                 labelStyle: const TextStyle(fontSize: 15),
                                 unselectedLabelStyle: const TextStyle(fontSize: 12),
                                 labelPadding: const EdgeInsets.symmetric(horizontal: 0.0),
                               ),
                               SizedBox(
-                                height: 300,
+                                height: AppTheme.fullHeight(context)/2.5,
                                 child: TabBarView(
                                   children: ProfileConstants.profileTabPages,
                                 ),
                               ),
+
                             ],
                           ),
                           ),

@@ -10,13 +10,11 @@ import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/core_utilities.dart';
-import 'package:neom_commons/core/utils/enums/app_file_from.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 import 'profile_controller.dart';
 
 class ProfileEditPage extends StatelessWidget {
   const ProfileEditPage({Key? key}) : super(key: key);
-
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +73,7 @@ class ProfileEditPage extends StatelessWidget {
                                             AppTranslationConstants.uploadImage.tr
                                           ),
                                           onPressed: () async {
-                                            await _.handleAndUploadImage(AppFileFrom.gallery, UploadImageType.profile);
+                                            await _.handleAndUploadImage(UploadImageType.profile);
                                           }
                                         ),
                                         SimpleDialogOption(
@@ -206,7 +204,7 @@ class ProfileEditPage extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             Text(_.profile.reason.name.tr),
-                            Text(CoreUtilities.getProfileMainFeature(_.profile).tr.capitalize ?? ""),
+                            Text(_.profile.type.value.tr.capitalize ?? ""),
                           ],
                         ),
                       ),

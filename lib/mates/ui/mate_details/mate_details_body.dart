@@ -34,7 +34,7 @@ class MateDetailsBody extends StatelessWidget {
               ),
             ],
           ) : Container(),
-          _.mate.genres != null ? GenresFormat(
+          _.mate.genres != null ? GenresGridView(
             _.mate.genres?.keys.toList() ?? [],
             AppColor.white,
             alignment: Alignment.centerLeft,

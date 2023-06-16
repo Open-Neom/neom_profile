@@ -18,7 +18,7 @@ class MateShowcase extends StatelessWidget {
       init: MateDetailsController(),
       builder: (_) {
         return Container(
-          padding: const EdgeInsets.all(AppTheme.padding20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: DefaultTabController(
             length: AppConstants.profileTabs.length,
             child: Obx(() => Column(

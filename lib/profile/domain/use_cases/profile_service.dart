@@ -1,5 +1,4 @@
 import 'package:neom_commons/core/domain/model/app_item.dart';
-import 'package:neom_commons/core/utils/enums/app_file_from.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 
 abstract class ProfileService {
@@ -16,6 +15,6 @@ abstract class ProfileService {
   void removeFollowing(String followingId);
   void addBlockTo(String followingId);
 
-  Future<void> handleAndUploadImage(AppFileFrom appFileFrom, UploadImageType uploadType);
+  Future<void> handleAndUploadImage(UploadImageType uploadType);
 
 }

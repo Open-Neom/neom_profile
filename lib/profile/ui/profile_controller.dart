@@ -18,7 +18,6 @@ import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/core_utilities.dart';
-import 'package:neom_commons/core/utils/enums/app_file_from.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 import 'package:neom_posts/posts/ui/add/post_upload_controller.dart';
 
@@ -157,8 +156,8 @@ class ProfileController extends GetxController implements ProfileService {
 
     for (var post in _profilePosts) {
       Event event = Event();
-      if(post.eventId.isNotEmpty) {
-        event = await EventFirestore().retrieve(post.eventId);
+      if(post.referenceId.isNotEmpty) {
+        event = await EventFirestore().retrieve(post.referenceId);
       }
       eventPosts[post] = event;
     }
@@ -281,7 +280,7 @@ class ProfileController extends GetxController implements ProfileService {
 
 
   @override
-  Future<void> handleAndUploadImage(AppFileFrom appFileFrom, UploadImageType uploadImageType) async {
+  Future<void> handleAndUploadImage(UploadImageType uploadImageType) async {
 
     logger.d("Entering handleAndUploadImage method");
 
@@ -290,7 +289,7 @@ class ProfileController extends GetxController implements ProfileService {
     update([AppPageIdConstants.profile]);
 
     try {
-      await postUploadController.handleImage(appFileFrom, isProfilePicture: true);
+      await postUploadController.handleImage(uploadImageType: UploadImageType.profile);
       if(postUploadController.imageFile.path.isNotEmpty) {
         String photoUrl = await postUploadController.handleUploadImage(
             uploadImageType);

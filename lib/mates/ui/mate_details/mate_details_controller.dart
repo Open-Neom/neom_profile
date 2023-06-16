@@ -158,7 +158,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
 
       for (var post in matePosts) {
-        eventPosts[post] = events[post.eventId] ?? Event();
+        eventPosts[post] = events[post.referenceId] ?? Event();
       }
 
       instrumentsText = CoreUtilities.getInstruments(mate.instruments ?? {});
