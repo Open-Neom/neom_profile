@@ -821,7 +821,7 @@
       "name": "neom_posts",
       "rootUri": "../../neom_posts",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.0"
     },
     {
       "name": "neom_timeline",
@@ -1310,7 +1310,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-07-22T20:18:18.735484Z",
+  "generated": "2023-07-22T21:50:59.385580Z",
   "generator": "pub",
   "generatorVersion": "3.0.5"
 }
