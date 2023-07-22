@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/neom_commons.dart';
+import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
 
 import '../../../profile/ui/profile_controller.dart';
 import '../../domain/use_cases/mate_details_service.dart';
@@ -36,6 +38,10 @@ class MateDetailsController extends GetxController implements MateDetailsService
   final RxMap<String, AppItem> _totalItems = <String, AppItem>{}.obs;
   Map<String, AppItem> get totalItems => _totalItems;
   set totalItems(Map<String, AppItem> totalItems) => _totalItems.value = totalItems;
+
+  final RxMap<String, ChamberPreset> _totalPresets = <String, ChamberPreset>{}.obs;
+  Map<String, ChamberPreset> get totalPresets => _totalPresets;
+  set totalPresets(Map<String, ChamberPreset> totalPresets) => _totalPresets.value = totalPresets;
 
   final RxMap<String, Itemlist> _itemlists = <String, Itemlist>{}.obs;
   Map<String, Itemlist> get itemlists => _itemlists;
@@ -151,18 +157,28 @@ class MateDetailsController extends GetxController implements MateDetailsService
     try {
       mate.itemlists = await ItemlistFirestore().retrieveItemlists(mate.id);
       itemlists = mate.itemlists ?? {};
+
       await getTotalInstruments();
       await getAddressSimple();
-      await getMatePosts();
-      await getTotalEvents();
 
+      if(mate.posts?.isNotEmpty ?? false) {
+        await getMatePosts();
+      }
+
+      if((mate.events?.isNotEmpty ?? false)
+          || (mate.goingEvents?.isNotEmpty ?? false)
+          || (mate.playingEvents?.isNotEmpty ?? false)) {
+        await getTotalEvents();
+      }
+
+      await getTotalItems();
 
       for (var post in matePosts) {
         eventPosts[post] = events[post.referenceId] ?? Event();
       }
 
       instrumentsText = CoreUtilities.getInstruments(mate.instruments ?? {});
-      totalItems = CoreUtilities.getTotalItems(itemlists);
+
     } catch (e) {
       logger.e(e.toString());
     }
@@ -219,11 +235,43 @@ class MateDetailsController extends GetxController implements MateDetailsService
     update([AppPageIdConstants.mate]);
   }
 
+  @override
+  Future<void> getTotalItems() async {
+    logger.d("");
+
+    if(mate.itemlists != null) {
+      if(AppFlavour.appInUse == AppInUse.cyberneom) {
+        mate.frequencies = await FrequencyFirestore().retrieveFrequencies(mate.id);
+        for (var freq in mate.frequencies!.values) {
+          totalPresets[freq.frequency.toString()] = ChamberPreset.custom(frequency: freq);
+        }
+        totalPresets.addAll(CoreUtilities.getTotalPresets(mate.itemlists!));
+      } else {
+        totalItems = CoreUtilities.getTotalItems(mate.itemlists!);
+      }
+
+    }
+
+    logger.d("${totalItems.length} Total Items for Profile");
+    update([AppPageIdConstants.mate]);
+  }
+
   Future<void> getTotalEvents()  async{
     logger.d("");
 
     try {
-      events = await EventFirestore().getEventsById(mate.events!);
+      if(mate.events != null && mate.events!.isNotEmpty) {
+        events = await EventFirestore().getEventsById(mate.events!);
+      }
+
+      if(mate.playingEvents != null && mate.playingEvents!.isNotEmpty) {
+        events.addAll(await EventFirestore().getEventsById(mate.playingEvents!));
+      }
+
+      if(mate.goingEvents != null && mate.goingEvents!.isNotEmpty) {
+        events.addAll(await EventFirestore().getEventsById(mate.goingEvents!));
+      }
+
     } catch (e) {
       logger.e(e.toString());
     }

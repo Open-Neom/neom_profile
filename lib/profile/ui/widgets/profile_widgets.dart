@@ -58,26 +58,26 @@ Widget buildFollowerInfo(context, AppProfile profile) {
           ),
         ],
       ),
-      Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            GestureDetector(
-              child: Text('${profile.itemmates!.length.toString()} ${AppTranslationConstants.itemmates.tr}',
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)),
-              onTap: () => profile.itemmates!.isNotEmpty
-                  ? Get.toNamed(AppRouteConstants.mates, arguments: profile.itemmates)
-                  : AppUtilities.showAlert(context, AppTranslationConstants.itemmates.tr, AppTranslationConstants.itemmatesMsg.tr), //Get.toNamed(GigRouteConstants.SONGMATES, arguments: songmate.songmates),
-            ),
-            Text(' | ', style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)
-            ),
-            GestureDetector(
-              child: Text('${profile.eventmates!.length.toString()} ${AppTranslationConstants.eventmates.tr}',
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)),
-              onTap: () => profile.eventmates!.isNotEmpty
-                  ? Get.toNamed(AppRouteConstants.mates, arguments: profile.eventmates)
-                  : AppUtilities.showAlert(context, AppTranslationConstants.eventmates.tr, AppTranslationConstants.eventmatesMsg.tr), //Get.toNamed(GigRouteConstants.SONGMATES, arguments: songmate.songmates),
-            ),
-          ]),
+      // Row(
+      //     mainAxisAlignment: MainAxisAlignment.center,
+      //     children: <Widget>[
+      //       GestureDetector(
+      //         child: Text('${profile.itemmates!.length.toString()} ${AppTranslationConstants.itemmates.tr}',
+      //             style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)),
+      //         onTap: () => profile.itemmates!.isNotEmpty
+      //             ? Get.toNamed(AppRouteConstants.mates, arguments: profile.itemmates)
+      //             : AppUtilities.showAlert(context, AppTranslationConstants.itemmates.tr, AppTranslationConstants.itemmatesMsg.tr), //Get.toNamed(GigRouteConstants.SONGMATES, arguments: songmate.songmates),
+      //       ),
+      //       Text(' | ', style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)
+      //       ),
+      //       GestureDetector(
+      //         child: Text('${profile.eventmates!.length.toString()} ${AppTranslationConstants.eventmates.tr}',
+      //             style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)),
+      //         onTap: () => profile.eventmates!.isNotEmpty
+      //             ? Get.toNamed(AppRouteConstants.mates, arguments: profile.eventmates)
+      //             : AppUtilities.showAlert(context, AppTranslationConstants.eventmates.tr, AppTranslationConstants.eventmatesMsg.tr), //Get.toNamed(GigRouteConstants.SONGMATES, arguments: songmate.songmates),
+      //       ),
+      //     ]),
       const Divider()
     ]),
   );

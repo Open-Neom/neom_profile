@@ -14,5 +14,6 @@ abstract class MateDetailsService {
   Future<void> blockProfile();
   Future<void> sendMessage();
   Future<void> unblockProfile(AppProfile blockedProfile);
+  Future<void> getTotalItems();
 
 }

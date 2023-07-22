@@ -78,7 +78,7 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ),
                       buildFollowerInfo(context, _.profile),
-                      AppTheme.heightSpace10,
+                      AppTheme.heightSpace20,
                       Container(
                         padding: const EdgeInsets.all(AppTheme.padding20),
                         child: Column(
@@ -89,12 +89,13 @@ class ProfilePage extends StatelessWidget {
                                   .copyWith(color: Colors.white
                               ),
                             ),
+                            (_.profile.genres?.isNotEmpty ?? false) ?
                             GenresGridView(
                               _.profile.genres?.keys.toList() ?? [],
                               AppColor.white,
                               alignment: Alignment.centerLeft,
                               fontSize: 15,
-                            ),
+                            ) : Container(),
                             Row(
                               children: <Widget>[
                                 Text(_.location.isNotEmpty ? _.location : AppTranslationConstants.notSpecified.tr,
@@ -127,8 +128,9 @@ class ProfilePage extends StatelessWidget {
                               TabBar(
                                 tabs: [
                                   Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${_.profile.posts?.length ?? 0})'),
-                                  Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${_.profile.appItems?.length ?? 0})'),
-                                  Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${_.profile.events?.length ?? 0})'),
+                                  Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${AppFlavour.appInUse == AppInUse.cyberneom ?
+                                  _.totalPresets.length : _.totalItems.length})'),
+                                  Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${_.events.length})'),
                                 ],
                                 indicatorColor: Colors.white,
                                 labelStyle: const TextStyle(fontSize: 15),
@@ -138,10 +140,10 @@ class ProfilePage extends StatelessWidget {
                               SizedBox(
                                 height: AppTheme.fullHeight(context)/2.5,
                                 child: TabBarView(
-                                  children: ProfileConstants.profileTabPages,
+                                  children: AppFlavour.appInUse == AppInUse.cyberneom
+                                      ? ProfileConstants.neomProfileTabPages : ProfileConstants.profileTabPages,
                                 ),
                               ),
-
                             ],
                           ),
                           ),

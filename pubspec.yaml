@@ -1,11 +1,11 @@
 name: neom_profile
 description: Profile Details for Cyberneom.
-version: 1.0.1
+version: 1.0.2
 homepage: https://github.com/emmanuel-montoya/neom_profile
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 environment:
-  sdk: '>=2.19.6 <3.0.0'
+  sdk: ">=3.0.0 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
@@ -15,6 +15,9 @@ dependencies:
   neom_commons:
     git:
       url: https://github.com/Cyberneom/neom_commons.git
+  neom_frequencies:
+    git:
+      url: https://github.com/emmanuel-montoya/neom_frequencies.git
   neom_posts:
     git:
       url: https://github.com/Cyberneom/neom_posts.git
@@ -27,6 +30,8 @@ dev_dependencies:
 dependency_overrides:
   neom_commons:
     path: ../neom_commons
+  neom_frequencies:
+    path: ../neom_frequencies
   neom_posts:
     path: ../neom_posts
   intl: 0.18.1

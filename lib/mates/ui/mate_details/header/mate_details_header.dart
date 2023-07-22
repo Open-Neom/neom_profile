@@ -96,7 +96,7 @@ class MateDetailHeader extends StatelessWidget {
               ),
               Container(
                 padding: const EdgeInsets.only(top: 10.0),
-                child: Column(children: const [
+                child: const Column(children: [
                   // TODO VERIFY IF SHOWING FOLLOWERS FOLLOWING
                   Divider()
                 ]),

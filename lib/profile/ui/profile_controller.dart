@@ -12,13 +12,16 @@ import 'package:neom_commons/core/data/implementations/user_controller.dart';
 import 'package:neom_commons/core/domain/model/app_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 import 'package:neom_commons/core/domain/model/event.dart';
+import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/domain/model/post.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/core_utilities.dart';
+import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
+import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
 import 'package:neom_posts/posts/ui/add/post_upload_controller.dart';
 
 import '../domain/use_cases/profile_service.dart';
@@ -48,6 +51,10 @@ class ProfileController extends GetxController implements ProfileService {
   final RxMap<String, AppItem> _totalItems = <String, AppItem>{}.obs;
   Map<String, AppItem> get totalItems => _totalItems;
   set totalItems(Map<String, AppItem> totalItems) => _totalItems.value = totalItems;
+
+  final RxMap<String, ChamberPreset> _totalPresets = <String, ChamberPreset>{}.obs;
+  Map<String, ChamberPreset> get totalPresets => _totalPresets;
+  set totalPresets(Map<String, ChamberPreset> totalPresets) => _totalPresets.value = totalPresets;
 
   int postCount = 0;
   bool isFollowing= false;
@@ -106,11 +113,13 @@ class ProfileController extends GetxController implements ProfileService {
         await getProfilePosts();
       }
 
-      if(profile.events?.isNotEmpty ?? false) {
-        getTotalEvents();
+      if((profile.events?.isNotEmpty ?? false)
+          || (profile.goingEvents?.isNotEmpty ?? false)
+          || (profile.playingEvents?.isNotEmpty ?? false)) {
+        await getTotalEvents();
       }
 
-      getTotalItems();
+      await getTotalItems();
 
     } catch (e) {
       logger.e(e.toString());
@@ -167,26 +176,42 @@ class ProfileController extends GetxController implements ProfileService {
   }
 
   @override
-  void getTotalItems() {
+  Future<void> getTotalItems() async {
     logger.d("");
 
     if(profile.itemlists != null) {
-      totalItems = CoreUtilities.getTotalItems(profile.itemlists!);
+      if(AppFlavour.appInUse == AppInUse.cyberneom) {
+        profile.frequencies = await FrequencyFirestore().retrieveFrequencies(profile.id);
+        for (var freq in profile.frequencies!.values) {
+          totalPresets[freq.frequency.toString()] = ChamberPreset.custom(frequency: freq);
+        }
+        totalPresets.addAll(CoreUtilities.getTotalPresets(profile.itemlists!));
+      } else {
+        totalItems = CoreUtilities.getTotalItems(profile.itemlists!);
+      }
+
     }
 
     logger.d("${totalItems.length} Total Items for Profile");
     update([AppPageIdConstants.profile]);
   }
 
-  void getTotalEvents() async {
+  Future<void> getTotalEvents() async {
     logger.d("");
 
-    if(profile.itemlists != null) {
+    if(profile.events != null && profile.events!.isNotEmpty) {
       events = await EventFirestore().getEventsById(profile.events!);
     }
 
+    if(profile.playingEvents != null && profile.playingEvents!.isNotEmpty) {
+      events.addAll(await EventFirestore().getEventsById(profile.playingEvents!));
+    }
 
-    logger.d("${totalItems.length} Total Items for Profile");
+    if(profile.goingEvents != null && profile.goingEvents!.isNotEmpty) {
+      events.addAll(await EventFirestore().getEventsById(profile.goingEvents!));
+    }
+
+    logger.d("${events.length} Total Events for Profile");
     update([AppPageIdConstants.profile]);
   }
 

@@ -29,9 +29,10 @@ class ProfileEvents extends StatelessWidget {
               onTap: () => Get.toNamed(AppRouteConstants.eventDetails, arguments: [event]),
               child: EventTile(event),
             );
-          }) : Image.asset(AppFlavour.getEventVector(),
-          height: 150
-      )
+          })
+          : Image.asset(AppFlavour.getEventVector(),
+            height: 150
+        )
       );
     }
 }
