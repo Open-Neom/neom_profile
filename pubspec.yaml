@@ -17,7 +17,7 @@ dependencies:
       url: https://github.com/Cyberneom/neom_commons.git
   neom_frequencies:
     git:
-      url: https://github.com/emmanuel-montoya/neom_frequencies.git
+      url: https://github.com/Cyberneom/neom_frequencies.git
   neom_posts:
     git:
       url: https://github.com/Cyberneom/neom_posts.git
