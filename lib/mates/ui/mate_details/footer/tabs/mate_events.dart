@@ -24,21 +24,7 @@ class MateEvents extends StatelessWidget {
               Event event = _.events.values.elementAt(index);
               return event.eventDate <= 0 ? Container() :
               GestureDetector(
-                onTap: () {
-                  try {
-                    //TODO VERIFY FUNCTIONALITY
-                    // if(Get.find<EventDetailsController>().initialized) {
-                    //   Get.find<EventDetailsController>().setEvent(event);
-                    //   Navigator.of(context).popUntil(ModalRoute.withName(AppRouteConstants.eventDetails));
-                    // } else {
-                    //   Get.toNamed(AppRouteConstants.eventDetails, arguments: [event]);
-                    // }
-                    Get.toNamed(AppRouteConstants.eventDetails, arguments: [event]);
-                  } catch (e) {
-                    Get.toNamed(AppRouteConstants.eventDetails, arguments: [event]);
-                  }
-
-                },
+                onTap: () => Get.toNamed(AppRouteConstants.eventDetails, arguments: [event]),
                 child: EventTile(event)
               );
             }
