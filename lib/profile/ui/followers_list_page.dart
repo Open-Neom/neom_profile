@@ -54,7 +54,7 @@ class FollowersListPage extends StatelessWidget {
                 title: Text(mate.name),
                 subtitle: Row(
                   children: [
-                    Text(mate.appItems?.length.toString() ?? ""),
+                    Text(mate.favoriteItems?.length.toString() ?? ""),
                     Icon(AppFlavour.getAppItemIcon(),
                       color: Colors.blueGrey, size: 20,),
                     Text(mate.mainFeature.tr.capitalize!),

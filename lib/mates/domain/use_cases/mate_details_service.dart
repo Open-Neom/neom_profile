@@ -1,4 +1,4 @@
-import 'package:neom_commons/core/domain/model/app_item.dart';
+import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 
 abstract class MateDetailsService {
@@ -8,7 +8,7 @@ abstract class MateDetailsService {
   Future<void> getMatePosts();
   Future<void> getAddressSimple();
   Future<void> getTotalInstruments();
-  void getItemDetails(AppItem appItem);
+  void getItemDetails(AppMediaItem appMediaItem);
   Future<void> follow();
   Future<void> unfollow();
   Future<void> blockProfile();

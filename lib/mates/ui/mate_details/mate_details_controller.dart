@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/neom_commons.dart';
 import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
@@ -35,9 +36,9 @@ class MateDetailsController extends GetxController implements MateDetailsService
   int get distance => _distance.value;
   set distance(int distance) => _distance.value = distance;
 
-  final RxMap<String, AppItem> _totalItems = <String, AppItem>{}.obs;
-  Map<String, AppItem> get totalItems => _totalItems;
-  set totalItems(Map<String, AppItem> totalItems) => _totalItems.value = totalItems;
+  final RxMap<String, AppMediaItem> _totalItems = <String, AppMediaItem>{}.obs;
+  Map<String, AppMediaItem> get totalItems => _totalItems;
+  set totalItems(Map<String, AppMediaItem> totalItems) => _totalItems.value = totalItems;
 
   final RxMap<String, ChamberPreset> _totalPresets = <String, ChamberPreset>{}.obs;
   Map<String, ChamberPreset> get totalPresets => _totalPresets;
@@ -297,10 +298,10 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
 
   @override
-  void getItemDetails(AppItem appItem){
-    logger.d("getItemDetails for ${appItem.name}");
+  void getItemDetails(AppMediaItem appMediaItem){
+    logger.d("getItemDetails for ${appMediaItem.name}");
     Get.toNamed(AppFlavour.getItemDetailsRoute(),
-        arguments: [appItem]
+        arguments: [appMediaItem]
     );
   }
 

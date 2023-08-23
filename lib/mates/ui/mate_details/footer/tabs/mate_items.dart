@@ -3,7 +3,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 
-import 'package:neom_commons/core/domain/model/app_item.dart';
+import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/utils/constants/app_assets.dart';
 import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
@@ -23,15 +23,15 @@ class MateItems extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
         itemCount: _.totalItems.length,
         itemBuilder: (context, index) {
-          AppItem appItem = _.totalItems.values.elementAt(index);
+          AppMediaItem appMediaItem = _.totalItems.values.elementAt(index);
           return GestureDetector(
             child: ListTile(
               contentPadding: const EdgeInsets.all(8.0),
-              title: Text(appItem.name.isEmpty ? ""
-                  : appItem.name.length > AppConstants.maxAppItemNameLength ? "${appItem.name.substring(0,AppConstants.maxAppItemNameLength)}...": appItem.name),
-              subtitle: Row(children: [Text(appItem.artist.isEmpty ? ""
-                  : appItem.artist.length > AppConstants.maxArtistNameLength ? "${appItem.artist.substring(0,AppConstants.maxArtistNameLength)}...": appItem.artist), const SizedBox(width:5,),RatingBar(
-                initialRating: appItem.state.toDouble(),
+              title: Text(appMediaItem.name.isEmpty ? ""
+                  : appMediaItem.name.length > AppConstants.maxAppItemNameLength ? "${appMediaItem.name.substring(0,AppConstants.maxAppItemNameLength)}...": appMediaItem.name),
+              subtitle: Row(children: [Text(appMediaItem.artist.isEmpty ? ""
+                  : appMediaItem.artist.length > AppConstants.maxArtistNameLength ? "${appMediaItem.artist.substring(0,AppConstants.maxArtistNameLength)}...": appMediaItem.artist), const SizedBox(width:5,),RatingBar(
+                initialRating: appMediaItem.state.toDouble(),
                 minRating: 1,
                 ignoreGestures: true,
                 direction: Axis.horizontal,
@@ -48,11 +48,11 @@ class MateItems extends StatelessWidget {
                   _.logger.d("New Rating set to $rating");
                   },
               ),]),
-              onTap: () => _.getItemDetails(appItem),
+              onTap: () => _.getItemDetails(appMediaItem),
               leading: Hero(
                 tag: CoreUtilities.getAppItemHeroTag(index),
-                child: Image.network(appItem.albumImgUrl.isNotEmpty
-                    ? appItem.albumImgUrl : AppFlavour.getNoImageUrl(),
+                child: Image.network(appMediaItem.imgUrl.isNotEmpty
+                    ? appMediaItem.imgUrl : AppFlavour.getNoImageUrl(),
                     width: 56.0
                 ),
               ),
