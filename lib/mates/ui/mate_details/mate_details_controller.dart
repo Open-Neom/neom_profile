@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/neom_commons.dart';
@@ -156,7 +157,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
   Future<void> retrieveDetails() async {
     logger.d("");
     try {
-      mate.itemlists = await ItemlistFirestore().retrieveItemlists(mate.id);
+      mate.itemlists = await ItemlistFirestore().fetchAll(profileId: mate.id);
       itemlists = mate.itemlists ?? {};
 
       await getTotalInstruments();
