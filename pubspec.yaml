@@ -18,6 +18,9 @@ dependencies:
   neom_frequencies:
     git:
       url: https://github.com/Cyberneom/neom_frequencies.git
+  neom_music_player:
+    git:
+      url: https://github.com/Cyberneom/neom_music_player.git
   neom_posts:
     git:
       url: https://github.com/Cyberneom/neom_posts.git
@@ -34,6 +37,8 @@ dependency_overrides:
     path: ../neom_frequencies
   neom_posts:
     path: ../neom_posts
+  neom_music_player:
+    path: ../neom_music_player
   intl: 0.18.1
 
 # For information on the generic Dart part of this file, see the

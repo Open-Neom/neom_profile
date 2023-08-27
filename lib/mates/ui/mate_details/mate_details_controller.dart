@@ -5,7 +5,8 @@ import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/neom_commons.dart';
 import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
-
+import 'package:neom_itemlists/itemlists/data/firestore/app_media_item_firestore.dart';
+import 'package:neom_music_player/ui/player/media_player_page.dart';
 import '../../../profile/ui/profile_controller.dart';
 import '../../domain/use_cases/mate_details_service.dart';
 
@@ -241,7 +242,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
   Future<void> getTotalItems() async {
     logger.d("");
 
-    if(mate.itemlists != null) {
+    if(mate.itemlists?.isNotEmpty ?? false) {
       if(AppFlavour.appInUse == AppInUse.cyberneom) {
         mate.frequencies = await FrequencyFirestore().retrieveFrequencies(mate.id);
         for (var freq in mate.frequencies!.values) {
@@ -251,7 +252,8 @@ class MateDetailsController extends GetxController implements MateDetailsService
       } else {
         totalItems = CoreUtilities.getTotalItems(mate.itemlists!);
       }
-
+    } else if(mate.favoriteItems?.isNotEmpty ?? false){
+      totalItems = await AppMediaItemFirestore().retrieveFromList(mate.favoriteItems!);
     }
 
     logger.d("${totalItems.length} Total Items for Profile");
@@ -297,15 +299,16 @@ class MateDetailsController extends GetxController implements MateDetailsService
     update([AppPageIdConstants.mate]);
   }
 
-
   @override
-  void getItemDetails(AppMediaItem appMediaItem){
+  void getItemDetails(AppMediaItem appMediaItem) {
     logger.d("getItemDetails for ${appMediaItem.name}");
-    Get.toNamed(AppFlavour.getItemDetailsRoute(),
-        arguments: [appMediaItem]
-    );
+    if (AppFlavour.appInUse == AppInUse.gigmeout) {
+      Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),
+          transition: Transition.downToUp);
+    } else {
+      Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
+    }
   }
-
 
   @override
   Future<void> follow() async {
