@@ -44,7 +44,7 @@ class MateListPage extends StatelessWidget {
                     Text(mate.favoriteItems!.length.toString()),
                     Icon(AppFlavour.getAppItemIcon(),
                       color: Colors.blueGrey, size: 20,),
-                    Text(mate.mainFeature.tr.capitalize!),
+                    Text(mate.mainFeature.tr.capitalize),
                   ]),
                 ),
               onLongPress: () => {},

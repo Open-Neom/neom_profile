@@ -21,10 +21,9 @@ class ProfileItems extends StatelessWidget {
         width: double.infinity,
         child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
-          itemCount: _.totalItems.length,
+          itemCount: _.totalMediaItems.length,
           itemBuilder: (context, index) {
-            String itemKey = _.totalItems.keys.elementAt(index);
-            AppMediaItem appMediaItem = _.totalItems[itemKey]!;
+            AppMediaItem appMediaItem = _.totalMediaItems.values.elementAt(index);
             return GestureDetector(
               child: ListTile(
                 contentPadding: const EdgeInsets.all(8.0),

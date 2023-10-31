@@ -7,9 +7,7 @@ import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/constants/app_hero_tag_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 import 'profile_controller.dart';
 
 class ProfileEditPage extends StatelessWidget {
@@ -22,6 +20,7 @@ class ProfileEditPage extends StatelessWidget {
       init: ProfileController(),
       builder: (_) => Scaffold(
         appBar: AppBarChild(title: AppTranslationConstants.profileDetails.tr),
+        backgroundColor: AppColor.main50,
         body: SingleChildScrollView(
           child: Container(
             decoration: AppTheme.appBoxDecoration,
@@ -34,7 +33,7 @@ class ProfileEditPage extends StatelessWidget {
                         fit: StackFit.loose,
                         alignment: Alignment.center,
                         children: <Widget>[
-                          _.profile.photoUrl.isEmpty ? const Icon(
+                          _.profile.value.photoUrl.isEmpty ? const Icon(
                               Icons.account_circle,
                               size: 150.0,
                               color: Colors.grey
@@ -46,45 +45,22 @@ class ProfileEditPage extends StatelessWidget {
                                 shape: BoxShape.circle,
                                 image: DecorationImage(
                                     fit: BoxFit.cover,
-                                    image: CachedNetworkImageProvider(_.profile.photoUrl)
+                                    image: CachedNetworkImageProvider(_.profile.value.photoUrl)
                                 ),
                               ),
                             ),
-                            onTap: () {
-                              Get.toNamed(AppRouteConstants.mediaFullScreen, arguments: [_.profile.photoUrl]);
+                            onTap: () async {
+                              await _.showUpdatePhotoDialog(context);
+                              ///DEPRECATED
+                              // Get.toNamed(AppRouteConstants.mediaFullScreen, arguments: [_.profile.value.photoUrl]);
                             }
                           ),
-                          _.isLoading ? const Center(child: CircularProgressIndicator())
+                          _.isLoading.value ? const Center(child: CircularProgressIndicator())
                             : Positioned(
                               bottom: AppTheme.padding20,
                               left: 0,
                               child: FloatingActionButton(
-                                heroTag: AppHeroTagConstants.floatingButton1,
-                                onPressed: () => showDialog(
-                                  context: context,
-                                  builder: (context){
-                                    return SimpleDialog(
-                                      backgroundColor: AppColor.getMain(),
-                                      title: Text(AppTranslationConstants.updateProfilePicture.tr),
-                                      children: <Widget>[
-                                        SimpleDialogOption(
-                                          child: Text(
-                                            AppTranslationConstants.uploadImage.tr
-                                          ),
-                                          onPressed: () async {
-                                            await _.handleAndUploadImage(UploadImageType.profile);
-                                          }
-                                        ),
-                                        SimpleDialogOption(
-                                          child: Text(
-                                            AppTranslationConstants.cancel.tr
-                                          ),
-                                          onPressed: () => Get.back()
-                                        ),
-                                      ],
-                                    );
-                                  }
-                                ),
+                                onPressed: () async => await _.showUpdatePhotoDialog(context),
                                 mini: true,
                                 child: const Icon(Icons.camera_alt),
                               )
@@ -111,7 +87,7 @@ class ProfileEditPage extends StatelessWidget {
                                     fontWeight: FontWeight.bold
                                 ),
                               ),
-                              Obx(()=> _.editStatus ? Container()
+                              Obx(()=> _.editStatus.value ? Container()
                               : FloatingActionButton(
                                 heroTag: AppHeroTagConstants.floatingButton2,
                                 onPressed: () => {
@@ -143,8 +119,8 @@ class ProfileEditPage extends StatelessWidget {
                               right: AppTheme.padding25),
                           child: Obx(()=> TextField(
                             controller: _.nameController,
-                            enabled: _.editStatus,
-                            autofocus: _.editStatus,
+                            enabled: _.editStatus.value,
+                            autofocus: _.editStatus.value,
                           ),
                         ),
                       ),
@@ -166,9 +142,10 @@ class ProfileEditPage extends StatelessWidget {
                             right: AppTheme.padding25
                         ),
                         child: TextField(
-                          maxLines: 4,
+                          minLines: 2,
+                          maxLines: 5,
                           controller: _.aboutMeController,
-                          enabled: _.editStatus,
+                          enabled: _.editStatus.value,
                         ),
                       ),
                       Container(
@@ -180,16 +157,12 @@ class ProfileEditPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: <Widget>[
                               Text(
-                                AppTranslationConstants.eventReason.tr,
-                                style: const TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.bold),
+                                AppTranslationConstants.preferenceToPlay.tr,
+                                style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                                 ),
                               Text(
                                 AppTranslationConstants.profileType.tr,
-                                style: const TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                               ),
                             ]
                           ),
@@ -202,12 +175,12 @@ class ProfileEditPage extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            Text(_.profile.reason.name.tr),
-                            Text(_.profile.type.value.tr.capitalize ?? ""),
+                            Text(_.profile.value.reason.name.tr, style: const TextStyle(fontSize: 16.0)),
+                            Text(_.profile.value.type.value.tr.capitalize, style: const TextStyle(fontSize: 16.0)),
                           ],
                         ),
                       ),
-                      Obx(()=> !_.editStatus ? Container() :
+                      Obx(()=> !_.editStatus.value ? Container() :
                       Container(
                         padding: const EdgeInsets.only(
                             left: AppTheme.padding25,
@@ -218,8 +191,8 @@ class ProfileEditPage extends StatelessWidget {
                           children: <Widget>[
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColor.bondiBlue75,
-                                padding: const EdgeInsets.symmetric(horizontal: 50),
+                                backgroundColor: AppColor.bondiBlue,
+                                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                                 textStyle: const TextStyle(color: Colors.white),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20.0)),
@@ -227,12 +200,12 @@ class ProfileEditPage extends StatelessWidget {
                               onPressed: () async {
                                 await _.updateProfileData();
                               },
-                              child: Text(AppTranslationConstants.save.tr),
+                              child: Text(AppTranslationConstants.save.tr, style: const TextStyle(fontSize: 16.0)),
                             ),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColor.getMain(),
-                                padding: const EdgeInsets.symmetric(horizontal: 50),
+                                backgroundColor: AppColor.main75,
+                                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                                 textStyle: const TextStyle(color: Colors.white),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20.0)),
@@ -240,7 +213,7 @@ class ProfileEditPage extends StatelessWidget {
                               onPressed: () {
                                 _.changeEditStatus();
                               },
-                              child: Text(AppTranslationConstants.cancel.tr),
+                              child: Text(AppTranslationConstants.cancel.tr, style: const TextStyle(fontSize: 16.0)),
                             ),
                           ],
                         ),

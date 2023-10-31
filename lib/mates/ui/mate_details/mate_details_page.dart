@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/utils/app_color.dart';
 
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
@@ -23,6 +24,7 @@ class MateDetailsPage extends StatelessWidget {
       id: AppPageIdConstants.mate,
       init: MateDetailsController(),
       builder: (_) => Scaffold(
+        backgroundColor: AppColor.main50,
         body: Container(
           height: MediaQuery.of(context).size.height,
           decoration: AppTheme.appBoxDecoration,

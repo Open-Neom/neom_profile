@@ -5,6 +5,7 @@ import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/implementations/mate_controller.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 import 'package:neom_commons/core/ui/widgets/appbar_child.dart';
+import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
@@ -20,10 +21,8 @@ class FollowingListPage extends StatelessWidget {
       id: AppPageIdConstants.following,
       init: MateController(),
       builder: (_) => Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(50),
-        child: AppBarChild(title: AppTranslationConstants.following.tr)
-      ),
+        backgroundColor: AppColor.main50,
+        appBar:AppBarChild(title: AppTranslationConstants.following.tr),
       body: Container(
         decoration: AppTheme.appBoxDecoration,
         child: _.mates.isEmpty ?
@@ -57,7 +56,7 @@ class FollowingListPage extends StatelessWidget {
                     Text(mate.favoriteItems?.length.toString() ?? ""),
                      Icon(AppFlavour.getAppItemIcon(),
                       color: Colors.blueGrey, size: 20,),
-                    Text(mate.mainFeature.tr.capitalize!),
+                    Text(mate.mainFeature.tr.capitalize),
                   ]),
                 ),
               onLongPress: () => {},

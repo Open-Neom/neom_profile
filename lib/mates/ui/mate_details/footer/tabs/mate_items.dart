@@ -21,9 +21,9 @@ class MateItems extends StatelessWidget {
       init: MateDetailsController(),
       builder: (_) => ListView.builder(
         padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
-        itemCount: _.totalItems.length,
+        itemCount: _.totalMediaItems.length,
         itemBuilder: (context, index) {
-          AppMediaItem appMediaItem = _.totalItems.values.elementAt(index);
+          AppMediaItem appMediaItem = _.totalMediaItems.values.elementAt(index);
           return GestureDetector(
             child: ListTile(
               contentPadding: const EdgeInsets.all(8.0),

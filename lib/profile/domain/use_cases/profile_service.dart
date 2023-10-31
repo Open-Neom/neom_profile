@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 
@@ -16,5 +17,8 @@ abstract class ProfileService {
   void addBlockTo(String followingId);
 
   Future<void> handleAndUploadImage(UploadImageType uploadType);
+
+  Future<void> showUpdatePhotoDialog(BuildContext context);
+  Future<void> showUpdateCoverImgDialog(BuildContext context);
 
 }

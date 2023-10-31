@@ -15,10 +15,11 @@ class ProfilePage extends StatelessWidget {
       id: AppPageIdConstants.profile,
       init: ProfileController(),
       builder: (_) => Scaffold(
+        backgroundColor: AppColor.main50,
         body: Container(
         height: AppTheme.fullHeight(context),
         decoration: AppTheme.appBoxDecoration,
-        child: _.isLoading ? const Center(child: CircularProgressIndicator())
+        child: _.isLoading.value ? const Center(child: CircularProgressIndicator())
        : SingleChildScrollView(
           child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,38 +29,16 @@ class ProfilePage extends StatelessWidget {
                 GestureDetector(
                   child: DiagonallyCutColoredImage(
                     Image(
-                      image: CachedNetworkImageProvider(_.profile.coverImgUrl.isNotEmpty
-                          ? _.profile.coverImgUrl :_.profile.photoUrl.isNotEmpty
-                          ? _.profile.photoUrl : AppFlavour.getNoImageUrl(),),
+                      image: CachedNetworkImageProvider(_.profile.value.coverImgUrl.isNotEmpty
+                          ? _.profile.value.coverImgUrl :_.profile.value.photoUrl.isNotEmpty
+                          ? _.profile.value.photoUrl : AppFlavour.getNoImageUrl(),),
                       width: AppTheme.fullWidth(context),
                       height: 250,
                       fit: BoxFit.cover,
                     ),
                     color: AppColor.cutColoredImage,
                     ),
-                  onTap: () => showDialog(
-                    context: context,
-                    builder: (context){
-                      return SimpleDialog(
-                        backgroundColor: AppColor.getMain(),
-                        title: Text(AppTranslationConstants.updateCoverImage.tr),
-                        children: <Widget>[
-                          SimpleDialogOption(
-                            child: Text(
-                                AppTranslationConstants.uploadImage.tr
-                            ),
-                            onPressed: () async {
-                              await _.handleAndUploadImage(UploadImageType.cover);
-                            }
-                          ),
-                          SimpleDialogOption(
-                            child: Text(AppTranslationConstants.cancel.tr),
-                            onPressed: () => Get.back()
-                          ),
-                        ],
-                      );
-                    }
-                  ),
+                  onTap: () async => await _.showUpdateCoverImgDialog(context),
                 ),
                 Align(
                   alignment: FractionalOffset.bottomCenter,
@@ -67,38 +46,38 @@ class ProfilePage extends StatelessWidget {
                   child: Column(
                     children: <Widget>[
                       Hero(
-                        tag: _.profile.name,
+                        tag: _.profile.value.name,
                         child: GestureDetector(
                           child: CircleAvatar(
-                            backgroundImage: CachedNetworkImageProvider(_.profile.photoUrl.isNotEmpty
-                                ? _.profile.photoUrl : AppFlavour.getNoImageUrl(),),
+                            backgroundImage: CachedNetworkImageProvider(_.profile.value.photoUrl.isNotEmpty
+                                ? _.profile.value.photoUrl : AppFlavour.getNoImageUrl(),),
                             radius: 50.0,
                           ),
                           onTap: () => Get.toNamed(AppRouteConstants.profileEdit),
                         ),
                       ),
-                      buildFollowerInfo(context, _.profile),
+                      buildFollowerInfo(context, _.profile.value),
                       AppTheme.heightSpace20,
                       Container(
                         padding: const EdgeInsets.all(AppTheme.padding20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text(_.profile.name.capitalize!,
+                            Text(_.profile.value.name.capitalize,
                               style: Theme.of(context).textTheme.titleLarge!
                                   .copyWith(color: Colors.white
                               ),
                             ),
-                            (_.profile.genres?.isNotEmpty ?? false) ?
+                            (_.profile.value.genres?.isNotEmpty ?? false) ?
                             GenresGridView(
-                              _.profile.genres?.keys.toList() ?? [],
+                              _.profile.value.genres?.keys.toList() ?? [],
                               AppColor.white,
                               alignment: Alignment.centerLeft,
                               fontSize: 15,
                             ) : Container(),
                             Row(
                               children: <Widget>[
-                                Text(_.location.isNotEmpty ? _.location : AppTranslationConstants.notSpecified.tr,
+                                Text(_.location.value.isNotEmpty ? _.location.value : AppTranslationConstants.notSpecified.tr,
                                   style: Theme.of(context).textTheme.titleMedium,
                                 ),
                                 IconButton(
@@ -110,8 +89,8 @@ class ProfilePage extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            Text(_.profile.aboutMe.isEmpty
-                                ? AppTranslationConstants.noProfileDesc.tr : _.profile.aboutMe.capitalizeFirst!,
+                            Text(_.profile.value.aboutMe.isEmpty
+                                ? AppTranslationConstants.noProfileDesc.tr : _.profile.value.aboutMe.capitalizeFirst,
                                 style: Theme.of(context).textTheme.bodyMedium!
                                     .copyWith(fontSize: 16),
                               textAlign: TextAlign.justify,
@@ -127,9 +106,9 @@ class ProfilePage extends StatelessWidget {
                             children: <Widget>[
                               TabBar(
                                 tabs: [
-                                  Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${_.profile.posts?.length ?? 0})'),
+                                  Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${_.profile.value.posts?.length ?? 0})'),
                                   Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${AppFlavour.appInUse == AppInUse.cyberneom ?
-                                  _.totalPresets.length : _.totalItems.length})'),
+                                  _.totalPresets.length : (_.totalMediaItems.length + _.totalReleaseItems.length)})'),
                                   Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${_.events.length})'),
                                 ],
                                 indicatorColor: Colors.white,

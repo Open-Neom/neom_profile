@@ -249,7 +249,7 @@ Widget _buildDotsMenu(BuildContext context, AppProfile itemmate, UserRole userRo
                                   onChanged: (String? reportType) {
                                     reportController.setReportType(reportType ?? "");
                                   },
-                                  value: reportController.reportType,
+                                  value: reportController.reportType.value,
                                   alignment: Alignment.center,
                                   icon: const Icon(Icons.arrow_downward),
                                   iconSize: 20,
@@ -276,7 +276,7 @@ Widget _buildDotsMenu(BuildContext context, AppProfile itemmate, UserRole userRo
                           DialogButton(
                             color: AppColor.bondiBlue75,
                             onPressed: () async {
-                              if(!reportController.isButtonDisabled) {
+                              if(!reportController.isButtonDisabled.value) {
                                 await reportController.sendReport(ReferenceType.profile, itemmate.id);
                                 AppUtilities.showAlert(context, AppTranslationConstants.report.tr, AppTranslationConstants.hasSentReport.tr);
                               }

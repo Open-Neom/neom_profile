@@ -19,14 +19,14 @@ class MateDetailsBody extends StatelessWidget {
       : Obx(()=> Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(_.mate.name.capitalize!, style: textTheme.headlineSmall!.copyWith()),
+          Text(_.mate.name.capitalize, style: textTheme.headlineSmall!.copyWith()),
           _.mate.type != ProfileType.fan ?
           Row(
             children: [
               Icon(AppFlavour.getInstrumentIcon(),
                 size: 15.0),
               AppTheme.widthSpace5,
-              Text(_.mate.mainFeature.tr.capitalize!,
+              Text(_.mate.mainFeature.tr.capitalize,
                 style: const TextStyle(
                   fontSize: 15,
                   color: AppColor.white
@@ -47,14 +47,14 @@ class MateDetailsBody extends StatelessWidget {
           ),
           Container(
             padding: const EdgeInsets.only(top: 10.0),
-            child: ReadMoreText(_.mate.aboutMe.isEmpty ? AppTranslationConstants.noProfileDesc.tr : _.mate.aboutMe.capitalizeFirst!,
+            child: ReadMoreText(_.mate.aboutMe.isEmpty ? AppTranslationConstants.noProfileDesc.tr : _.mate.aboutMe.capitalizeFirst,
               trimLines: 6,
               colorClickableText: Colors.grey.shade500,
               trimMode: TrimMode.Line,
               trimCollapsedText: '... ${AppTranslationConstants.readMore.tr}',
               textAlign: TextAlign.justify,
               style: textTheme.bodyMedium!.copyWith(color: Colors.white70, fontSize: 16.0),
-              trimExpandedText: ' ${AppTranslationConstants.less.tr.capitalize!}',
+              trimExpandedText: ' ${AppTranslationConstants.less.tr.capitalize}',
             ),
           ),
         ]),

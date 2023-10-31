@@ -30,7 +30,7 @@ class MateShowcase extends StatelessWidget {
                   tabs: [
                     Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${_.matePosts.length})'),
                     Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${AppFlavour.appInUse == AppInUse.cyberneom ?
-                    _.totalPresets.length : _.totalItems.length})'),
+                    _.totalPresets.length : (_.totalMediaItems.length + _.totalReleaseItems.length)})'),
                     Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${_.events.length})')
                   ],
                   indicatorColor: Colors.white,
@@ -38,8 +38,8 @@ class MateShowcase extends StatelessWidget {
                   unselectedLabelStyle: const TextStyle(fontSize: 12),
                   labelPadding: const EdgeInsets.symmetric(horizontal: 0.0),
                 ),
-                SizedBox.fromSize(
-                  size: const Size.fromHeight(300.0),
+                SizedBox(
+                  height: AppTheme.fullHeight(context)/2.5,
                   child: TabBarView(
                    children: AppFlavour.appInUse == AppInUse.cyberneom
                   ? MateConstants.neomMateTabPages : MateConstants.mateTabPages,
