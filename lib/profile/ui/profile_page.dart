@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/ui/widgets/app_circular_progress_indicator.dart';
+import 'package:neom_commons/core/ui/widgets/read_more_container.dart';
 import 'package:neom_commons/neom_commons.dart';
 import '../utils/profile_constants.dart';
 import 'profile_controller.dart';
@@ -19,8 +21,8 @@ class ProfilePage extends StatelessWidget {
         body: Container(
         height: AppTheme.fullHeight(context),
         decoration: AppTheme.appBoxDecoration,
-        child: _.isLoading.value ? const Center(child: CircularProgressIndicator())
-       : SingleChildScrollView(
+        child: _.isLoading.value ? const AppCircularProgressIndicator()
+            : SingleChildScrollView(
           child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -89,11 +91,11 @@ class ProfilePage extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            Text(_.profile.value.aboutMe.isEmpty
-                                ? AppTranslationConstants.noProfileDesc.tr : _.profile.value.aboutMe.capitalizeFirst,
-                                style: Theme.of(context).textTheme.bodyMedium!
-                                    .copyWith(fontSize: 16),
-                              textAlign: TextAlign.justify,
+                            ReadMoreContainer(
+                              text:_.profile.value.aboutMe.isEmpty
+                                  ? AppTranslationConstants.noProfileDesc.tr
+                                  : _.profile.value.aboutMe.capitalizeFirst,
+                              color: Colors.white70,
                             ),
                           ],
                         ),
@@ -107,7 +109,7 @@ class ProfilePage extends StatelessWidget {
                               TabBar(
                                 tabs: [
                                   Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${_.profile.value.posts?.length ?? 0})'),
-                                  Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${AppFlavour.appInUse == AppInUse.cyberneom ?
+                                  Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${AppFlavour.appInUse == AppInUse.c ?
                                   _.totalPresets.length : (_.totalMediaItems.length + _.totalReleaseItems.length)})'),
                                   Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${_.events.length})'),
                                 ],
@@ -119,7 +121,7 @@ class ProfilePage extends StatelessWidget {
                               SizedBox(
                                 height: AppTheme.fullHeight(context)/2.5,
                                 child: TabBarView(
-                                  children: AppFlavour.appInUse == AppInUse.cyberneom
+                                  children: AppFlavour.appInUse == AppInUse.c
                                       ? ProfileConstants.neomProfileTabPages : ProfileConstants.profileTabPages,
                                 ),
                               ),

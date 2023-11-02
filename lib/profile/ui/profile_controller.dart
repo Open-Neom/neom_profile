@@ -103,7 +103,6 @@ class ProfileController extends GetxController implements ProfileService {
       }
 
       await getTotalItems();
-
     } catch (e) {
       logger.e(e.toString());
     }
@@ -137,7 +136,7 @@ class ProfileController extends GetxController implements ProfileService {
   @override
   void getItemDetails(AppMediaItem appMediaItem){
     logger.d("getItemDetails for ${appMediaItem.name}");
-    if(AppFlavour.appInUse != AppInUse.gigmeout) {
+    if(AppFlavour.appInUse != AppInUse.g) {
       Get.toNamed(AppFlavour.getItemDetailsRoute(),
           arguments: [appMediaItem]
       );
@@ -166,10 +165,10 @@ class ProfileController extends GetxController implements ProfileService {
 
   @override
   Future<void> getTotalItems() async {
-    logger.t('getTotal ${AppFlavour.appInUse == AppInUse.cyberneom ? 'Presets': 'AppMediaItems & AppReleaseItems'}');
+    logger.t('getTotal ${AppFlavour.appInUse == AppInUse.c ? 'Presets': 'AppMediaItems & AppReleaseItems'}');
 
     if(profile.value.itemlists != null) {
-      if(AppFlavour.appInUse == AppInUse.cyberneom) {
+      if(AppFlavour.appInUse == AppInUse.c) {
         profile.value.frequencies = await FrequencyFirestore().retrieveFrequencies(profile.value.id);
         for (var freq in profile.value.frequencies!.values) {
           totalPresets[freq.frequency.toString()] = ChamberPreset.custom(frequency: freq);
@@ -250,6 +249,7 @@ class ProfileController extends GetxController implements ProfileService {
               if(await ProfileFirestore().updateName(profile.value.id, profileName)) {
                 userController.profile.name = profileName;
                 profile.value.name = profileName;
+                profile.value.lastNameUpdate = DateTime.now().millisecondsSinceEpoch;
                 AppUtilities.showSnackBar(
                   title: AppTranslationConstants.profileDetails.tr,
                   message: MessageTranslationConstants.profileNameUpdated.tr,

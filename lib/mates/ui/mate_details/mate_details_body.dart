@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/ui/widgets/read_more_container.dart';
 import 'package:neom_commons/neom_commons.dart';
-import 'package:readmore/readmore.dart';
 
 import 'mate_details_controller.dart';
 
@@ -23,8 +23,7 @@ class MateDetailsBody extends StatelessWidget {
           _.mate.type != ProfileType.fan ?
           Row(
             children: [
-              Icon(AppFlavour.getInstrumentIcon(),
-                size: 15.0),
+              Icon(AppFlavour.getInstrumentIcon(), size: 15.0),
               AppTheme.widthSpace5,
               Text(_.mate.mainFeature.tr.capitalize,
                 style: const TextStyle(
@@ -47,15 +46,12 @@ class MateDetailsBody extends StatelessWidget {
           ),
           Container(
             padding: const EdgeInsets.only(top: 10.0),
-            child: ReadMoreText(_.mate.aboutMe.isEmpty ? AppTranslationConstants.noProfileDesc.tr : _.mate.aboutMe.capitalizeFirst,
-              trimLines: 6,
-              colorClickableText: Colors.grey.shade500,
-              trimMode: TrimMode.Line,
-              trimCollapsedText: '... ${AppTranslationConstants.readMore.tr}',
-              textAlign: TextAlign.justify,
-              style: textTheme.bodyMedium!.copyWith(color: Colors.white70, fontSize: 16.0),
-              trimExpandedText: ' ${AppTranslationConstants.less.tr.capitalize}',
-            ),
+            child: ReadMoreContainer(
+              text: _.mate.aboutMe.isEmpty
+                  ? AppTranslationConstants.noProfileDesc.tr
+                  : _.mate.aboutMe.capitalizeFirst,
+              color: Colors.white70,
+            )
           ),
         ]),
       ),

@@ -102,7 +102,7 @@ class MateDetailHeader extends StatelessWidget {
                 ]),
               ),
               AppTheme.heightSpace10,
-              AppFlavour.appInUse != AppInUse.emxi || _.mateBlogEntries.isEmpty
+              AppFlavour.appInUse != AppInUse.e || _.mateBlogEntries.isEmpty
                   ? Container() : TextButton(
                 style: TextButton.styleFrom(
                   foregroundColor: AppColor.white,
@@ -278,7 +278,8 @@ Widget _buildDotsMenu(BuildContext context, AppProfile itemmate, UserRole userRo
                             onPressed: () async {
                               if(!reportController.isButtonDisabled.value) {
                                 await reportController.sendReport(ReferenceType.profile, itemmate.id);
-                                AppUtilities.showAlert(context, AppTranslationConstants.report.tr, AppTranslationConstants.hasSentReport.tr);
+                                AppUtilities.showAlert(context, title: AppTranslationConstants.report.tr,
+                                    message: AppTranslationConstants.hasSentReport.tr);
                               }
                             },
                             child: Text(AppTranslationConstants.send.tr,
@@ -322,7 +323,8 @@ Widget _buildDotsMenu(BuildContext context, AppProfile itemmate, UserRole userRo
                             onPressed: () async {
                               if(!itemmateDetailsController.isButtonDisabled) {
                                 await itemmateDetailsController.blockProfile();
-                                AppUtilities.showAlert(context, AppTranslationConstants.blockProfile.tr, AppTranslationConstants.blockedProfileMsg.tr);
+                                AppUtilities.showAlert(context, title: AppTranslationConstants.blockProfile.tr,
+                                    message: AppTranslationConstants.blockedProfileMsg.tr);
                               }
                             },
                             child: Text(AppTranslationConstants.toBlock.tr,

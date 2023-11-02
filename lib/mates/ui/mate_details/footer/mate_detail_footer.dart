@@ -29,7 +29,7 @@ class MateShowcase extends StatelessWidget {
                 TabBar(
                   tabs: [
                     Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${_.matePosts.length})'),
-                    Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${AppFlavour.appInUse == AppInUse.cyberneom ?
+                    Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${AppFlavour.appInUse == AppInUse.c ?
                     _.totalPresets.length : (_.totalMediaItems.length + _.totalReleaseItems.length)})'),
                     Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${_.events.length})')
                   ],
@@ -41,7 +41,7 @@ class MateShowcase extends StatelessWidget {
                 SizedBox(
                   height: AppTheme.fullHeight(context)/2.5,
                   child: TabBarView(
-                   children: AppFlavour.appInUse == AppInUse.cyberneom
+                   children: AppFlavour.appInUse == AppInUse.c
                   ? MateConstants.neomMateTabPages : MateConstants.mateTabPages,
                   ),
                 ),

@@ -187,7 +187,6 @@ class MateDetailsController extends GetxController implements MateDetailsService
       logger.e(e.toString());
     }
 
-    logger.d("");
     isLoadingDetails = false;
     update([AppPageIdConstants.mate]);
   }
@@ -195,7 +194,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> getMatePosts() async {
-    logger.d("");
+    logger.t("getMatePosts");
 
     try {
       matePosts = await PostFirestore().getProfilePosts(mate.id);
@@ -242,10 +241,10 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> getTotalItems() async {
-    logger.d("");
+    logger.t("getTotalItems");
 
     if(mate.itemlists?.isNotEmpty ?? false) {
-      if(AppFlavour.appInUse == AppInUse.cyberneom) {
+      if(AppFlavour.appInUse == AppInUse.c) {
         mate.frequencies = await FrequencyFirestore().retrieveFrequencies(mate.id);
         for (var freq in mate.frequencies!.values) {
           totalPresets[freq.frequency.toString()] = ChamberPreset.custom(frequency: freq);
@@ -265,19 +264,25 @@ class MateDetailsController extends GetxController implements MateDetailsService
   }
 
   Future<void> getTotalEvents()  async{
-    logger.d("");
+    logger.t("getTotalEvents for mate");
 
     try {
       if(mate.events != null && mate.events!.isNotEmpty) {
-        events = await EventFirestore().getEventsById(mate.events!);
+        Map<String, Event> createdEvents = await EventFirestore().getEventsById(mate.events!);
+        logger.d("${createdEvents.length} created events founds for mate ${mate.id}");
+        events.addAll(createdEvents);
       }
 
       if(mate.playingEvents != null && mate.playingEvents!.isNotEmpty) {
-        events.addAll(await EventFirestore().getEventsById(mate.playingEvents!));
+        Map<String, Event> playingEvents = await EventFirestore().getEventsById(mate.playingEvents!);
+        logger.d("${playingEvents.length} playing events founds for mate ${mate.id}");
+        events.addAll(playingEvents);
       }
 
       if(mate.goingEvents != null && mate.goingEvents!.isNotEmpty) {
-        events.addAll(await EventFirestore().getEventsById(mate.goingEvents!));
+        Map<String, Event> goingEvents = await EventFirestore().getEventsById(mate.goingEvents!);
+        logger.d("${goingEvents.length} going events founds for mate ${mate.id}");
+        events.addAll(goingEvents);
       }
 
     } catch (e) {
@@ -295,7 +300,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
     try {
       mate.instruments = await InstrumentFirestore().retrieveInstruments(mate.id);
-      logger.d("${mate.instruments?.length ?? 0} Total Instruments for Profile");
+      logger.t("${mate.instruments?.length ?? 0} Total Instruments for Profile");
     } catch (e) {
       logger.e(e.toString());
     }
@@ -306,7 +311,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
   @override
   void getItemDetails(AppMediaItem appMediaItem) {
     logger.d("getItemDetails for ${appMediaItem.name}");
-    if (AppFlavour.appInUse == AppInUse.gigmeout) {
+    if (AppFlavour.appInUse == AppInUse.g) {
       Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),
           transition: Transition.downToUp);
     } else {

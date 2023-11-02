@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/ui/widgets/app_circular_progress_indicator.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 
 import 'package:neom_commons/core/utils/app_theme.dart';
@@ -28,7 +29,7 @@ class MateDetailsPage extends StatelessWidget {
         body: Container(
           height: MediaQuery.of(context).size.height,
           decoration: AppTheme.appBoxDecoration,
-          child: _.isLoading ? const Center(child: CircularProgressIndicator())
+          child: _.isLoading ? const AppCircularProgressIndicator()
               : _.blockedProfile ? Container() : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

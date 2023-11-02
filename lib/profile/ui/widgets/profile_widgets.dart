@@ -45,7 +45,8 @@ Widget buildFollowerInfo(context, AppProfile profile) {
             ),
             onTap: () => profile.following!.isNotEmpty
                 ? Get.toNamed(AppRouteConstants.following, arguments: profile.following)
-                : AppUtilities.showAlert(context, AppTranslationConstants.following.tr, AppTranslationConstants.followingMsg.tr),
+                : AppUtilities.showAlert(context, title: AppTranslationConstants.following.tr,
+                message: AppTranslationConstants.followingMsg.tr),
           ),
           Text(' | ', style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)
           ),
@@ -54,7 +55,8 @@ Widget buildFollowerInfo(context, AppProfile profile) {
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)),
             onTap: () => profile.followers!.isNotEmpty
                 ? Get.toNamed(AppRouteConstants.followers, arguments: profile.followers)
-                : AppUtilities.showAlert(context, AppTranslationConstants.followers.tr, AppTranslationConstants.followersMsg.tr),
+                : AppUtilities.showAlert(context, title: AppTranslationConstants.followers.tr,
+                message: AppTranslationConstants.followersMsg.tr),
           ),
         ],
       ),
