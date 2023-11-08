@@ -8,7 +8,6 @@ import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/neom_commons.dart';
 import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
 import 'package:neom_itemlists/itemlists/data/firestore/app_media_item_firestore.dart';
-import 'package:neom_music_player/ui/player/media_player_page.dart';
 import '../../../profile/ui/profile_controller.dart';
 import '../../domain/use_cases/mate_details_service.dart';
 
@@ -312,8 +311,8 @@ class MateDetailsController extends GetxController implements MateDetailsService
   void getItemDetails(AppMediaItem appMediaItem) {
     logger.d("getItemDetails for ${appMediaItem.name}");
     if (AppFlavour.appInUse == AppInUse.g) {
-      Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),
-          transition: Transition.downToUp);
+      ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem), transition: Transition.downToUp);
+      Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
     } else {
       Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
     }
@@ -321,7 +320,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> follow() async {
-    logger.d("");
+    logger.t("Follow profile ${mate.id}");
 
     try {
       if(await ProfileFirestore().followProfile(profileId: profile.id, followedProfileId:  mate.id)) {
@@ -371,7 +370,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> unfollow() async {
-    logger.d("");
+    logger.t("Unfollow ${mate.id}");
     try {
       if (await ProfileFirestore().unfollowProfile(profileId: profile.id,unfollowProfileId:  mate.id)) {
         following = false;

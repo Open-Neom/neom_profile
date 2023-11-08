@@ -18,13 +18,13 @@ import 'package:neom_commons/core/domain/model/post.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/core_utilities.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
-import 'package:neom_music_player/ui/player/media_player_page.dart';
 import 'package:neom_posts/posts/ui/add/post_upload_controller.dart';
 
 import '../domain/use_cases/profile_service.dart';
@@ -137,18 +137,17 @@ class ProfileController extends GetxController implements ProfileService {
   void getItemDetails(AppMediaItem appMediaItem){
     logger.d("getItemDetails for ${appMediaItem.name}");
     if(AppFlavour.appInUse != AppInUse.g) {
-      Get.toNamed(AppFlavour.getItemDetailsRoute(),
-          arguments: [appMediaItem]
-      );
+      Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
     } else {
-      Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.downToUp);
+      ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.downToUp);
+      Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
     }
 
 
   }
 
   Future<void> getProfilePosts() async {
-    logger.d("getProfilePosts");
+    logger.t("getProfilePosts");
     profilePosts.value = await PostFirestore().getProfilePosts(profile.value.id);
 
     for (var post in profilePosts) {
@@ -212,7 +211,7 @@ class ProfileController extends GetxController implements ProfileService {
 
   @override
   Future<void> updateLocation() async {
-    logger.d("Updating location");
+    logger.t("Updating location");
     try {
 
       Position newPosition =  await GeoLocatorController().getCurrentPosition();
@@ -334,8 +333,7 @@ class ProfileController extends GetxController implements ProfileService {
 
   @override
   Future<void> handleAndUploadImage(UploadImageType uploadImageType) async {
-
-    logger.d("Entering handleAndUploadImage method");
+    logger.t("Entering handleAndUploadImage method");
 
     isLoading.value = true;
     update([AppPageIdConstants.profile]);

@@ -458,12 +458,6 @@
       "languageVersion": "3.0"
     },
     {
-      "name": "flutter_app_badger",
-      "rootUri": "file:///Users/serzen/.pub-cache/hosted/pub.dev/flutter_app_badger-1.5.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "flutter_cache_manager",
       "rootUri": "file:///Users/serzen/.pub-cache/hosted/pub.dev/flutter_cache_manager-3.3.1",
       "packageUri": "lib/",
@@ -1010,12 +1004,6 @@
       "languageVersion": "2.17"
     },
     {
-      "name": "material_design_icons_flutter",
-      "rootUri": "file:///Users/serzen/.pub-cache/hosted/pub.dev/material_design_icons_flutter-7.0.7296",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "meta",
       "rootUri": "file:///Users/serzen/.pub-cache/hosted/pub.dev/meta-1.9.1",
       "packageUri": "lib/",
@@ -1270,12 +1258,6 @@
     {
       "name": "permission_handler_windows",
       "rootUri": "file:///Users/serzen/.pub-cache/hosted/pub.dev/permission_handler_windows-0.1.3",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "persistent_bottom_nav_bar",
-      "rootUri": "file:///Users/serzen/.pub-cache/git/PersistentBottomNavBar-ecdadb01e4b4255cd35d6e9ac813703150784772/",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -1802,7 +1784,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-11-02T21:26:11.393360Z",
+  "generated": "2023-11-08T22:14:25.819182Z",
   "generator": "pub",
-  "generatorVersion": "3.1.4"
+  "generatorVersion": "3.1.5"
 }
