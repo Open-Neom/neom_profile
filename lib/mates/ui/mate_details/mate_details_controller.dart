@@ -158,7 +158,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
   Future<void> retrieveDetails() async {
     logger.t("retrieveDetails");
     try {
-      mate.itemlists = await ItemlistFirestore().fetchAll(profileId: mate.id);
+      mate.itemlists = await ItemlistFirestore().fetchAll(ownerId: mate.id);
       itemlists = mate.itemlists ?? {};
 
       await getTotalInstruments();
