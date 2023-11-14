@@ -15,17 +15,17 @@ class MateDetailsBody extends StatelessWidget {
     return GetBuilder<MateDetailsController>(
       id: AppPageIdConstants.mate,
       init: MateDetailsController(),
-      builder: (_) =>  _.isLoading ? const Center(child: CircularProgressIndicator())
+      builder: (_) =>  _.isLoading.value ? const Center(child: CircularProgressIndicator())
       : Obx(()=> Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(_.mate.name.capitalize, style: textTheme.headlineSmall!.copyWith()),
-          _.mate.type != ProfileType.fan ?
+          Text(_.mate.value.name.capitalize, style: textTheme.headlineSmall!.copyWith()),
+          _.mate.value.type != ProfileType.fan ?
           Row(
             children: [
               Icon(AppFlavour.getInstrumentIcon(), size: 15.0),
               AppTheme.widthSpace5,
-              Text(_.mate.mainFeature.tr.capitalize,
+              Text(_.mate.value.mainFeature.tr.capitalize,
                 style: const TextStyle(
                   fontSize: 15,
                   color: AppColor.white
@@ -33,23 +33,23 @@ class MateDetailsBody extends StatelessWidget {
               ),
             ],
           ) : Container(),
-          _.mate.genres != null ? GenresGridView(
-            _.mate.genres?.keys.toList() ?? [],
+          _.mate.value.genres != null ? GenresGridView(
+            _.mate.value.genres?.keys.toList() ?? [],
             AppColor.white,
             alignment: Alignment.centerLeft,
             fontSize: 15,
           ) : Container(),
           Container(
-            child: _.address.isNotEmpty && _.distance > 0.0
-                ? _buildLocationInfo(_.address, _.distance, textTheme)
+            child: _.address.value.isNotEmpty && _.distance > 0.0
+                ? _buildLocationInfo(_.address.value, _.distance.value, textTheme)
                 : Container(),
           ),
           Container(
             padding: const EdgeInsets.only(top: 10.0),
             child: ReadMoreContainer(
-              text: _.mate.aboutMe.isEmpty
+              text: _.mate.value.aboutMe.isEmpty
                   ? AppTranslationConstants.noProfileDesc.tr
-                  : _.mate.aboutMe.capitalizeFirst,
+                  : _.mate.value.aboutMe.capitalizeFirst,
               color: Colors.white70,
             )
           ),

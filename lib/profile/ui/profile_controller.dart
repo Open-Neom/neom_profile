@@ -30,8 +30,7 @@ import 'package:neom_posts/posts/ui/add/post_upload_controller.dart';
 import '../domain/use_cases/profile_service.dart';
 
 class ProfileController extends GetxController implements ProfileService {
-
-  final logger = AppUtilities.logger;
+  
   final userController = Get.find<UserController>();
   final loginController = Get.find<LoginController>();
 
@@ -42,6 +41,7 @@ class ProfileController extends GetxController implements ProfileService {
 
   final RxMap<String, AppMediaItem> totalMediaItems = <String, AppMediaItem>{}.obs;
   final RxMap<String, AppReleaseItem> totalReleaseItems = <String, AppReleaseItem>{}.obs;
+  final RxMap<String, AppMediaItem>  totalMixedItems = <String, AppMediaItem>{}.obs;
   final RxMap<String, ChamberPreset> totalPresets = <String, ChamberPreset>{}.obs;
 
   final RxList<Post> profilePosts = <Post>[].obs;
@@ -68,14 +68,14 @@ class ProfileController extends GetxController implements ProfileService {
   @override
   void onInit() async {
     super.onInit();
-    logger.t("Profile Controller");
+    AppUtilities.logger.t("Profile Controller");
 
     try {
         profile.value = userController.profile;
         profileName = profile.value.name;
         profileAboutMe = profile.value.aboutMe;
       } catch (e) {
-        logger.e(e);
+        AppUtilities.logger.e(e);
     }
 
     if(profile.value.position != null) {
@@ -90,7 +90,7 @@ class ProfileController extends GetxController implements ProfileService {
   @override
   void onReady() async {
     super.onReady();
-    logger.t("Profile Controller Ready");
+    AppUtilities.logger.t("Profile Controller Ready");
     try {
       if(profile.value.posts?.isNotEmpty ?? false) {
         await getProfilePosts();
@@ -104,7 +104,7 @@ class ProfileController extends GetxController implements ProfileService {
 
       await getTotalItems();
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
     isLoading.value = false;
@@ -120,12 +120,12 @@ class ProfileController extends GetxController implements ProfileService {
 
   @override
   Future<void> editProfile() async {
-    logger.d("");
+    AppUtilities.logger.d("");
   }
 
 
   void changeEditStatus(){
-    logger.t("Changing edit status from $editStatus");
+    AppUtilities.logger.t("Changing edit status from $editStatus");
 
     editStatus.value ? editStatus.value = false
         : editStatus.value = true;
@@ -135,7 +135,7 @@ class ProfileController extends GetxController implements ProfileService {
 
   @override
   void getItemDetails(AppMediaItem appMediaItem){
-    logger.d("getItemDetails for ${appMediaItem.name}");
+    AppUtilities.logger.d("getItemDetails for ${appMediaItem.name}");
     if(AppFlavour.appInUse != AppInUse.g) {
       Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
     } else {
@@ -147,7 +147,7 @@ class ProfileController extends GetxController implements ProfileService {
   }
 
   Future<void> getProfilePosts() async {
-    logger.t("getProfilePosts");
+    AppUtilities.logger.t("getProfilePosts");
     profilePosts.value = await PostFirestore().getProfilePosts(profile.value.id);
 
     for (var post in profilePosts) {
@@ -158,13 +158,13 @@ class ProfileController extends GetxController implements ProfileService {
       eventPosts[post] = event;
     }
 
-    logger.d("${profilePosts.length} Total Posts for Profile");
+    AppUtilities.logger.d("${profilePosts.length} Total Posts for Profile");
     update([AppPageIdConstants.profile, AppPageIdConstants.profilePosts]);
   }
 
   @override
   Future<void> getTotalItems() async {
-    logger.t('getTotal ${AppFlavour.appInUse == AppInUse.c ? 'Presets': 'AppMediaItems & AppReleaseItems'}');
+    AppUtilities.logger.t('getTotal ${AppFlavour.appInUse == AppInUse.c ? 'Presets': 'AppMediaItems & AppReleaseItems'}');
 
     if(profile.value.itemlists != null) {
       if(AppFlavour.appInUse == AppInUse.c) {
@@ -174,44 +174,47 @@ class ProfileController extends GetxController implements ProfileService {
         }
         totalPresets.addAll(CoreUtilities.getTotalPresets(profile.value.itemlists!));
       } else {
-        totalMediaItems.value = CoreUtilities.getTotalMediaItems(profile.value.itemlists!);
         totalReleaseItems.value = CoreUtilities.getTotalReleaseItems(profile.value.itemlists!);
+        totalMediaItems.value = CoreUtilities.getTotalMediaItems(profile.value.itemlists!);
+        for (var item in totalReleaseItems.values) {
+          totalMixedItems[item.id] = AppMediaItem.fromAppReleaseItem(item);
+        }
+        totalMixedItems.addAll(totalMediaItems);
       }
-
     }
 
-    logger.t("${(totalMediaItems.length + totalReleaseItems.length)} Total Items for Profile");
+    AppUtilities.logger.d("${totalMixedItems.length} Total Items for Profile");
     update([AppPageIdConstants.profile]);
   }
 
   Future<void> getTotalEvents() async {
-    logger.t("getTotalEvents");
+    AppUtilities.logger.t("getTotalEvents");
 
     if(profile.value.events != null && profile.value.events!.isNotEmpty) {
       Map<String, Event> createdEvents = await EventFirestore().getEventsById(profile.value.events!);
-      logger.d("${createdEvents.length} created events founds for profile ${profile.value.id}");
+      AppUtilities.logger.d("${createdEvents.length} created events founds for profile ${profile.value.id}");
       events.addAll(createdEvents);
     }
 
     if(profile.value.playingEvents != null && profile.value.playingEvents!.isNotEmpty) {
       Map<String, Event> playingEvents = await EventFirestore().getEventsById(profile.value.playingEvents!);
-      logger.d("${playingEvents.length} playing events founds for profile ${profile.value.id}");
+      AppUtilities.logger.d("${playingEvents.length} playing events founds for profile ${profile.value.id}");
       events.addAll(playingEvents);
     }
 
     if(profile.value.goingEvents != null && profile.value.goingEvents!.isNotEmpty) {
       Map<String, Event> goingEvents = await EventFirestore().getEventsById(profile.value.goingEvents!);
-      logger.d("${goingEvents.length} going events founds for profile ${profile.value.id}");
+      AppUtilities.logger.d("${goingEvents.length} going events founds for profile ${profile.value.id}");
       events.addAll(goingEvents);
     }
 
-    logger.d("${events.length} Total Events found for Profile");
+    AppUtilities.logger.d("${events.length} Total Events found for Profile");
     update([AppPageIdConstants.profile]);
   }
 
   @override
   Future<void> updateLocation() async {
-    logger.t("Updating location");
+    AppUtilities.logger.t("Updating location");
     try {
 
       Position newPosition =  await GeoLocatorController().getCurrentPosition();
@@ -221,16 +224,16 @@ class ProfileController extends GetxController implements ProfileService {
         location.value = await GeoLocatorController().getAddressSimple(profile.value.position!);
       }
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
-    logger.d("Location retrieved and updated successfully");
+    AppUtilities.logger.d("Location retrieved and updated successfully");
     update([AppPageIdConstants.profile]);
   }
 
   @override
   Future<void> updateProfileData() async {
-    logger.t("Updating Profile Data");
+    AppUtilities.logger.t("Updating Profile Data");
     bool nameChanged = false;
     bool aboutMeChanged = false;
 
@@ -333,7 +336,7 @@ class ProfileController extends GetxController implements ProfileService {
 
   @override
   Future<void> handleAndUploadImage(UploadImageType uploadImageType) async {
-    logger.t("Entering handleAndUploadImage method");
+    AppUtilities.logger.t("Entering handleAndUploadImage method");
 
     isLoading.value = true;
     update([AppPageIdConstants.profile]);
@@ -360,7 +363,7 @@ class ProfileController extends GetxController implements ProfileService {
           }
         }
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
     isLoading.value = false;

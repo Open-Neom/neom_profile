@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
+import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_assets.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
@@ -56,7 +57,7 @@ class ProfileChamberPresets extends StatelessWidget {
                   itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
                   itemSize: 15,
                   onRatingUpdate: (rating) {
-                    _.logger.d("New Rating set to $rating");
+                    AppUtilities.logger.d("New Rating set to $rating");
                   },
                 ),
                 onTap: () {

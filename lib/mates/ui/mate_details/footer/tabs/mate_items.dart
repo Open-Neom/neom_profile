@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
+import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_assets.dart';
 import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
@@ -45,7 +46,7 @@ class MateItems extends StatelessWidget {
                 itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
                 itemSize: 15,
                 onRatingUpdate: (rating) {
-                  _.logger.d("New Rating set to $rating");
+                  AppUtilities.logger.d("New Rating set to $rating");
                   },
               ),]),
               onTap: () => _.getItemDetails(appMediaItem),

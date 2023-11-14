@@ -3,6 +3,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
+import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_assets.dart';
 import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
@@ -21,9 +22,9 @@ class ProfileItems extends StatelessWidget {
         width: double.infinity,
         child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
-          itemCount: _.totalMediaItems.length,
+          itemCount: _.totalMixedItems.length,
           itemBuilder: (context, index) {
-            AppMediaItem appMediaItem = _.totalMediaItems.values.elementAt(index);
+            AppMediaItem appMediaItem = _.totalMixedItems.values.elementAt(index);
             return GestureDetector(
               child: ListTile(
                 contentPadding: const EdgeInsets.all(8.0),
@@ -46,7 +47,7 @@ class ProfileItems extends StatelessWidget {
                     itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
                     itemSize: 15,
                     onRatingUpdate: (rating) {
-                      _.logger.d("New Rating set to $rating");
+                      AppUtilities.logger.d("New Rating set to $rating");
                       },
                   ),]),
                 onTap: () => _.getItemDetails(appMediaItem),

@@ -29,8 +29,8 @@ class MateDetailsPage extends StatelessWidget {
         body: Container(
           height: MediaQuery.of(context).size.height,
           decoration: AppTheme.appBoxDecoration,
-          child: _.isLoading ? const AppCircularProgressIndicator()
-              : _.blockedProfile ? Container() : SingleChildScrollView(
+          child: _.isLoading.value ? const AppCircularProgressIndicator()
+              : _.blockedProfile.value ? Container() : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -39,7 +39,7 @@ class MateDetailsPage extends StatelessWidget {
                     padding: const EdgeInsets.all(AppTheme.padding20),
                     child: const MateDetailsBody(),
                   ),
-                  _.isLoadingDetails ? const Center(
+                  _.isLoadingDetails.value ? const Center(
                       child: CircularProgressIndicator())
                       : const MateShowcase(),
                 ],
