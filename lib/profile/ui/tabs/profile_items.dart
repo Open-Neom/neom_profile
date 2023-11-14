@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
-import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/constants/app_assets.dart';
+import 'package:neom_commons/core/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/core/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/core_utilities.dart';
 import '../profile_controller.dart';
 
 class ProfileItems extends StatelessWidget {
@@ -28,34 +25,21 @@ class ProfileItems extends StatelessWidget {
             return GestureDetector(
               child: ListTile(
                 contentPadding: const EdgeInsets.all(8.0),
-                title: Text(appMediaItem.name.isEmpty ? "" : appMediaItem.name),
-                subtitle: Row(children: [Text(appMediaItem.artist.isEmpty ? ""
-                    : appMediaItem.artist.length > AppConstants.maxArtistNameLength ? "${appMediaItem.artist.substring(0,AppConstants.maxArtistNameLength)}...": appMediaItem.artist),
-                  const SizedBox(width:5,),
-                  RatingBar(
-                    initialRating: appMediaItem.state.toDouble(),
-                    minRating: 1,
-                    ignoreGestures: true,
-                    direction: Axis.horizontal,
-                    allowHalfRating: false,
-                    itemCount: 5,
-                    ratingWidget: RatingWidget(
-                      full: CoreUtilities.ratingImage(AppAssets.heart),
-                      half: CoreUtilities.ratingImage(AppAssets.heartHalf),
-                      empty: CoreUtilities.ratingImage(AppAssets.heartBorder),
-                    ),
-                    itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
-                    itemSize: 15,
-                    onRatingUpdate: (rating) {
-                      AppUtilities.logger.d("New Rating set to $rating");
-                      },
-                  ),]),
-                onTap: () => _.getItemDetails(appMediaItem),
-                leading: Hero(
-                  tag: CoreUtilities.getAppItemHeroTag(index),
-                  child: Image.network(appMediaItem.imgUrl.isNotEmpty ? appMediaItem.imgUrl
-                    : AppFlavour.getNoImageUrl(), width: 50.0)
+                leading: HandledCachedNetworkImage(appMediaItem.imgUrl,
+                  width: 50, enableFullScreen: false,
                 ),
+                title: Text(appMediaItem.name.isEmpty ? "" : appMediaItem.name),
+                subtitle: Row(
+                  children: [
+                    Text(appMediaItem.artist.isEmpty ? ""
+                    : appMediaItem.artist.length > AppConstants.maxArtistNameLength
+                    ? "${appMediaItem.artist.substring(0,AppConstants.maxArtistNameLength)}..."
+                    : appMediaItem.artist),
+                    const SizedBox(width:5,),
+                    RatingHeartBar(state: appMediaItem.state.toDouble(),),
+                  ]
+                ),
+                onTap: () => _.getItemDetails(appMediaItem),
               ),
             );
           },
