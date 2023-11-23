@@ -75,11 +75,13 @@ class ProfilePage extends StatelessWidget {
                               _.profile.value.genres?.keys.toList() ?? [],
                               AppColor.white,
                               alignment: Alignment.centerLeft,
-                              fontSize: 15,
+                              fontSize: 13,
                             ) : Container(),
                             Row(
                               children: <Widget>[
-                                Text(_.location.value.isNotEmpty ? _.location.value : AppTranslationConstants.notSpecified.tr,
+                                Text(_.location.value.isNotEmpty ? _.location.value.length > AppConstants.maxArtistNameLength
+                                    ? "${_.location.value.substring(0,AppConstants.maxArtistNameLength)}..." : _.location.value
+                                    : AppTranslationConstants.notSpecified.tr,
                                   style: Theme.of(context).textTheme.titleMedium,
                                 ),
                                 IconButton(

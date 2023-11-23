@@ -61,13 +61,13 @@ class MateDetailsBody extends StatelessWidget {
   Widget _buildLocationInfo(String addressSimple, int distance,  TextTheme textTheme) {
     return Row(
         children: <Widget>[
-          Icon(
-            Icons.place,
+          Icon(Icons.place,
             color: AppColor.white80,
             size: 16.0,
           ),
           AppTheme.widthSpace5,
-          Text(addressSimple.isEmpty ? AppTranslationConstants.notSpecified.tr : addressSimple,
+          Text(addressSimple.isEmpty ? AppTranslationConstants.notSpecified.tr : addressSimple.length > AppConstants.maxArtistNameLength
+              ? "${addressSimple.substring(0,AppConstants.maxArtistNameLength)}..." : addressSimple,
             style: textTheme.titleSmall!.copyWith(color: AppColor.white80),
           ),
           Container(

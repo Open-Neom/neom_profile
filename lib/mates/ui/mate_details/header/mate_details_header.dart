@@ -120,7 +120,7 @@ class MateDetailHeader extends StatelessWidget {
                     ),
                   ],
                   onTap: () {
-                    Get.toNamed(AppRouteConstants.mateBlog, arguments: [_.mate]);
+                    Get.toNamed(AppRouteConstants.mateBlog, arguments: [_.mate.value]);
                   },
                 ),
                 onPressed: () => {
