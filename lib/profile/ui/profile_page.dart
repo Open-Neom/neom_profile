@@ -65,10 +65,26 @@ class ProfilePage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text(_.profile.value.name.capitalize,
-                              style: Theme.of(context).textTheme.titleLarge!
-                                  .copyWith(color: Colors.white
-                              ),
+                            Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: 30,
+                                    alignment: Alignment.center,
+                                    child: Text(_.profile.value.name.capitalize,
+                                      style: Theme.of(context).textTheme.titleLarge!
+                                          .copyWith(color: Colors.white
+                                      ),
+                                    ),
+                                  ),
+                                  AppTheme.widthSpace5,
+                                  if(_.profile.value.isVerified)
+                                    Container(
+                                        height: 30,
+                                        alignment: Alignment.center,
+                                        child: const Icon(Icons.verified, size: 18,)
+                                    ),
+                                ]
                             ),
                             (_.profile.value.genres?.isNotEmpty ?? false) ?
                             GenresGridView(

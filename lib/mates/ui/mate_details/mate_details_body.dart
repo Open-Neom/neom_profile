@@ -19,7 +19,25 @@ class MateDetailsBody extends StatelessWidget {
       : Obx(()=> Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(_.mate.value.name.capitalize, style: textTheme.headlineSmall!.copyWith()),
+          Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 30,
+                  child: Text(_.mate.value.name.capitalize,
+                    style: Theme.of(context).textTheme.titleLarge!
+                        .copyWith(color: Colors.white
+                    ),
+                  ),
+                ),
+                AppTheme.widthSpace5,
+                if(_.mate.value.isVerified)
+                  const SizedBox(
+                      height: 30,
+                      child: Icon(Icons.verified, size: 20,)
+                  ),
+              ]
+          ),
           _.mate.value.type != ProfileType.fan ?
           Row(
             children: [
