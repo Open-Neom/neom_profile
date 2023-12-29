@@ -106,6 +106,8 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/awesome_notifications-0.8.2" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/shared_preferences_android-2.2.1" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/share_plus-7.2.1" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_custom_tabs-1.0.4" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_custom_tabs_web-1.1.0" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

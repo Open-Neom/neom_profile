@@ -215,7 +215,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
         for (var freq in mate.value.frequencies!.values) {
           totalPresets[freq.frequency.toString()] = ChamberPreset.custom(frequency: freq);
         }
-        totalPresets.addAll(CoreUtilities.getTotalPresets(mate.value.itemlists!));
+        totalPresets.addAll(CoreUtilities.getTotalPresets(mate.value.chambers!));
       } else {
         totalMediaItems.value = CoreUtilities.getTotalMediaItems(mate.value.itemlists!);
         totalReleaseItems.value = CoreUtilities.getTotalReleaseItems(mate.value.itemlists!);
