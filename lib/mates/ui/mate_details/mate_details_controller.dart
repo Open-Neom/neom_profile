@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/data/firestore/app_release_item_firestore.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
@@ -48,6 +47,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
   List<Post> mateBlogEntries = <Post>[];
   
   GeoLocatorService geoLocatorService = GeoLocatorController();
+  bool debugPushNotifications = false;
 
   @override
   void onInit() async {
@@ -64,7 +64,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
         await loadMate(itemmateId);
         await retrieveDetails();
 
-        if(mate.value.id.isNotEmpty && (userController.user!.userRole == UserRole.subscriber || kDebugMode)) {
+        if(mate.value.id.isNotEmpty && (userController.user!.userRole == UserRole.subscriber || debugPushNotifications)) {
           FirebaseMessagingCalls.sendPrivatePushNotification(
             toProfileId: mate.value.id,
             fromProfile: profile,
