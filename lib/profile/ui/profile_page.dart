@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/ui/widgets/app_circular_progress_indicator.dart';
 import 'package:neom_commons/core/ui/widgets/read_more_container.dart';
+import 'package:neom_commons/core/utils/enums/verification_level.dart';
 import 'package:neom_commons/neom_commons.dart';
 import '../utils/profile_constants.dart';
 import 'profile_controller.dart';
@@ -78,11 +79,11 @@ class ProfilePage extends StatelessWidget {
                                     ),
                                   ),
                                   AppTheme.widthSpace5,
-                                  if(_.profile.value.isVerified)
+                                  if(_.profile.value.verificationLevel != VerificationLevel.none)
                                     Container(
-                                        height: 30,
-                                        alignment: Alignment.center,
-                                        child: const Icon(Icons.verified, size: 18,)
+                                      height: 30,
+                                      alignment: Alignment.center,
+                                      child: const Icon(Icons.verified, size: 18,)
                                     ),
                                 ]
                             ),

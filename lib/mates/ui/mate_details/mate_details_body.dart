@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/ui/widgets/read_more_container.dart';
+import 'package:neom_commons/core/utils/enums/verification_level.dart';
 import 'package:neom_commons/neom_commons.dart';
 
 import 'mate_details_controller.dart';
@@ -25,17 +26,12 @@ class MateDetailsBody extends StatelessWidget {
                 SizedBox(
                   height: 30,
                   child: Text(_.mate.value.name.capitalize,
-                    style: Theme.of(context).textTheme.titleLarge!
-                        .copyWith(color: Colors.white
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.white),
                   ),
                 ),
                 AppTheme.widthSpace5,
-                if(_.mate.value.isVerified)
-                  const SizedBox(
-                      height: 30,
-                      child: Icon(Icons.verified, size: 20,)
-                  ),
+                if(_.mate.value.verificationLevel != VerificationLevel.none)
+                  const SizedBox(height: 30, child: Icon(Icons.verified, size: 20,)),
               ]
           ),
           _.mate.value.type != ProfileType.fan ?
