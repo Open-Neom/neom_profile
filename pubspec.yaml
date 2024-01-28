@@ -1,6 +1,6 @@
 name: neom_profile
 description: Profile Details for Cyberneom.
-version: 1.1.1
+version: 1.1.2
 homepage: https://github.com/emmanuel-montoya/neom_profile
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
@@ -14,16 +14,17 @@ dependencies:
 
   neom_commons:
     git:
-      url: https://github.com/Cyberneom/neom_commons.git
+      url: git@github.com:Cyberneom/neom_commons.git
+  neom_posts:
+    git:
+      url: git@github.com:Cyberneom/neom_posts.git
+
   neom_frequencies:
     git:
       url: https://github.com/Cyberneom/neom_frequencies.git
   neom_music_player:
     git:
       url: https://github.com/Cyberneom/neom_music_player.git
-  neom_posts:
-    git:
-      url: https://github.com/Cyberneom/neom_posts.git
 
 dev_dependencies:
   flutter_test:
@@ -31,17 +32,15 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 
 dependency_overrides:
-  neom_commons:
-    path: ../neom_commons
-  neom_frequencies:
-    path: ../neom_frequencies
-  neom_posts:
-    path: ../neom_posts
-  neom_music_player:
-    path: ../neom_music_player
+#  neom_commons:
+#    path: ../neom_commons
+#  neom_frequencies:
+#    path: ../neom_frequencies
+#  neom_posts:
+#    path: ../neom_posts
+#  neom_music_player:
+#    path: ../neom_music_player
   uuid: 4.1.0
   logger: 2.0.2+1
-#  http: 1.1.0
-#  google_api_headers: 2.0.3
 
 flutter:
