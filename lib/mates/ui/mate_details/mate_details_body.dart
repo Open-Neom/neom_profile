@@ -25,7 +25,7 @@ class MateDetailsBody extends StatelessWidget {
               children: [
                 SizedBox(
                   height: 30,
-                  child: Text(_.mate.value.name.capitalize,
+                  child: Text(CoreUtilities.capitalizeFirstLetter(_.mate.value.name),
                     style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.white),
                   ),
                 ),
@@ -46,24 +46,24 @@ class MateDetailsBody extends StatelessWidget {
                 ),
               ),
             ],
-          ) : Container(),
+          ) : const SizedBox.shrink(),
           _.mate.value.genres != null ? GenresGridView(
             _.mate.value.genres?.keys.toList() ?? [],
             AppColor.white,
             alignment: Alignment.centerLeft,
             fontSize: 15,
-          ) : Container(),
-          Container(
+          ) : const SizedBox.shrink(),
+          SizedBox(
             child: _.address.value.isNotEmpty && _.distance > 0.0
                 ? _buildLocationInfo(_.address.value, _.distance.value, textTheme)
-                : Container(),
+                : const SizedBox.shrink(),
           ),
-          Container(
+          Padding(
             padding: const EdgeInsets.only(top: 10.0),
             child: ReadMoreContainer(
               text: _.mate.value.aboutMe.isEmpty
                   ? AppTranslationConstants.noProfileDesc.tr
-                  : _.mate.value.aboutMe.capitalizeFirst,
+                  : CoreUtilities.capitalizeFirstLetter(_.mate.value.aboutMe),
               color: Colors.white70,
             )
           ),
@@ -84,7 +84,7 @@ class MateDetailsBody extends StatelessWidget {
               ? "${addressSimple.substring(0,AppConstants.maxArtistNameLength)}..." : addressSimple,
             style: textTheme.titleSmall!.copyWith(color: AppColor.white80),
           ),
-          Container(
+          Padding(
             padding: const EdgeInsets.only(left: 5.0),
             child: Text(distance == 0 ? "" : "- ${distance.ceil().toString()} ${AppConstants.km}",
               style: textTheme.titleSmall!.copyWith(color: AppColor.white80),

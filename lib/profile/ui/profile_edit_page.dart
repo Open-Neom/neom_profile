@@ -28,7 +28,7 @@ class ProfileEditPage extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 SizedBox(
-                    height: AppTheme.fullHeight(context)/4,
+                    height: AppTheme.fullHeight(context)/3,
                     child: Stack(
                         fit: StackFit.loose,
                         alignment: Alignment.center,
@@ -72,7 +72,7 @@ class ProfileEditPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      Container(
+                      Padding(
                           padding: const EdgeInsets.only(
                               left: AppTheme.padding25,
                               right: AppTheme.padding25
@@ -87,7 +87,7 @@ class ProfileEditPage extends StatelessWidget {
                                     fontWeight: FontWeight.bold
                                 ),
                               ),
-                              Obx(()=> _.editStatus.value ? Container()
+                              Obx(()=> _.editStatus.value ? const SizedBox.shrink()
                               : FloatingActionButton(
                                 heroTag: AppHeroTagConstants.floatingButton2,
                                 onPressed: () => {
@@ -101,7 +101,7 @@ class ProfileEditPage extends StatelessWidget {
                             ],
                           )
                       ),
-                      Container(
+                      Padding(
                         padding: const EdgeInsets.only(
                             left: AppTheme.padding25,
                             right: AppTheme.padding25,
@@ -113,7 +113,7 @@ class ProfileEditPage extends StatelessWidget {
                               fontWeight: FontWeight.bold),
                         ),
                       ),
-                      Container(
+                      Padding(
                           padding: const EdgeInsets.only(
                               left: AppTheme.padding25,
                               right: AppTheme.padding25),
@@ -124,7 +124,7 @@ class ProfileEditPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Container(
+                      Padding(
                         padding: const EdgeInsets.only(
                             left: AppTheme.padding25,
                             right: AppTheme.padding25,
@@ -136,7 +136,7 @@ class ProfileEditPage extends StatelessWidget {
                               fontWeight: FontWeight.bold),
                         ),
                       ),
-                      Container(
+                      Padding(
                         padding: const EdgeInsets.only(
                             left: AppTheme.padding25,
                             right: AppTheme.padding25
@@ -148,40 +148,40 @@ class ProfileEditPage extends StatelessWidget {
                           enabled: _.editStatus.value,
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.only(
-                            left: AppTheme.padding25,
-                            right: AppTheme.padding25,
-                            top: AppTheme.padding10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: <Widget>[
-                              Text(
-                                AppTranslationConstants.preferenceToPlay.tr,
-                                style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                                ),
-                              Text(
-                                AppTranslationConstants.profileType.tr,
-                                style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                              ),
-                            ]
-                          ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.only(
-                            left: AppTheme.padding25,
-                            right: AppTheme.padding25,
-                            top: AppTheme.padding10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Text(_.profile.value.reason.name.tr, style: const TextStyle(fontSize: 16.0)),
-                            Text(_.profile.value.type.value.tr.capitalize, style: const TextStyle(fontSize: 16.0)),
-                          ],
-                        ),
-                      ),
-                      Obx(()=> !_.editStatus.value ? Container() :
-                      Container(
+                      // Container(
+                      //   padding: const EdgeInsets.only(
+                      //       left: AppTheme.padding25,
+                      //       right: AppTheme.padding25,
+                      //       top: AppTheme.padding10),
+                      //     child: Row(
+                      //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      //       children: <Widget>[
+                      //         Text(
+                      //           AppTranslationConstants.preferenceToPlay.tr,
+                      //           style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                      //           ),
+                      //         Text(
+                      //           AppTranslationConstants.profileType.tr,
+                      //           style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                      //         ),
+                      //       ]
+                      //     ),
+                      // ),
+                      // Container(
+                      //   padding: const EdgeInsets.only(
+                      //       left: AppTheme.padding25,
+                      //       right: AppTheme.padding25,
+                      //       top: AppTheme.padding10),
+                      //   child: Row(
+                      //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      //     children: [
+                      //       Text(_.profile.value.reason.name.tr, style: const TextStyle(fontSize: 16.0)),
+                      //       Text(_.profile.value.type.value.tr.capitalize, style: const TextStyle(fontSize: 16.0)),
+                      //     ],
+                      //   ),
+                      // ),
+                      Obx(()=> !_.editStatus.value ? const SizedBox.shrink() :
+                      Padding(
                         padding: const EdgeInsets.only(
                             left: AppTheme.padding25,
                             right: AppTheme.padding25,

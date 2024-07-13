@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:neom_commons/core/data/firestore/app_media_item_firestore.dart';
 import 'package:neom_commons/core/data/firestore/app_release_item_firestore.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
@@ -6,7 +7,6 @@ import 'package:neom_commons/core/domain/model/app_release_item.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/neom_commons.dart';
 import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
-import 'package:neom_itemlists/itemlists/data/firestore/app_media_item_firestore.dart';
 import '../../../profile/ui/profile_controller.dart';
 import '../../domain/use_cases/mate_details_service.dart';
 

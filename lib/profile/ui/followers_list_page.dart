@@ -60,7 +60,7 @@ class FollowersListPage extends StatelessWidget {
                   ]),
                 ),
               onLongPress: () => {},
-            ) : Container();
+            ) : const SizedBox.shrink();
           },
         ),
       )

@@ -1,0 +1,9 @@
+dependency_overrides:
+  neom_commons:
+    path: ../neom_commons
+#  neom_posts:
+#    path: ../neom_posts
+  #  neom_frequencies:
+  #    path: ../neom_frequencies
+  uuid: 4.4.0
+  rxdart: 0.28.0

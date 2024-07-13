@@ -60,7 +60,7 @@ class MateDetailHeader extends StatelessWidget {
                   ),
                   color: AppColor.cutColoredImage,);
             } else {
-              return Container();
+              return const SizedBox.shrink();
             }
           },
         ),
@@ -94,16 +94,16 @@ class MateDetailHeader extends StatelessWidget {
                   },
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.only(top: 10.0),
-                child: const Column(children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 10.0),
+                child: Column(children: [
                   // TODO VERIFY IF SHOWING FOLLOWERS FOLLOWING
                   Divider()
                 ]),
               ),
               AppTheme.heightSpace10,
               AppFlavour.appInUse != AppInUse.e || _.mateBlogEntries.isEmpty
-                  ? Container() : TextButton(
+                  ? const SizedBox.shrink() : TextButton(
                 style: TextButton.styleFrom(
                   foregroundColor: AppColor.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -127,7 +127,7 @@ class MateDetailHeader extends StatelessWidget {
 
                 },
               ),
-              Container(
+              Padding(
                 padding: EdgeInsets.only(
                   top: _.mateBlogEntries.isEmpty ? 40.0 : 20.0,
                   left: 16.0,
@@ -171,7 +171,7 @@ class MateDetailHeader extends StatelessWidget {
             ],
           ),
         ),
-        Container(
+        Padding(
           padding: const EdgeInsets.only(top: 25, right: 10, left: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

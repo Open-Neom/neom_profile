@@ -61,7 +61,7 @@ class ProfilePage extends StatelessWidget {
                       ),
                       buildFollowerInfo(context, _.profile.value),
                       AppTheme.heightSpace20,
-                      Container(
+                      Padding(
                         padding: const EdgeInsets.all(AppTheme.padding20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +72,7 @@ class ProfilePage extends StatelessWidget {
                                   Container(
                                     height: 30,
                                     alignment: Alignment.center,
-                                    child: Text(_.profile.value.name.capitalize,
+                                    child: Text(CoreUtilities.capitalizeFirstLetter(_.profile.value.name),
                                       style: Theme.of(context).textTheme.titleLarge!
                                           .copyWith(color: Colors.white
                                       ),
@@ -92,34 +92,33 @@ class ProfilePage extends StatelessWidget {
                               _.profile.value.genres?.keys.toList() ?? [],
                               AppColor.white,
                               alignment: Alignment.centerLeft,
-                              fontSize: 13,
-                            ) : Container(),
+                              fontSize: 12,
+                            ) : const SizedBox.shrink(),
                             Row(
                               children: <Widget>[
-                                Text(_.location.value.isNotEmpty ? _.location.value.length > AppConstants.maxArtistNameLength
-                                    ? "${_.location.value.substring(0,AppConstants.maxArtistNameLength)}..." : _.location.value
+                                Text(_.location.value.isNotEmpty ? _.location.value.length > AppConstants.maxLocationNameLength
+                                    ? "${_.location.value.substring(0,AppConstants.maxLocationNameLength)}..." : _.location.value
                                     : AppTranslationConstants.notSpecified.tr,
-                                  style: Theme.of(context).textTheme.titleMedium,
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.place,
                                     color: Colors.white,
-                                    size: 15.0,
+                                    size: 15,
                                   ),
                                   onPressed: ()=> _.updateLocation(),
                                 ),
                               ],
                             ),
                             ReadMoreContainer(
+                              padding: 0,
                               text:_.profile.value.aboutMe.isEmpty
                                   ? AppTranslationConstants.noProfileDesc.tr
-                                  : _.profile.value.aboutMe.capitalizeFirst,
-                              color: Colors.white70,
+                                  : CoreUtilities.capitalizeFirstLetter(_.profile.value.aboutMe),
                             ),
                           ],
                         ),
                       ),
-                      Container(
+                      Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: DefaultTabController(
                           length: AppConstants.profileTabs.length,

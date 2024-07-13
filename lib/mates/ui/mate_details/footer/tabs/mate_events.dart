@@ -22,7 +22,7 @@ class MateEvents extends StatelessWidget {
             itemCount: _.events.length,
             itemBuilder: (context, index){
               Event event = _.events.values.elementAt(index);
-              return event.eventDate <= 0 ? Container() :
+              return event.eventDate <= 0 ? const SizedBox.shrink() :
               GestureDetector(
                 onTap: () => Get.toNamed(AppRouteConstants.eventDetails, arguments: [event]),
                 child: EventTile(event)

@@ -24,7 +24,7 @@ class ProfilePosts extends StatelessWidget {
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Container(
+              Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 10.0),
                 child: Text(
                   AppTranslationConstants.noPostsYet.tr,

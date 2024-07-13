@@ -33,7 +33,7 @@ Widget buildTitleLabel(BuildContext context, String title, String msg){
 }
 
 Widget buildFollowerInfo(context, AppProfile profile) {
-  return Container(
+  return Padding(
     padding: const EdgeInsets.only(top: AppTheme.padding10),
     child: Column(children: [
       Row(
