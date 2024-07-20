@@ -80,8 +80,8 @@ class MateDetailsBody extends StatelessWidget {
             size: 16.0,
           ),
           AppTheme.widthSpace5,
-          Text(addressSimple.isEmpty ? AppTranslationConstants.notSpecified.tr : addressSimple.length > AppConstants.maxArtistNameLength
-              ? "${addressSimple.substring(0,AppConstants.maxArtistNameLength)}..." : addressSimple,
+          Text(addressSimple.isEmpty ? AppTranslationConstants.notSpecified.tr : addressSimple.length > AppConstants.maxLocationNameLength
+              ? "${addressSimple.substring(0,AppConstants.maxLocationNameLength)}..." : addressSimple,
             style: textTheme.titleSmall!.copyWith(color: AppColor.white80),
           ),
           Padding(

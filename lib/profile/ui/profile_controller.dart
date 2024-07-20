@@ -13,6 +13,7 @@ import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 import 'package:neom_commons/core/domain/model/app_release_item.dart';
 import 'package:neom_commons/core/domain/model/event.dart';
+import 'package:neom_commons/core/domain/model/instrument.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/domain/model/post.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
@@ -62,6 +63,8 @@ class ProfileController extends GetxController implements ProfileService {
   String profileAboutMe = "";
   bool aboutMeValid = true;
   bool isValidName = true;
+  Map<String, Instrument> previousInstruments = {};
+  String previousMainFeature = '';
 
 
 
@@ -107,6 +110,8 @@ class ProfileController extends GetxController implements ProfileService {
       AppUtilities.logger.e(e.toString());
     }
 
+    previousInstruments = Map.from(profile.value.instruments ?? {});
+    previousMainFeature = profile.value.mainFeature;
     isLoading.value = false;
     update([AppPageIdConstants.profile]);
   }
@@ -130,6 +135,8 @@ class ProfileController extends GetxController implements ProfileService {
     editStatus.value ? editStatus.value = false
         : editStatus.value = true;
 
+    aboutMeController.text.trim();
+    
     update([AppPageIdConstants.profile]);
   }
 
@@ -234,13 +241,13 @@ class ProfileController extends GetxController implements ProfileService {
   @override
   Future<void> updateProfileData() async {
     AppUtilities.logger.t("Updating Profile Data");
-    bool nameChanged = false;
-    bool aboutMeChanged = false;
 
-    if(profileName != nameController.text.trim()) nameChanged = true;
-    if(profileAboutMe != aboutMeController.text.trim()) aboutMeChanged = true;
+    bool nameChanged = profileName != nameController.text.trim();
+    bool aboutMeChanged = profileAboutMe != aboutMeController.text.trim();
+    bool profileInstrumentsChanged = !CoreUtilities.mapKeysEquals(previousInstruments, profile.value.instruments ?? {});
+    bool mainFeatureChanged = previousMainFeature != profile.value.mainFeature;
 
-    if(nameChanged || aboutMeChanged) {
+    if(nameChanged || aboutMeChanged || mainFeatureChanged || profileInstrumentsChanged) {
       if(nameChanged) {
         profileName = nameController.text.trim();
 
@@ -299,7 +306,8 @@ class ProfileController extends GetxController implements ProfileService {
         }
       }
 
-
+      if(profileInstrumentsChanged) previousInstruments = Map.from(profile.value.instruments ?? {});
+      if(mainFeatureChanged) previousMainFeature = profile.value.mainFeature;
     } else {
       AppUtilities.showSnackBar(
         title: AppTranslationConstants.profileDetails.tr,
@@ -307,6 +315,8 @@ class ProfileController extends GetxController implements ProfileService {
       );
       return;
     }
+
+
 
     editStatus.value = false;
     update([AppPageIdConstants.profile, AppPageIdConstants.appDrawer]);
