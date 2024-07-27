@@ -12,7 +12,7 @@ import 'mate_details_body.dart';
 import 'mate_details_controller.dart';
 
 class MateDetailsPage extends StatelessWidget {
-  const MateDetailsPage({Key? key}) : super(key: key);
+  const MateDetailsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +29,8 @@ class MateDetailsPage extends StatelessWidget {
         body: Container(
           height: MediaQuery.of(context).size.height,
           decoration: AppTheme.appBoxDecoration,
-          child: _.isLoading.value ? const AppCircularProgressIndicator()
-              : _.blockedProfile.value ? const SizedBox.shrink() : SingleChildScrollView(
+          child: _.isLoading ? const AppCircularProgressIndicator()
+              : _.blockedProfile ? const SizedBox.shrink() : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -39,8 +39,7 @@ class MateDetailsPage extends StatelessWidget {
                     padding: EdgeInsets.all(AppTheme.padding20),
                     child: MateDetailsBody(),
                   ),
-                  _.isLoadingDetails.value ? const Center(
-                      child: CircularProgressIndicator())
+                  _.isLoadingDetails ? const Center(child: LinearProgressIndicator())
                       : const MateShowcase(),
                 ],
               ),

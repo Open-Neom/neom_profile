@@ -8,7 +8,7 @@ import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import '../profile_controller.dart';
 
 class ProfileItems extends StatelessWidget {
-  const ProfileItems({Key? key}) : super(key: key);
+  const ProfileItems({super.key});
 
   @override
   Widget build(BuildContext context) {

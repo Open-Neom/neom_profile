@@ -31,7 +31,7 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 import '../mate_details_controller.dart';
 
 class MateDetailHeader extends StatelessWidget {
-  const MateDetailHeader({Key? key}) : super(key: key);
+  const MateDetailHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,18 +41,18 @@ class MateDetailHeader extends StatelessWidget {
       builder: (_) => Stack(
       children: <Widget>[
         FutureBuilder(
-          future: CoreUtilities().isAvailableMediaUrl(_.mate.value.coverImgUrl.isNotEmpty ?
-            _.mate.value.coverImgUrl : _.mate.value.photoUrl.isNotEmpty
-            ? _.mate.value.photoUrl : AppFlavour.getNoImageUrl()),
+          future: CoreUtilities().isAvailableMediaUrl(_.mate.coverImgUrl.isNotEmpty ?
+            _.mate.coverImgUrl : _.mate.photoUrl.isNotEmpty
+            ? _.mate.photoUrl : AppFlavour.getNoImageUrl()),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
                 return DiagonallyCutColoredImage(
                   Image(
                       image: NetworkImage(
                           (snapshot.data == true) ?
-                          (_.mate.value.coverImgUrl.isNotEmpty ?
-                      _.mate.value.coverImgUrl : _.mate.value.photoUrl.isNotEmpty
-                          ? _.mate.value.photoUrl : AppFlavour.getNoImageUrl()) : AppFlavour.getNoImageUrl(),),
+                          (_.mate.coverImgUrl.isNotEmpty ?
+                      _.mate.coverImgUrl : _.mate.photoUrl.isNotEmpty
+                          ? _.mate.photoUrl : AppFlavour.getNoImageUrl()) : AppFlavour.getNoImageUrl(),),
                       width: MediaQuery.of(context).size.width,
                       height: 250.0,
                       fit: BoxFit.cover,
@@ -70,18 +70,18 @@ class MateDetailHeader extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Hero(
-                tag: _.mate.value.name,
+                tag: _.mate.name,
                 child: FutureBuilder(
-                  future: CoreUtilities().isAvailableMediaUrl(_.mate.value.photoUrl.isNotEmpty
-                      ? _.mate.value.photoUrl : AppFlavour.getNoImageUrl(),),
+                  future: CoreUtilities().isAvailableMediaUrl(_.mate.photoUrl.isNotEmpty
+                      ? _.mate.photoUrl : AppFlavour.getNoImageUrl(),),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return CircleAvatar(
                         backgroundImage: NetworkImage((snapshot.data == true) ?
-                        (_.mate.value.photoUrl.isNotEmpty ? _.mate.value.photoUrl : AppFlavour.getNoImageUrl())
+                        (_.mate.photoUrl.isNotEmpty ? _.mate.photoUrl : AppFlavour.getNoImageUrl())
                             : AppFlavour.getNoImageUrl(),),
                         radius: 60.0,
-                        onBackgroundImageError: (object, error) => CachedNetworkImageProvider(_.mate.value.photoUrl.isNotEmpty ? _.mate.value.photoUrl
+                        onBackgroundImageError: (object, error) => CachedNetworkImageProvider(_.mate.photoUrl.isNotEmpty ? _.mate.photoUrl
                             : AppFlavour.getNoImageUrl(),),
                       );
                     } else {
@@ -94,14 +94,15 @@ class MateDetailHeader extends StatelessWidget {
                   },
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.only(top: 10.0),
-                child: Column(children: [
-                  // TODO VERIFY IF SHOWING FOLLOWERS FOLLOWING
-                  Divider()
-                ]),
-              ),
-              AppTheme.heightSpace10,
+              ///DEPRECATED AS APP IS NOT SHOWING FOLLOWING & FOLLOWERS
+              // const Padding(
+              //   padding: EdgeInsets.only(top: 10.0),
+              //   child: Column(children: [
+              //     // TODO VERIFY IF SHOWING FOLLOWERS FOLLOWING
+              //     Divider()
+              //   ]),
+              // ),
+              AppTheme.heightSpace30,
               AppFlavour.appInUse != AppInUse.e || _.mateBlogEntries.isEmpty
                   ? const SizedBox.shrink() : TextButton(
                 style: TextButton.styleFrom(
@@ -120,7 +121,7 @@ class MateDetailHeader extends StatelessWidget {
                     ),
                   ],
                   onTap: () {
-                    Get.toNamed(AppRouteConstants.mateBlog, arguments: [_.mate.value]);
+                    Get.toNamed(AppRouteConstants.mateBlog, arguments: [_.mate]);
                   },
                 ),
                 onPressed: () => {
@@ -143,10 +144,10 @@ class MateDetailHeader extends StatelessWidget {
                         child: MaterialButton(
                           minWidth: 140.0,
                           color: Colors.transparent,
-                          child: _.following.value ? Text(AppTranslationConstants.unfollow.tr.toUpperCase()) :
+                          child: _.following ? Text(AppTranslationConstants.unfollow.tr.toUpperCase()) :
                           Text(AppTranslationConstants.follow.tr.toUpperCase()),
                           onPressed: () {
-                            _.following.value ? _.unfollow() : _.follow();
+                            _.following ? _.unfollow() : _.follow();
                           },
                         ),
                       ),
@@ -182,7 +183,7 @@ class MateDetailHeader extends StatelessWidget {
                       backgroundColor: AppTheme.canvasColor75(context),
                       context: context,
                       builder: (context) {
-                        return _buildDotsMenu(context, _.mate.value, _.userController.user!.userRole);
+                        return _buildDotsMenu(context, _.mate, _.userController.user!.userRole);
                       }
                   ),
                   icon: const Icon(FontAwesomeIcons.ellipsisVertical, size: 20)
@@ -201,15 +202,19 @@ Widget _buildDotsMenu(BuildContext context, AppProfile itemmate, UserRole userRo
       Icons.info, AppTranslationConstants.reportProfile));
   listMore.add(Menu3DotsModel(AppTranslationConstants.blockProfile.tr, AppTranslationConstants.blockProfileMsg,
       Icons.block, AppTranslationConstants.blockProfile));
-
   if(userRole != UserRole.subscriber) {
-    //TODO
-    // listMore.add(Menu3DotsModel(GigTranslationConstants.removeProfile.tr, GigTranslationConstants.removeProfileMsg,
-    //     Icons.delete, GigTranslationConstants.removeProfile));
+    listMore.add(Menu3DotsModel(AppTranslationConstants.changeVerificationLevel.tr, AppTranslationConstants.changeVerificationLevelMsg,
+        Icons.verified, AppTranslationConstants.changeVerificationLevel));
+    listMore.add(Menu3DotsModel(AppTranslationConstants.removeProfile.tr, AppTranslationConstants.removeProfileMsg,
+        Icons.delete, AppTranslationConstants.removeProfile));
+    if(userRole == UserRole.superAdmin) {
+      listMore.add(Menu3DotsModel(AppTranslationConstants.changeUserRole.tr, AppTranslationConstants.changeUserRoleMsg,
+          Icons.verified_user_rounded, AppTranslationConstants.changeUserRole));
+    }
   }
 
   return Container(
-      height: userRole == UserRole.subscriber ? 160 : 220,
+      height: userRole == UserRole.subscriber ? 160 : 300,
       decoration: BoxDecoration(
         color: AppColor.main50,
         borderRadius: const BorderRadius.only(
@@ -312,7 +317,7 @@ Widget _buildDotsMenu(BuildContext context, AppProfile itemmate, UserRole userRo
                           DialogButton(
                             color: AppColor.bondiBlue75,
                             onPressed: () async {
-                              Get.back();
+                              Navigator.of(context).pop();
                             },
                             child: Text(AppTranslationConstants.goBack.tr,
                               style: const TextStyle(fontSize: 15),
@@ -321,11 +326,7 @@ Widget _buildDotsMenu(BuildContext context, AppProfile itemmate, UserRole userRo
                           DialogButton(
                             color: AppColor.bondiBlue75,
                             onPressed: () async {
-                              if(!itemmateDetailsController.isButtonDisabled.value) {
-                                await itemmateDetailsController.blockProfile();
-                                AppUtilities.showAlert(context, title: AppTranslationConstants.blockProfile.tr,
-                                    message: AppTranslationConstants.blockedProfileMsg.tr);
-                              }
+                              await itemmateDetailsController.blockProfile();
                             },
                             child: Text(AppTranslationConstants.toBlock.tr,
                               style: const TextStyle(fontSize: 15),
@@ -335,10 +336,45 @@ Widget _buildDotsMenu(BuildContext context, AppProfile itemmate, UserRole userRo
                     ).show();
                     break;
                   case AppTranslationConstants.removeProfile:
-                    Get.snackbar(AppTranslationConstants.underConstruction.tr,
-                        AppTranslationConstants.underConstructionMsg.tr,
-                        snackPosition: SnackPosition.bottom
-                    );
+                    MateDetailsController itemmateDetailsController = Get.put(MateDetailsController());
+                    Alert(
+                        context: context,
+                        style: AlertStyle(
+                          backgroundColor: AppColor.main50,
+                          titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        title: AppTranslationConstants.removeProfile.tr,
+                        content: Column(
+                          children: [
+                            Text(AppTranslationConstants.removeProfileMsg.tr,
+                              style: const TextStyle(fontSize: 15),
+                            ),
+                            AppTheme.heightSpace10,
+                            Text(AppTranslationConstants.removeProfileMsg2.tr,
+                              style: const TextStyle(fontSize: 15),
+                            ),
+                          ],),
+                        buttons: [
+                          DialogButton(
+                            color: AppColor.bondiBlue75,
+                            onPressed: () async {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text(AppTranslationConstants.goBack.tr,
+                              style: const TextStyle(fontSize: 15),
+                            ),
+                          ),
+                          DialogButton(
+                            color: AppColor.bondiBlue75,
+                            onPressed: () async {
+                              await itemmateDetailsController.removeProfile();
+                            },
+                            child: Text(AppTranslationConstants.toRemove.tr,
+                              style: const TextStyle(fontSize: 15),
+                            ),
+                          )
+                        ]
+                    ).show();
                     break;
                 }
                 //Get.back();

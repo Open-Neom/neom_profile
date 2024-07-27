@@ -11,8 +11,7 @@ import '../../../utils/mate_constants.dart';
 import '../mate_details_controller.dart';
 
 class MateShowcase extends StatelessWidget {
-  const MateShowcase({Key? key}) : super(key: key);
-
+  const MateShowcase({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +23,7 @@ class MateShowcase extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: DefaultTabController(
             length: AppConstants.profileTabs.length,
-            child: Obx(() => Column(
+            child: Column(
               children: <Widget>[
                 TabBar(
                   tabs: [
@@ -46,7 +45,6 @@ class MateShowcase extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
             ),
           ),
         );

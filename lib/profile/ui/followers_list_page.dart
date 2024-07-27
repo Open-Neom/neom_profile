@@ -12,7 +12,7 @@ import 'package:neom_commons/core/utils/constants/app_translation_constants.dart
 import 'package:neom_commons/core/utils/core_utilities.dart';
 
 class FollowersListPage extends StatelessWidget {
-  const FollowersListPage({Key? key}) : super(key: key);
+  const FollowersListPage({super.key});
 
 
   @override

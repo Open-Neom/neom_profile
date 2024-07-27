@@ -12,36 +12,33 @@ import '../../domain/use_cases/mate_details_service.dart';
 
 class MateDetailsController extends GetxController implements MateDetailsService {
 
-  
   final loginController = Get.find<LoginController>();
   final userController = Get.find<UserController>();
 
-  final RxMap<String, AppProfile> mates = <String, AppProfile>{}.obs;
-  
-  final Rx<AppProfile> mate = AppProfile().obs;
+  Map<String, AppProfile> mates = <String, AppProfile>{};
+  AppProfile mate = AppProfile();
 
   AppProfile profile = AppProfile();
 
-  final RxString address = "".obs;
-  final RxString instrumentsText = "".obs;
-  final RxInt distance = 0.obs;
+  String address = "";
+  String instrumentsText = "";
+  int distance = 0;
 
-  final RxMap<String, AppMediaItem> totalMediaItems = <String, AppMediaItem>{}.obs;
-  final RxMap<String, AppReleaseItem> totalReleaseItems = <String, AppReleaseItem>{}.obs;
-  final RxMap<String, AppMediaItem>  totalMixedItems = <String, AppMediaItem>{}.obs;
-  final RxMap<String, ChamberPreset> totalPresets = <String, ChamberPreset>{}.obs;
+  Map<String, AppMediaItem> totalMediaItems = <String, AppMediaItem>{};
+  Map<String, AppReleaseItem> totalReleaseItems = <String, AppReleaseItem>{};
+  Map<String, AppMediaItem>  totalMixedItems = <String, AppMediaItem>{};
+  Map<String, ChamberPreset> totalPresets = <String, ChamberPreset>{};
 
-  final RxMap<String, Itemlist> itemlists = <String, Itemlist>{}.obs;
+  Map<String, Itemlist> itemlists = <String, Itemlist>{};
 
-  final RxBool following = false.obs;
-  final RxBool blockedProfile = false.obs;
+  bool following = false;
+  bool blockedProfile = false;
 
-  final RxMap<Post, Event> eventPosts = <Post, Event>{}.obs;
-  final RxMap<String, Event> events = <String, Event>{}.obs;
+  Map<Post, Event> eventPosts = <Post, Event>{};
+  Map<String, Event> events = <String, Event>{};
   
-  final RxBool isLoading = true.obs;
-  final RxBool isLoadingDetails = true.obs;
-  final RxBool isButtonDisabled = false.obs;
+  bool isLoading = true;
+  bool isLoadingDetails = true;
 
   List<Post> matePosts = <Post>[];
   List<Post> mateBlogEntries = <Post>[];
@@ -58,15 +55,15 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
     try {
       profile = userController.profile;
-      blockedProfile.value = profile.blockTo?.contains(itemmateId) ?? false;
+      blockedProfile = profile.blockTo?.contains(itemmateId) ?? false;
 
-      if(itemmateId.isNotEmpty && !blockedProfile.value) {
+      if(itemmateId.isNotEmpty && !blockedProfile) {
         await loadMate(itemmateId);
         await retrieveDetails();
 
-        if(mate.value.id.isNotEmpty && (userController.user!.userRole == UserRole.subscriber || debugPushNotifications)) {
+        if(mate.id.isNotEmpty && (userController.user!.userRole == UserRole.subscriber || debugPushNotifications)) {
           FirebaseMessagingCalls.sendPrivatePushNotification(
-            toProfileId: mate.value.id,
+            toProfileId: mate.id,
             fromProfile: profile,
             notificationType: PushNotificationType.viewProfile,
             referenceId: profile.id,
@@ -74,14 +71,14 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
           FirebaseMessagingCalls.sendGlobalPushNotification(
             fromProfile: profile,
-            toProfile: mate.value,
+            toProfile: mate,
             notificationType: PushNotificationType.viewProfile,
-            referenceId: mate.value.id,
+            referenceId: mate.id,
           );
         }
       } else {
         AppUtilities.logger.i("Profile $itemmateId is blocked");
-        isLoading.value = false;
+        isLoading = false;
       }
     } catch (e) {
       AppUtilities.logger.e(e.toString());
@@ -107,16 +104,16 @@ class MateDetailsController extends GetxController implements MateDetailsService
     AppUtilities.logger.t("loadMate $itemmateId}");
 
     try {
-      mate.value = await ProfileFirestore().retrieve(itemmateId);
-      if(mate.value.id.isNotEmpty) {
-        following.value = profile.following!.contains(itemmateId);
+      mate = await ProfileFirestore().retrieve(itemmateId);
+      if(mate.id.isNotEmpty) {
+        following = profile.following!.contains(itemmateId);
       }
 
     } catch (e) {
       AppUtilities.logger.e(e.toString());
     }
 
-    isLoading.value = false;
+    isLoading = false;
     update([AppPageIdConstants.mate, AppPageIdConstants.search]);
   }
 
@@ -125,35 +122,34 @@ class MateDetailsController extends GetxController implements MateDetailsService
   Future<void> retrieveDetails() async {
     AppUtilities.logger.t("retrieveDetails");
     try {
-      mate.value.itemlists = await ItemlistFirestore().fetchAll(ownerId: mate.value.id);
-      itemlists.value = mate.value.itemlists ?? {};
+      mate.itemlists = await ItemlistFirestore().fetchAll(ownerId: mate.id);
+      itemlists = mate.itemlists ?? {};
 
-      await getTotalInstruments();
       await getAddressSimple();
-
-      if(mate.value.posts?.isNotEmpty ?? false) {
+      if(mate.posts?.isNotEmpty ?? false) {
         await getMatePosts();
       }
 
-      if((mate.value.events?.isNotEmpty ?? false)
-          || (mate.value.goingEvents?.isNotEmpty ?? false)
-          || (mate.value.playingEvents?.isNotEmpty ?? false)) {
-        await getTotalEvents();
-      }
+      getTotalInstruments(); ///NO NEED TO WAIT FOR IT
+      getTotalItems();
 
-      await getTotalItems();
+      if((mate.events?.isNotEmpty ?? false)
+          || (mate.goingEvents?.isNotEmpty ?? false)
+          || (mate.playingEvents?.isNotEmpty ?? false)) {
+        getTotalEvents();
+      }
 
       for (var post in matePosts) {
         eventPosts[post] = events[post.referenceId] ?? Event();
       }
 
-      instrumentsText.value = CoreUtilities.getInstruments(mate.value.instruments ?? {});
+      instrumentsText = CoreUtilities.getInstruments(mate.instruments ?? {});
 
     } catch (e) {
       AppUtilities.logger.e(e.toString());
     }
 
-    isLoadingDetails.value = false;
+    isLoadingDetails = false;
     update([AppPageIdConstants.mate]);
   }
 
@@ -163,7 +159,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
     AppUtilities.logger.t("getMatePosts");
 
     try {
-      matePosts = await PostFirestore().getProfilePosts(mate.value.id);
+      matePosts = await PostFirestore().getProfilePosts(mate.id);
 
       for (var post in matePosts) {
         if(post.type == PostType.blogEntry && !post.isDraft) {
@@ -178,13 +174,13 @@ class MateDetailsController extends GetxController implements MateDetailsService
       AppUtilities.logger.e(e.toString());
     }
 
-    //isLoading.value = false;
+    //isLoading = false;
     update([AppPageIdConstants.mate]);
   }
 
 
   void clear() {
-    mates.value = <String, AppProfile>{};
+    mates = <String, AppProfile>{};
   }
 
 
@@ -193,9 +189,9 @@ class MateDetailsController extends GetxController implements MateDetailsService
     AppUtilities.logger.t('getAddressSimple');
 
     try {
-      if(mate.value.position!.latitude != 0 && mate.value.position!.longitude != 0) {
-        address.value = await geoLocatorService.getAddressSimple(mate.value.position!);
-        distance.value = AppUtilities.distanceBetweenPositionsRounded(profile.position!, mate.value.position!);
+      if(mate.position!.latitude != 0 && mate.position!.longitude != 0) {
+        address = await geoLocatorService.getAddressSimple(mate.position!);
+        distance = AppUtilities.distanceBetweenPositionsRounded(profile.position!, mate.position!);
       }
     } catch (e) {
       AppUtilities.logger.e(e.toString());
@@ -209,20 +205,20 @@ class MateDetailsController extends GetxController implements MateDetailsService
   Future<void> getTotalItems() async {
     AppUtilities.logger.t("getTotalItems");
 
-    if(mate.value.itemlists?.isNotEmpty ?? false) {
+    if(mate.itemlists?.isNotEmpty ?? false) {
       if(AppFlavour.appInUse == AppInUse.c) {
-        mate.value.frequencies = await FrequencyFirestore().retrieveFrequencies(mate.value.id);
-        for (var freq in mate.value.frequencies!.values) {
+        mate.frequencies = await FrequencyFirestore().retrieveFrequencies(mate.id);
+        for (var freq in mate.frequencies!.values) {
           totalPresets[freq.frequency.toString()] = ChamberPreset.custom(frequency: freq);
         }
-        totalPresets.addAll(CoreUtilities.getTotalPresets(mate.value.chambers!));
+        totalPresets.addAll(CoreUtilities.getTotalPresets(mate.chambers!));
       } else {
-        totalMediaItems.value = CoreUtilities.getTotalMediaItems(mate.value.itemlists!);
-        totalReleaseItems.value = CoreUtilities.getTotalReleaseItems(mate.value.itemlists!);
+        totalMediaItems = CoreUtilities.getTotalMediaItems(mate.itemlists!);
+        totalReleaseItems = CoreUtilities.getTotalReleaseItems(mate.itemlists!);
       }
-    } else if(mate.value.favoriteItems?.isNotEmpty ?? false){
-      totalMediaItems.value = await AppMediaItemFirestore().retrieveFromList(mate.value.favoriteItems!);
-      totalReleaseItems.value = await AppReleaseItemFirestore().retrieveFromList(mate.value.favoriteItems!);
+    } else if(mate.favoriteItems?.isNotEmpty ?? false){
+      totalMediaItems = await AppMediaItemFirestore().retrieveFromList(mate.favoriteItems!);
+      totalReleaseItems = await AppReleaseItemFirestore().retrieveFromList(mate.favoriteItems!);
     }
 
     for (var item in totalReleaseItems.values) {
@@ -238,21 +234,21 @@ class MateDetailsController extends GetxController implements MateDetailsService
     AppUtilities.logger.t("getTotalEvents for mate");
 
     try {
-      if(mate.value.events != null && mate.value.events!.isNotEmpty) {
-        Map<String, Event> createdEvents = await EventFirestore().getEventsById(mate.value.events!);
-        AppUtilities.logger.d("${createdEvents.length} created events founds for mate ${mate.value.id}");
+      if(mate.events != null && mate.events!.isNotEmpty) {
+        Map<String, Event> createdEvents = await EventFirestore().getEventsById(mate.events!);
+        AppUtilities.logger.d("${createdEvents.length} created events founds for mate ${mate.id}");
         events.addAll(createdEvents);
       }
 
-      if(mate.value.playingEvents != null && mate.value.playingEvents!.isNotEmpty) {
-        Map<String, Event> playingEvents = await EventFirestore().getEventsById(mate.value.playingEvents!);
-        AppUtilities.logger.d("${playingEvents.length} playing events founds for mate ${mate.value.id}");
+      if(mate.playingEvents != null && mate.playingEvents!.isNotEmpty) {
+        Map<String, Event> playingEvents = await EventFirestore().getEventsById(mate.playingEvents!);
+        AppUtilities.logger.d("${playingEvents.length} playing events founds for mate ${mate.id}");
         events.addAll(playingEvents);
       }
 
-      if(mate.value.goingEvents != null && mate.value.goingEvents!.isNotEmpty) {
-        Map<String, Event> goingEvents = await EventFirestore().getEventsById(mate.value.goingEvents!);
-        AppUtilities.logger.d("${goingEvents.length} going events founds for mate ${mate.value.id}");
+      if(mate.goingEvents != null && mate.goingEvents!.isNotEmpty) {
+        Map<String, Event> goingEvents = await EventFirestore().getEventsById(mate.goingEvents!);
+        AppUtilities.logger.d("${goingEvents.length} going events founds for mate ${mate.id}");
         events.addAll(goingEvents);
       }
 
@@ -270,8 +266,8 @@ class MateDetailsController extends GetxController implements MateDetailsService
     AppUtilities.logger.t('getTotalInstruments');
 
     try {
-      mate.value.instruments = await InstrumentFirestore().retrieveInstruments(mate.value.id);
-      AppUtilities.logger.t("${mate.value.instruments?.length ?? 0} Total Instruments for Profile");
+      mate.instruments = await InstrumentFirestore().retrieveInstruments(mate.id);
+      AppUtilities.logger.t("${mate.instruments?.length ?? 0} Total Instruments for Profile");
     } catch (e) {
       AppUtilities.logger.e(e.toString());
     }
@@ -292,21 +288,21 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> follow() async {
-    AppUtilities.logger.t("Follow profile ${mate.value.id}");
+    AppUtilities.logger.t("Follow profile ${mate.id}");
 
     try {
-      if(await ProfileFirestore().followProfile(profileId: profile.id, followedProfileId:  mate.value.id)) {
-        following.value = true;
-        mate.value.followers!.add(profile.id);
+      if(await ProfileFirestore().followProfile(profileId: profile.id, followedProfileId:  mate.id)) {
+        following = true;
+        mate.followers!.add(profile.id);
 
         try {
-          Get.find<ProfileController>().addFollowing(mate.value.id);
+          Get.find<ProfileController>().addFollowing(mate.id);
         } catch (e) {
-          Get.put(ProfileController()).addFollowing(mate.value.id);
+          Get.put(ProfileController()).addFollowing(mate.id);
         }
 
         ActivityFeed activityFeed = ActivityFeed();
-        activityFeed.ownerId =  mate.value.id;
+        activityFeed.ownerId =  mate.id;
         activityFeed.profileId = profile.id;
         activityFeed.createdTime = DateTime.now().millisecondsSinceEpoch;
         activityFeed.activityFeedType = ActivityFeedType.follow;
@@ -317,7 +313,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
         ActivityFeedFirestore().insert(activityFeed);
 
         FirebaseMessagingCalls.sendPrivatePushNotification(
-          toProfileId: mate.value.id,
+          toProfileId: mate.id,
           fromProfile: profile,
           notificationType: PushNotificationType.following,
           referenceId: profile.id,
@@ -325,9 +321,9 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
         FirebaseMessagingCalls.sendGlobalPushNotification(
           fromProfile: profile,
-          toProfile: mate.value,
+          toProfile: mate,
           notificationType: PushNotificationType.following,
-          referenceId: mate.value.id,
+          referenceId: mate.id,
         );
 
       }
@@ -342,13 +338,13 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> unfollow() async {
-    AppUtilities.logger.t("Unfollow ${mate.value.id}");
+    AppUtilities.logger.t("Unfollow ${mate.id}");
     try {
-      if (await ProfileFirestore().unfollowProfile(profileId: profile.id,unfollowProfileId:  mate.value.id)) {
-        following.value = false;
-        userController.profile.following!.remove(mate.value.id);
-        mate.value.followers!.remove(profile.id,);
-        Get.find<ProfileController>().removeFollowing(mate.value.id);
+      if (await ProfileFirestore().unfollowProfile(profileId: profile.id,unfollowProfileId:  mate.id)) {
+        following = false;
+        userController.profile.following!.remove(mate.id);
+        mate.followers!.remove(profile.id,);
+        Get.find<ProfileController>().removeFollowing(mate.id);
       }
     } catch (e) {
       AppUtilities.logger.e(e.toString());
@@ -364,13 +360,17 @@ class MateDetailsController extends GetxController implements MateDetailsService
     try {
       if (await ProfileFirestore().blockProfile(
           profileId: profile.id,
-          profileToBlock: mate.value.id)) {
-        following.value = false;
-        userController.profile.following!.remove(mate.value.id);
-        mate.value.followers?.remove(profile.id);
-        mate.value.blockedBy?.add(profile.id);
+          profileToBlock: mate.id)) {
+        following = false;
+        userController.profile.following!.remove(mate.id);
+        mate.followers?.remove(profile.id);
+        mate.blockedBy?.add(profile.id);
 
-        userController.profile.blockTo!.add(mate.value.id);
+        userController.profile.blockTo!.add(mate.id);
+
+        AppUtilities.showSnackBar(
+            title: AppTranslationConstants.blockProfile.tr,
+            message: AppTranslationConstants.blockedProfileMsg.tr);
       } else {
         AppUtilities.logger.i("Something happened while blocking profile");
       }
@@ -383,8 +383,6 @@ class MateDetailsController extends GetxController implements MateDetailsService
     update([AppPageIdConstants.mate, AppPageIdConstants.profile]);
   }
 
-
-
   @override
   Future<void> unblockProfile(AppProfile blockedProfile) async {
     AppUtilities.logger.d("");
@@ -392,6 +390,10 @@ class MateDetailsController extends GetxController implements MateDetailsService
       if (await ProfileFirestore().unblockProfile(profileId: userController.profile.id, profileToUnblock:  blockedProfile.id)) {
         userController.profile.blockTo!.remove(blockedProfile.id);
         blockedProfile.blockedBy!.remove(profile.id);
+        AppUtilities.showSnackBar(
+            title: AppTranslationConstants.unblockProfile.tr,
+            message: AppTranslationConstants.unblockedProfileMsg.tr
+        );
       } else {
         AppUtilities.logger.i("Somethnig happened while unblocking profile");
       }
@@ -411,13 +413,53 @@ class MateDetailsController extends GetxController implements MateDetailsService
     Inbox inbox = Inbox();
 
     try {
-      inbox = await InboxFirestore().getOrCreateInboxRoom(profile, mate.value);
+      inbox = await InboxFirestore().getOrCreateInboxRoom(profile, mate);
 
       inbox.id.isNotEmpty ? Get.toNamed(AppRouteConstants.inboxRoom, arguments: [inbox])
         : Get.toNamed(AppRouteConstants.home);
     } catch (e) {
       AppUtilities.logger.e(e.toString());
     }
+  }
+
+  @override
+  Future<void> removeProfile() async {
+    AppUtilities.logger.d("Remove Profile from Application - Admin Function");
+    try {
+      AppUser userFromProfile = await UserFirestore().getByProfileId(mate.id);
+
+      if (await ProfileFirestore().remove(userId: userFromProfile.id, profileId: mate.id)) {
+        if(following) {
+          ProfileFirestore().unfollowProfile(profileId: profile.id, unfollowProfileId: mate.id);
+          userController.profile.following!.remove(mate.id);
+        }
+
+        AppUtilities.showSnackBar(
+          title: AppTranslationConstants.removeProfile.tr,
+          message: AppTranslationConstants.removedProfileMsg.tr
+        );
+      } else {
+        AppUtilities.logger.i("Something happened while removing profile");
+      }
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+
+    Get.back();
+    Get.back();
+    update([AppPageIdConstants.mate, AppPageIdConstants.profile, AppPageIdConstants.home]);
+  }
+
+  @override
+  Future<void> changeUserRole() {
+    // TODO: implement changeUserRole
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> changeVerificationLevel() {
+    // TODO: implement changeVerificationLevel
+    throw UnimplementedError();
   }
 
 

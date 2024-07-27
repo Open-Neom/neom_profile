@@ -7,7 +7,7 @@ import 'package:neom_commons/neom_commons.dart';
 import 'mate_details_controller.dart';
 
 class MateDetailsBody extends StatelessWidget {
-  const MateDetailsBody({Key? key}) : super(key: key);
+  const MateDetailsBody({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +16,8 @@ class MateDetailsBody extends StatelessWidget {
     return GetBuilder<MateDetailsController>(
       id: AppPageIdConstants.mate,
       init: MateDetailsController(),
-      builder: (_) =>  _.isLoading.value ? const Center(child: CircularProgressIndicator())
-      : Obx(()=> Column(
+      builder: (_) =>  _.isLoading ? const Center(child: CircularProgressIndicator())
+      : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
@@ -25,21 +25,21 @@ class MateDetailsBody extends StatelessWidget {
               children: [
                 SizedBox(
                   height: 30,
-                  child: Text(CoreUtilities.capitalizeFirstLetter(_.mate.value.name),
+                  child: Text(CoreUtilities.capitalizeFirstLetter(_.mate.name),
                     style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.white),
                   ),
                 ),
                 AppTheme.widthSpace5,
-                if(_.mate.value.verificationLevel != VerificationLevel.none)
+                if(_.mate.verificationLevel != VerificationLevel.none)
                   const SizedBox(height: 30, child: Icon(Icons.verified, size: 20,)),
               ]
           ),
-          _.mate.value.type != ProfileType.fan ?
+          _.mate.type != ProfileType.fan ?
           Row(
             children: [
               Icon(AppFlavour.getInstrumentIcon(), size: 15.0),
               AppTheme.widthSpace5,
-              Text(_.mate.value.mainFeature.tr.capitalize,
+              Text(_.mate.mainFeature.tr.capitalize,
                 style: const TextStyle(
                   fontSize: 15,
                   color: AppColor.white
@@ -47,27 +47,27 @@ class MateDetailsBody extends StatelessWidget {
               ),
             ],
           ) : const SizedBox.shrink(),
-          _.mate.value.genres != null ? GenresGridView(
-            _.mate.value.genres?.keys.toList() ?? [],
+          _.mate.genres != null ? GenresGridView(
+            _.mate.genres?.keys.toList() ?? [],
             AppColor.white,
             alignment: Alignment.centerLeft,
             fontSize: 15,
           ) : const SizedBox.shrink(),
           SizedBox(
-            child: _.address.value.isNotEmpty && _.distance > 0.0
-                ? _buildLocationInfo(_.address.value, _.distance.value, textTheme)
+            child: _.address.isNotEmpty && _.distance > 0.0
+                ? _buildLocationInfo(_.address, _.distance, textTheme)
                 : const SizedBox.shrink(),
           ),
           Padding(
             padding: const EdgeInsets.only(top: 10.0),
             child: ReadMoreContainer(
-              text: _.mate.value.aboutMe.isEmpty
+              text: _.mate.aboutMe.isEmpty
                   ? AppTranslationConstants.noProfileDesc.tr
-                  : CoreUtilities.capitalizeFirstLetter(_.mate.value.aboutMe),
+                  : CoreUtilities.capitalizeFirstLetter(_.mate.aboutMe),
               color: Colors.white70,
             )
           ),
-        ]),
+        ]
       ),
     );
   }

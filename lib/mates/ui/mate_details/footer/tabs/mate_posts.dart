@@ -11,7 +11,7 @@ import 'package:neom_commons/core/utils/enums/post_type.dart';
 import '../../mate_details_controller.dart';
 
 class MatePosts extends StatelessWidget {
-  const MatePosts({Key? key}) : super(key: key);
+  const MatePosts({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class MatePosts extends StatelessWidget {
         id: AppPageIdConstants.mate,
         init: MateDetailsController(),
         builder: (_) {
-          if (_.isLoading.value) {
+          if (_.isLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (_.matePosts.isEmpty) {
             return Column(

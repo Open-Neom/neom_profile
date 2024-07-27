@@ -10,7 +10,7 @@ import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 
 class MateListPage extends StatelessWidget {
-  const MateListPage({Key? key}) : super(key: key);
+  const MateListPage({super.key});
 
   @override
   Widget build(BuildContext context) {

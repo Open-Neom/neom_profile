@@ -13,7 +13,7 @@ import 'package:neom_commons/core/utils/constants/app_translation_constants.dart
 import 'profile_controller.dart';
 
 class ProfileEditPage extends StatelessWidget {
-  const ProfileEditPage({Key? key}) : super(key: key);
+  const ProfileEditPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -221,7 +221,7 @@ class ProfileEditPage extends StatelessWidget {
                                   textStyle: const TextStyle(color: Colors.white),
                                   elevation: 5,
                                   shape: RoundedRectangleBorder(
-                                      side: BorderSide(width: 1, color: Colors.white54), // Borde blanco
+                                      side: const BorderSide(width: 1, color: Colors.white54), // Borde blanco
                                       borderRadius: BorderRadius.circular(20.0)),
                                 ),
                                 onPressed: () {

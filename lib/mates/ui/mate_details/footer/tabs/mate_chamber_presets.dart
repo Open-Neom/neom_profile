@@ -11,7 +11,7 @@ import 'package:neom_commons/core/utils/core_utilities.dart';
 import '../../mate_details_controller.dart';
 
 class MateChamberPresets extends StatelessWidget {
-  const MateChamberPresets({Key? key}) : super(key: key);
+  const MateChamberPresets({super.key});
 
   @override
   Widget build(BuildContext context) {

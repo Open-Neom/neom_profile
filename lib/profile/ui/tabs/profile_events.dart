@@ -11,7 +11,7 @@ import '../profile_controller.dart';
 
 class ProfileEvents extends StatelessWidget {
   
-  const ProfileEvents({Key? key}) : super(key: key);
+  const ProfileEvents({super.key});
 
   @override
   Widget build(BuildContext context) {

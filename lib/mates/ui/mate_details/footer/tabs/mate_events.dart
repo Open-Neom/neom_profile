@@ -9,7 +9,7 @@ import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import '../../mate_details_controller.dart';
 
 class MateEvents extends StatelessWidget {
-  const MateEvents({Key? key}) : super(key: key);
+  const MateEvents({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ import 'package:neom_commons/core/utils/core_utilities.dart';
 import '../profile_controller.dart';
 
 class ProfileChamberPresets extends StatelessWidget {
-  const ProfileChamberPresets({Key? key}) : super(key: key);
+  const ProfileChamberPresets({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -9,7 +9,7 @@ import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import '../../mate_details_controller.dart';
 
 class MateItems extends StatelessWidget {
-  const MateItems({Key? key}) : super(key: key);
+  const MateItems({super.key});
 
 
   @override
