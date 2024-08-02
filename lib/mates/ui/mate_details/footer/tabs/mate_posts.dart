@@ -19,7 +19,7 @@ class MatePosts extends StatelessWidget {
         id: AppPageIdConstants.mate,
         init: MateDetailsController(),
         builder: (_) {
-          if (_.isLoading) {
+          if (_.isLoadingPosts) {
             return const Center(child: CircularProgressIndicator());
           } else if (_.matePosts.isEmpty) {
             return Column(

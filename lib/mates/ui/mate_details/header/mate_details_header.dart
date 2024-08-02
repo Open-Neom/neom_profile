@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
+import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
+import 'package:neom_commons/core/data/firestore/user_firestore.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 import 'package:neom_commons/core/domain/model/menu_three_dots.dart';
 import 'package:neom_commons/core/ui/reports/report_controller.dart';
@@ -25,6 +27,7 @@ import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/reference_type.dart';
 import 'package:neom_commons/core/utils/enums/report_type.dart';
 import 'package:neom_commons/core/utils/enums/user_role.dart';
+import 'package:neom_commons/core/utils/enums/verification_level.dart';
 import 'package:neom_timeline/timeline/ui/widgets/timeline_widgets.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
@@ -203,13 +206,13 @@ Widget _buildDotsMenu(BuildContext context, AppProfile itemmate, UserRole userRo
   listMore.add(Menu3DotsModel(AppTranslationConstants.blockProfile.tr, AppTranslationConstants.blockProfileMsg,
       Icons.block, AppTranslationConstants.blockProfile));
   if(userRole != UserRole.subscriber) {
-    listMore.add(Menu3DotsModel(AppTranslationConstants.changeVerificationLevel.tr, AppTranslationConstants.changeVerificationLevelMsg,
-        Icons.verified, AppTranslationConstants.changeVerificationLevel));
+    listMore.add(Menu3DotsModel(AppTranslationConstants.updateVerificationLevel.tr, AppTranslationConstants.updateVerificationLevelMsg,
+        Icons.verified, AppTranslationConstants.updateVerificationLevel));
     listMore.add(Menu3DotsModel(AppTranslationConstants.removeProfile.tr, AppTranslationConstants.removeProfileMsg,
         Icons.delete, AppTranslationConstants.removeProfile));
     if(userRole == UserRole.superAdmin) {
-      listMore.add(Menu3DotsModel(AppTranslationConstants.changeUserRole.tr, AppTranslationConstants.changeUserRoleMsg,
-          Icons.verified_user_rounded, AppTranslationConstants.changeUserRole));
+      listMore.add(Menu3DotsModel(AppTranslationConstants.updateUserRole.tr, AppTranslationConstants.updateUserRoleMsg,
+          Icons.verified_user_rounded, AppTranslationConstants.updateUserRole));
     }
   }
 
@@ -232,149 +235,19 @@ Widget _buildDotsMenu(BuildContext context, AppProfile itemmate, UserRole userRo
               onTap: () async {
                 switch (listMore[index].action) {
                   case AppTranslationConstants.reportProfile:
-                    ReportController reportController = Get.put(ReportController());
-                    //_.alreadySent ? {} :
-                    Alert(
-                        context: context,
-                        style: AlertStyle(
-                          backgroundColor: AppColor.main50,
-                          titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        title: AppTranslationConstants.sendReport.tr,
-                        content: Column(
-                          children: <Widget>[
-                            Obx(()=>
-                                DropdownButton<String>(
-                                  items: ReportType.values.map((ReportType reportType) {
-                                    return DropdownMenuItem<String>(
-                                      value: reportType.name,
-                                      child: Text(reportType.name.tr),
-                                    );
-                                  }).toList(),
-                                  onChanged: (String? reportType) {
-                                    reportController.setReportType(reportType ?? "");
-                                  },
-                                  value: reportController.reportType.value,
-                                  alignment: Alignment.center,
-                                  icon: const Icon(Icons.arrow_downward),
-                                  iconSize: 20,
-                                  elevation: 16,
-                                  style: const TextStyle(color: Colors.white),
-                                  dropdownColor: AppColor.main75,
-                                  underline: Container(
-                                    height: 1,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                            ),
-                            TextField(
-                              onChanged: (text) {
-                                reportController.setMessage(text);
-                              },
-                              decoration: InputDecoration(
-                                  labelText: AppTranslationConstants.message.tr
-                              ),
-                            ),
-                          ],
-                        ),
-                        buttons: [
-                          DialogButton(
-                            color: AppColor.bondiBlue75,
-                            onPressed: () async {
-                              if(!reportController.isButtonDisabled.value) {
-                                await reportController.sendReport(ReferenceType.profile, itemmate.id);
-                                AppUtilities.showAlert(context, title: AppTranslationConstants.report.tr,
-                                    message: AppTranslationConstants.hasSentReport.tr);
-                              }
-                            },
-                            child: Text(AppTranslationConstants.send.tr,
-                              style: const TextStyle(fontSize: 15),
-                            ),
-                          )
-                        ]
-                    ).show();
+                    showReportProfileAlert(context, itemmate);
                     break;
                   case AppTranslationConstants.blockProfile:
-                    MateDetailsController itemmateDetailsController = Get.put(MateDetailsController());
-                    Alert(
-                        context: context,
-                        style: AlertStyle(
-                          backgroundColor: AppColor.main50,
-                          titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        title: AppTranslationConstants.blockProfile.tr,
-                        content: Column(
-                          children: [
-                            Text(AppTranslationConstants.blockProfileMsg.tr,
-                              style: const TextStyle(fontSize: 15),
-                            ),
-                            AppTheme.heightSpace10,
-                            Text(AppTranslationConstants.blockProfileMsg2.tr,
-                              style: const TextStyle(fontSize: 15),
-                            ),
-                        ],),
-                        buttons: [
-                          DialogButton(
-                            color: AppColor.bondiBlue75,
-                            onPressed: () async {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text(AppTranslationConstants.goBack.tr,
-                              style: const TextStyle(fontSize: 15),
-                            ),
-                          ),
-                          DialogButton(
-                            color: AppColor.bondiBlue75,
-                            onPressed: () async {
-                              await itemmateDetailsController.blockProfile();
-                            },
-                            child: Text(AppTranslationConstants.toBlock.tr,
-                              style: const TextStyle(fontSize: 15),
-                            ),
-                          )
-                        ]
-                    ).show();
+                    showBlockProfileAlert(context);
                     break;
                   case AppTranslationConstants.removeProfile:
-                    MateDetailsController itemmateDetailsController = Get.put(MateDetailsController());
-                    Alert(
-                        context: context,
-                        style: AlertStyle(
-                          backgroundColor: AppColor.main50,
-                          titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        title: AppTranslationConstants.removeProfile.tr,
-                        content: Column(
-                          children: [
-                            Text(AppTranslationConstants.removeProfileMsg.tr,
-                              style: const TextStyle(fontSize: 15),
-                            ),
-                            AppTheme.heightSpace10,
-                            Text(AppTranslationConstants.removeProfileMsg2.tr,
-                              style: const TextStyle(fontSize: 15),
-                            ),
-                          ],),
-                        buttons: [
-                          DialogButton(
-                            color: AppColor.bondiBlue75,
-                            onPressed: () async {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text(AppTranslationConstants.goBack.tr,
-                              style: const TextStyle(fontSize: 15),
-                            ),
-                          ),
-                          DialogButton(
-                            color: AppColor.bondiBlue75,
-                            onPressed: () async {
-                              await itemmateDetailsController.removeProfile();
-                            },
-                            child: Text(AppTranslationConstants.toRemove.tr,
-                              style: const TextStyle(fontSize: 15),
-                            ),
-                          )
-                        ]
-                    ).show();
+                    showRemoveProfileAlert(context);
+                    break;
+                  case AppTranslationConstants.updateVerificationLevel:
+                    showUpdateVerificationLevelAlert(context);
+                    break;
+                  case AppTranslationConstants.updateUserRole:
+                    showUpdateUserRoleAlert(context);
                     break;
                 }
                 //Get.back();
@@ -383,3 +256,297 @@ Widget _buildDotsMenu(BuildContext context, AppProfile itemmate, UserRole userRo
           })
   );
 }
+
+void showRemoveProfileAlert(BuildContext context) {
+  MateDetailsController mateDetailsController = Get.put(MateDetailsController());
+  Alert(
+      context: context,
+      style: AlertStyle(
+        backgroundColor: AppColor.main50,
+        titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      title: AppTranslationConstants.removeProfile.tr,
+      content: Column(
+        children: [
+          Text(AppTranslationConstants.removeProfileMsg.tr,
+            style: const TextStyle(fontSize: 15),
+          ),
+          AppTheme.heightSpace10,
+          Text(AppTranslationConstants.removeProfileMsg2.tr,
+            style: const TextStyle(fontSize: 15),
+          ),
+        ],),
+      buttons: [
+        DialogButton(
+          color: AppColor.bondiBlue75,
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+          child: Text(AppTranslationConstants.goBack.tr,
+            style: const TextStyle(fontSize: 15),
+          ),
+        ),
+        DialogButton(
+          color: AppColor.bondiBlue75,
+          onPressed: () async {
+            await mateDetailsController.removeProfile();
+          },
+          child: Text(AppTranslationConstants.toRemove.tr,
+            style: const TextStyle(fontSize: 15),
+          ),
+        )
+      ]
+  ).show();
+}
+
+void showBlockProfileAlert(BuildContext context) {
+  MateDetailsController mateDetailsController = Get.put(MateDetailsController());
+  Alert(
+      context: context,
+      style: AlertStyle(
+        backgroundColor: AppColor.main50,
+        titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      title: AppTranslationConstants.blockProfile.tr,
+      content: Column(
+        children: [
+          Text(AppTranslationConstants.blockProfileMsg.tr,
+            style: const TextStyle(fontSize: 15),
+          ),
+          AppTheme.heightSpace10,
+          Text(AppTranslationConstants.blockProfileMsg2.tr,
+            style: const TextStyle(fontSize: 15),
+          ),
+      ],),
+      buttons: [
+        DialogButton(
+          color: AppColor.bondiBlue75,
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+          child: Text(AppTranslationConstants.goBack.tr,
+            style: const TextStyle(fontSize: 15),
+          ),
+        ),
+        DialogButton(
+          color: AppColor.bondiBlue75,
+          onPressed: () async {
+            await mateDetailsController.blockProfile();
+          },
+          child: Text(AppTranslationConstants.toBlock.tr,
+            style: const TextStyle(fontSize: 15),
+          ),
+        )
+      ]
+  ).show();
+}
+
+void showReportProfileAlert(BuildContext context, AppProfile itemmate) {
+  ReportController reportController = Get.put(ReportController());
+  Alert(
+      context: context,
+      style: AlertStyle(
+        backgroundColor: AppColor.main50,
+        titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      title: AppTranslationConstants.sendReport.tr,
+      content: Column(
+        children: <Widget>[
+          Obx(()=>
+              DropdownButton<String>(
+                items: ReportType.values.map((ReportType reportType) {
+                  return DropdownMenuItem<String>(
+                    value: reportType.name,
+                    child: Text(reportType.name.tr),
+                  );
+                }).toList(),
+                onChanged: (String? reportType) {
+                  reportController.setReportType(reportType ?? "");
+                },
+                value: reportController.reportType.value,
+                alignment: Alignment.center,
+                icon: const Icon(Icons.arrow_downward),
+                iconSize: 20,
+                elevation: 16,
+                style: const TextStyle(color: Colors.white),
+                dropdownColor: AppColor.main75,
+                underline: Container(
+                  height: 1,
+                  color: Colors.grey,
+                ),
+              ),
+          ),
+          TextField(
+            onChanged: (text) {
+              reportController.setMessage(text);
+            },
+            decoration: InputDecoration(
+                labelText: AppTranslationConstants.message.tr
+            ),
+          ),
+        ],
+      ),
+      buttons: [
+        DialogButton(
+          color: AppColor.bondiBlue75,
+          onPressed: () async {
+            if(!reportController.isButtonDisabled.value) {
+              await reportController.sendReport(ReferenceType.profile, itemmate.id);
+              AppUtilities.showAlert(context, title: AppTranslationConstants.report.tr,
+                  message: AppTranslationConstants.hasSentReport.tr);
+            }
+          },
+          child: Text(AppTranslationConstants.send.tr,
+            style: const TextStyle(fontSize: 15),
+          ),
+        )
+      ]
+  ).show();
+}
+
+void showUpdateVerificationLevelAlert(BuildContext context) {
+  MateDetailsController mateDetailsController = Get.put(
+      MateDetailsController());
+  Alert(
+      context: context,
+      style: AlertStyle(
+        backgroundColor: AppColor.main50,
+        titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      title: AppTranslationConstants.verificationLevel.tr,
+      content: Column(
+        children: <Widget>[
+          AppTheme.heightSpace10,
+          Text(AppTranslationConstants.updateVerificationLevelMsg.tr,
+            style: const TextStyle(fontSize: 15),
+          ),
+          Obx(() =>
+              DropdownButton<VerificationLevel>(
+                items: VerificationLevel.values.map((
+                    VerificationLevel verificationLevel) {
+                  return DropdownMenuItem<VerificationLevel>(
+                    value: verificationLevel,
+                    child: Text(verificationLevel.name.tr),
+                  );
+                }).toList(),
+                onChanged: (VerificationLevel? selectedLevel) {
+                  if (selectedLevel == null) return;
+                  mateDetailsController.selectVerificationLevel(selectedLevel);
+                },
+                value: mateDetailsController.verificationLevel.value,
+                alignment: Alignment.center,
+                icon: const Icon(Icons.arrow_downward),
+                iconSize: 20,
+                elevation: 16,
+                style: const TextStyle(color: Colors.white),
+                dropdownColor: AppColor.main75,
+                underline: Container(
+                  height: 1,
+                  color: Colors.grey,
+                ),
+              ),
+          ),
+        ],
+      ),
+      buttons: [
+        DialogButton(
+          color: AppColor.bondiBlue75,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text(AppTranslationConstants.goBack.tr,
+            style: const TextStyle(fontSize: 15),
+          ),
+        ),
+        DialogButton(
+          color: AppColor.bondiBlue75,
+          onPressed: () async {
+            if (mateDetailsController.verificationLevel.value !=
+                mateDetailsController.mate.verificationLevel) {
+              await mateDetailsController.updateVerificationLevel();
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            } else {
+              AppUtilities.showSnackBar(
+                  title: AppTranslationConstants.updateVerificationLevel.tr,
+                  message: AppTranslationConstants.updateVerificationLevelSame
+                      .tr);
+            }
+          },
+          child: Text(AppTranslationConstants.toUpdate.tr,
+            style: const TextStyle(fontSize: 15),
+          ),
+        )
+      ]
+  ).show();
+
+}
+
+  void showUpdateUserRoleAlert(BuildContext context) {
+    MateDetailsController mateDetailsController = Get.put(
+        MateDetailsController());
+
+    mateDetailsController.getUserInfo().then((value) {
+      Alert(
+          context: context,
+          style: AlertStyle(
+            backgroundColor: AppColor.main50,
+            titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          title: AppTranslationConstants.updateUserRole.tr,
+          content: Column(
+            children: <Widget>[
+              AppTheme.heightSpace10,
+              Text(AppTranslationConstants.updateUserRoleMsg.tr,
+                style: const TextStyle(fontSize: 15),
+              ),
+              Obx(() =>
+                  DropdownButton<UserRole>(
+                    items: UserRole.values.map((UserRole userRole) {
+                      return DropdownMenuItem<UserRole>(
+                        value: userRole,
+                        child: Text(userRole.name.tr),
+                      );
+                    }).toList(),
+                    onChanged: (UserRole? selectedRole) {
+                      if (selectedRole == null) return;
+                      mateDetailsController.selectUserRole(selectedRole);
+                    },
+                    value: mateDetailsController.newUserRole.value,
+                    alignment: Alignment.center,
+                    icon: const Icon(Icons.arrow_downward),
+                    iconSize: 20,
+                    elevation: 16,
+                    style: const TextStyle(color: Colors.white),
+                    dropdownColor: AppColor.main75,
+                    underline: Container(
+                      height: 1,
+                      color: Colors.grey,
+                    ),
+                  ),
+              ),
+            ],
+          ),
+          buttons: [
+            DialogButton(
+              color: AppColor.bondiBlue75,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(AppTranslationConstants.goBack.tr,
+                style: const TextStyle(fontSize: 15),
+              ),
+            ),
+            DialogButton(
+              color: AppColor.bondiBlue75,
+              onPressed: () async {
+                await mateDetailsController.updateUserRole();
+              },
+              child: Text(AppTranslationConstants.toUpdate.tr,
+                style: const TextStyle(fontSize: 15),
+              ),
+            )
+          ]
+      ).show();
+    });
+  }

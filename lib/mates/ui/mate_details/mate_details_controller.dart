@@ -5,6 +5,7 @@ import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_release_item.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
+import 'package:neom_commons/core/utils/enums/verification_level.dart';
 import 'package:neom_commons/neom_commons.dart';
 import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
 import '../../../profile/ui/profile_controller.dart';
@@ -19,6 +20,8 @@ class MateDetailsController extends GetxController implements MateDetailsService
   AppProfile mate = AppProfile();
 
   AppProfile profile = AppProfile();
+
+  PostFirestore postFirestore = PostFirestore();
 
   String address = "";
   String instrumentsText = "";
@@ -39,12 +42,17 @@ class MateDetailsController extends GetxController implements MateDetailsService
   
   bool isLoading = true;
   bool isLoadingDetails = true;
+  bool isLoadingPosts = true;
 
   List<Post> matePosts = <Post>[];
   List<Post> mateBlogEntries = <Post>[];
   
   GeoLocatorService geoLocatorService = GeoLocatorController();
   bool debugPushNotifications = false;
+
+  final Rx<VerificationLevel> verificationLevel = VerificationLevel.none.obs;
+  final Rx<UserRole> newUserRole = UserRole.subscriber.obs;
+  AppUser mateUser = AppUser();
 
   @override
   void onInit() async {
@@ -108,7 +116,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
       if(mate.id.isNotEmpty) {
         following = profile.following!.contains(itemmateId);
       }
-
+      verificationLevel.value = mate.verificationLevel;
     } catch (e) {
       AppUtilities.logger.e(e.toString());
     }
@@ -125,11 +133,11 @@ class MateDetailsController extends GetxController implements MateDetailsService
       mate.itemlists = await ItemlistFirestore().fetchAll(ownerId: mate.id);
       itemlists = mate.itemlists ?? {};
 
-      await getAddressSimple();
       if(mate.posts?.isNotEmpty ?? false) {
-        await getMatePosts();
+        getMatePosts();
       }
 
+      getAddressSimple();
       getTotalInstruments(); ///NO NEED TO WAIT FOR IT
       getTotalItems();
 
@@ -159,7 +167,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
     AppUtilities.logger.t("getMatePosts");
 
     try {
-      matePosts = await PostFirestore().getProfilePosts(mate.id);
+      matePosts = await postFirestore.getProfilePosts(mate.id);
 
       for (var post in matePosts) {
         if(post.type == PostType.blogEntry && !post.isDraft) {
@@ -174,7 +182,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
       AppUtilities.logger.e(e.toString());
     }
 
-    //isLoading = false;
+    isLoadingPosts = false;
     update([AppPageIdConstants.mate]);
   }
 
@@ -451,16 +459,68 @@ class MateDetailsController extends GetxController implements MateDetailsService
   }
 
   @override
-  Future<void> changeUserRole() {
-    // TODO: implement changeUserRole
-    throw UnimplementedError();
+  void selectVerificationLevel(VerificationLevel level) {
+    try {
+      verificationLevel.value = level;
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
   }
 
   @override
-  Future<void> changeVerificationLevel() {
-    // TODO: implement changeVerificationLevel
-    throw UnimplementedError();
+  Future<void> updateVerificationLevel() async {
+    try {
+      if(await ProfileFirestore().updateVerificationLevel(mate.id, verificationLevel.value)) {
+        mate.verificationLevel = verificationLevel.value;
+      }
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+
+    update([AppPageIdConstants.mate]);
   }
+
+  @override
+  void selectUserRole(UserRole role) {
+    try {
+      newUserRole.value = role;
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+  }
+
+  @override
+  Future<void> updateUserRole() async {
+    try {
+      if(newUserRole.value != mateUser.userRole && mateUser.id.isNotEmpty) {
+        await UserFirestore().updateUserRole(mateUser.id, newUserRole.value);
+        Get.back();
+        AppUtilities.showSnackBar(
+            title: AppTranslationConstants.updateUserRole.tr,
+            message: AppTranslationConstants.updateUserRoleSuccess.tr);
+      } else {
+        AppUtilities.showSnackBar(
+            title: AppTranslationConstants.updateUserRoleSame.tr,
+            message: AppTranslationConstants.updateUserRoleSame.tr);
+      }
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+
+  }
+
+  Future<void> getUserInfo() async {
+
+    try {
+      mateUser = await UserFirestore().getByProfileId(mate.id);
+      newUserRole.value = mateUser.userRole;
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+
+    update([AppPageIdConstants.mate]);
+  }
+
 
 
 }

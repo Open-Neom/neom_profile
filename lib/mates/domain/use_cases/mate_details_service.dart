@@ -1,5 +1,7 @@
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
+import 'package:neom_commons/core/utils/enums/user_role.dart';
+import 'package:neom_commons/core/utils/enums/verification_level.dart';
 
 abstract class MateDetailsService {
 
@@ -16,7 +18,9 @@ abstract class MateDetailsService {
   Future<void> unblockProfile(AppProfile blockedProfile);
   Future<void> getTotalItems();
   Future<void> removeProfile();
-  Future<void> changeVerificationLevel();
-  Future<void> changeUserRole();
+  void selectVerificationLevel(VerificationLevel level);
+  Future<void> updateVerificationLevel();
+  void selectUserRole(UserRole role);
+  Future<void> updateUserRole();
 
 }
