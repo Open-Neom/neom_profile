@@ -69,7 +69,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
         await loadMate(itemmateId);
         await retrieveDetails();
 
-        if(mate.id.isNotEmpty && (userController.user!.userRole == UserRole.subscriber || debugPushNotifications)) {
+        if(mate.id.isNotEmpty && (userController.user.userRole == UserRole.subscriber || debugPushNotifications)) {
           FirebaseMessagingCalls.sendPrivatePushNotification(
             toProfileId: mate.id,
             fromProfile: profile,
@@ -197,7 +197,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
     AppUtilities.logger.t('getAddressSimple');
 
     try {
-      if(mate.position!.latitude != 0 && mate.position!.longitude != 0) {
+      if(mate.position != null && mate.position!.latitude != 0 && mate.position!.longitude != 0) {
         address = await geoLocatorService.getAddressSimple(mate.position!);
         distance = AppUtilities.distanceBetweenPositionsRounded(profile.position!, mate.position!);
       }

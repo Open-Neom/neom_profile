@@ -34,7 +34,7 @@ class MateDetailsBody extends StatelessWidget {
                   const SizedBox(height: 30, child: Icon(Icons.verified, size: 20,)),
               ]
           ),
-          _.mate.type != ProfileType.fan ?
+          _.mate.mainFeature.isNotEmpty ?
           Row(
             children: [
               Icon(AppFlavour.getInstrumentIcon(), size: 15.0),

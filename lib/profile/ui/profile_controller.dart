@@ -359,15 +359,15 @@ class ProfileController extends GetxController implements ProfileService {
 
         if(uploadImageType == UploadImageType.profile) {
           if (await ProfileFirestore().updatePhotoUrl(profile.value.id, photoUrl)) {
-            if (await UserFirestore().updatePhotoUrl(userController.user!.id, photoUrl)) {
-              userController.user!.photoUrl = photoUrl;
-              userController.user!.profiles.first.photoUrl = photoUrl;
+            if (await UserFirestore().updatePhotoUrl(userController.user.id, photoUrl)) {
+              userController.user.photoUrl = photoUrl;
+              userController.user.profiles.first.photoUrl = photoUrl;
               profile.value.photoUrl = photoUrl;
             }
           }
         } else if(uploadImageType == UploadImageType.cover) {
           if (await ProfileFirestore().updateCoverImgUrl(profile.value.id, photoUrl)) {
-              userController.user!.profiles.first.coverImgUrl = photoUrl;
+              userController.user.profiles.first.coverImgUrl = photoUrl;
               profile.value.coverImgUrl = photoUrl;
             }
           }

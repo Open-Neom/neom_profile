@@ -186,7 +186,7 @@ class MateDetailHeader extends StatelessWidget {
                       backgroundColor: AppTheme.canvasColor75(context),
                       context: context,
                       builder: (context) {
-                        return _buildDotsMenu(context, _.mate, _.userController.user!.userRole);
+                        return _buildDotsMenu(context, _.mate, _.userController.user.userRole);
                       }
                   ),
                   icon: const Icon(FontAwesomeIcons.ellipsisVertical, size: 20)
