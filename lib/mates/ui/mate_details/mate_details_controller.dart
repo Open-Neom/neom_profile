@@ -59,7 +59,15 @@ class MateDetailsController extends GetxController implements MateDetailsService
     super.onInit();
     AppUtilities.logger.t("onInit");
 
-    String itemmateId = Get.arguments ?? "";
+    String itemmateId = '';
+
+    if(Get.arguments != null && Get.arguments.isNotEmpty) {
+      if (Get.arguments is List) {
+        itemmateId = Get.arguments[0];
+      } else {
+        itemmateId = Get.arguments ?? "";
+      }
+    }
 
     try {
       profile = userController.profile;

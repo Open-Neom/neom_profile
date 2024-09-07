@@ -46,7 +46,7 @@ class MateDetailHeader extends StatelessWidget {
         FutureBuilder(
           future: CoreUtilities().isAvailableMediaUrl(_.mate.coverImgUrl.isNotEmpty ?
             _.mate.coverImgUrl : _.mate.photoUrl.isNotEmpty
-            ? _.mate.photoUrl : AppFlavour.getNoImageUrl()),
+            ? _.mate.photoUrl : AppFlavour.getAppLogoUrl()),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
                 return DiagonallyCutColoredImage(
@@ -55,7 +55,7 @@ class MateDetailHeader extends StatelessWidget {
                           (snapshot.data == true) ?
                           (_.mate.coverImgUrl.isNotEmpty ?
                       _.mate.coverImgUrl : _.mate.photoUrl.isNotEmpty
-                          ? _.mate.photoUrl : AppFlavour.getNoImageUrl()) : AppFlavour.getNoImageUrl(),),
+                          ? _.mate.photoUrl : AppFlavour.getAppLogoUrl()) : AppFlavour.getAppLogoUrl(),),
                       width: MediaQuery.of(context).size.width,
                       height: 250.0,
                       fit: BoxFit.cover,
@@ -116,7 +116,7 @@ class MateDetailHeader extends StatelessWidget {
                 child: AnimatedTextKit(
                   repeatForever: true,
                   animatedTexts: [
-                    FlickerAnimatedText(">> Ver Blog <<",
+                    FlickerAnimatedText(AppTranslationConstants.checkMyBlog.tr,
                         textStyle: const TextStyle(
                             fontSize: 18,
                             decoration: TextDecoration.underline
