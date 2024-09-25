@@ -185,9 +185,9 @@ class ProfileEditPage extends StatelessWidget {
                                         ),
                                         SizedBox(
                                           width: AppTheme.fullWidth(context)*0.5,
-                                          child: Text(_.profile.value.instruments!.keys.where((instr) => instr != AppTranslationConstants.moderator && instr != AppTranslationConstants.moderator.tr)
+                                          child: Text(_.profile.value.instruments != null ?  _.profile.value.instruments!.keys.where((instr) => instr != AppTranslationConstants.moderator && instr != AppTranslationConstants.moderator.tr)
                                               .map((instr) => instr.tr)
-                                              .join(', ').capitalizeFirst,
+                                              .join(', ').capitalizeFirst : '',
                                               textAlign: TextAlign.end,
                                               style: const TextStyle(
                                                   fontSize: 16.0, decoration: TextDecoration.underline,

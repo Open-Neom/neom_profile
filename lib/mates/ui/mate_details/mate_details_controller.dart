@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/data/firestore/app_media_item_firestore.dart';
 import 'package:neom_commons/core/data/firestore/app_release_item_firestore.dart';
@@ -77,7 +78,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
         await loadMate(itemmateId);
         await retrieveDetails();
 
-        if(mate.id.isNotEmpty && (userController.user.userRole == UserRole.subscriber || debugPushNotifications)) {
+        if((kDebugMode && mate.id.isNotEmpty && (userController.user.userRole == UserRole.subscriber) || debugPushNotifications)) {
           FirebaseMessagingCalls.sendPrivatePushNotification(
             toProfileId: mate.id,
             fromProfile: profile,
@@ -143,6 +144,8 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
       if(mate.posts?.isNotEmpty ?? false) {
         getMatePosts();
+      } else {
+        isLoadingPosts = false;
       }
 
       getAddressSimple();

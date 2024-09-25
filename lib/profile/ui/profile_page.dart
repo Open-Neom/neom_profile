@@ -94,20 +94,21 @@ class ProfilePage extends StatelessWidget {
                               alignment: Alignment.centerLeft,
                               fontSize: 12,
                             ) : const SizedBox.shrink(),
-                            Row(
-                              children: <Widget>[
-                                Text(_.location.value.isNotEmpty ? _.location.value.length > AppConstants.maxLocationNameLength
-                                    ? "${_.location.value.substring(0,AppConstants.maxLocationNameLength)}..." : _.location.value
-                                    : AppTranslationConstants.notSpecified.tr,
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.place,
+                            GestureDetector(
+                              child: Row(
+                                children: <Widget>[
+                                  const Icon(Icons.place,
                                     color: Colors.white,
                                     size: 15,
                                   ),
-                                  onPressed: ()=> _.updateLocation(),
-                                ),
-                              ],
+                                  AppTheme.widthSpace5,
+                                  Text(_.location.value.isNotEmpty ? _.location.value.length > AppConstants.maxLocationNameLength
+                                      ? "${_.location.value.substring(0,AppConstants.maxLocationNameLength)}..." : _.location.value
+                                      : AppTranslationConstants.notSpecified.tr,
+                                  ),
+                                ],
+                              ),
+                              onTap: ()=> _.updateLocation(),
                             ),
                             ReadMoreContainer(
                               padding: 0,
