@@ -147,7 +147,7 @@ class ProfileController extends GetxController implements ProfileService {
       Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
     } else {
       ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.downToUp);
-      Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+      Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
     }
 
 

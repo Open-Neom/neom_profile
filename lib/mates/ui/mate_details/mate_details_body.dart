@@ -31,7 +31,7 @@ class MateDetailsBody extends StatelessWidget {
                 ),
                 AppTheme.widthSpace5,
                 if(_.mate.verificationLevel != VerificationLevel.none)
-                  const SizedBox(height: 30, child: Icon(Icons.verified, size: 20,)),
+                  SizedBox(height: 30, child: AppFlavour.getVerificationIcon(_.mate.verificationLevel, size: 18)),
               ]
           ),
           _.mate.mainFeature.isNotEmpty ?

@@ -83,7 +83,7 @@ class ProfilePage extends StatelessWidget {
                                     Container(
                                       height: 30,
                                       alignment: Alignment.center,
-                                      child: const Icon(Icons.verified, size: 18,)
+                                      child: AppFlavour.getVerificationIcon(_.profile.value.verificationLevel, size: 18,)
                                     ),
                                 ]
                             ),
