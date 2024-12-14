@@ -87,7 +87,7 @@ class ProfilePage extends StatelessWidget {
                                     ),
                                 ]
                             ),
-                            Divider(),
+                            const Divider(),
                             (_.profile.value.genres?.isNotEmpty ?? false) ?
                             GenresGridView(
                               _.profile.value.genres?.keys.toList() ?? [],
@@ -111,7 +111,7 @@ class ProfilePage extends StatelessWidget {
                               ),
                               onTap: ()=> _.updateLocation(),
                             ),
-                            Divider(),
+                            const Divider(),
                             ReadMoreContainer(
                               padding: 0,
                               text:_.profile.value.aboutMe.isEmpty

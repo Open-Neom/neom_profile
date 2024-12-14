@@ -224,17 +224,20 @@ class ProfileController extends GetxController implements ProfileService {
     AppUtilities.logger.t("Updating location");
     try {
 
-      Position newPosition =  await GeoLocatorController().getCurrentPosition();
-
-      if(await ProfileFirestore().updatePosition(profile.value.id, newPosition)){
-        profile.value.position = newPosition;
-        location.value = await GeoLocatorController().getAddressSimple(profile.value.position!);
+      Position? newPosition =  await GeoLocatorController().getCurrentPosition();
+      if(newPosition != null) {
+        if(await ProfileFirestore().updatePosition(profile.value.id, newPosition)){
+          profile.value.position = newPosition;
+          location.value = await GeoLocatorController().getAddressSimple(profile.value.position!);
+        }
+        AppUtilities.logger.d("Location retrieved and updated successfully");
+      } else {
+        AppUtilities.logger.d("Location was not updated as access is deniedForever");
       }
     } catch (e) {
       AppUtilities.logger.e(e.toString());
     }
 
-    AppUtilities.logger.d("Location retrieved and updated successfully");
     update([AppPageIdConstants.profile]);
   }
 

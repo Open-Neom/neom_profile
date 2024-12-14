@@ -218,7 +218,7 @@ class ProfileEditPage extends StatelessWidget {
                                           ]
                                       ),
                                     ],
-                                  ) : SizedBox.shrink()
+                                  ) : const SizedBox.shrink()
                                 ]
                               ) : AppFlavour.appInUse != AppInUse.c ? Center(
                                 child: ElevatedButton(
@@ -244,7 +244,7 @@ class ProfileEditPage extends StatelessWidget {
                                     ],
                                   )
                                 ),
-                              ) : SizedBox.shrink()
+                              ) : const SizedBox.shrink()
                             ],
                           )
                       ),
