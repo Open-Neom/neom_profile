@@ -10,6 +10,7 @@ import 'package:neom_commons/core/utils/constants/app_hero_tag_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'profile_controller.dart';
 
 class ProfileEditPage extends StatelessWidget {
@@ -161,82 +162,89 @@ class ProfileEditPage extends StatelessWidget {
                                         ),
                                       ]
                                   ),
-                                  AppTheme.heightSpace20,
-                                  Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        Text(
-                                          AppTranslationConstants.preferenceToPlay.tr,
-                                          style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(_.profile.value.reason.name.tr,
-                                            style: const TextStyle(
-                                                fontSize: 16.0, decoration: TextDecoration.underline
+                                  AppFlavour.appInUse != AppInUse.c ?
+                                  Column(
+                                    children: [
+                                      AppTheme.heightSpace20,
+                                      Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Text(
+                                              AppTranslationConstants.preferenceToPlay.tr,
+                                              style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                                            ),
+                                            Text(_.profile.value.reason.name.tr,
+                                                style: const TextStyle(
+                                                    fontSize: 16.0, decoration: TextDecoration.underline
+                                                )
+                                            ),
+                                          ]
+                                      ),
+                                      AppTheme.heightSpace20,
+                                      Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Text(AppTranslationConstants.instruments.tr,
+                                              style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                                            ),
+                                            SizedBox(
+                                              width: AppTheme.fullWidth(context)*0.5,
+                                              child: Text(_.profile.value.instruments != null ?  _.profile.value.instruments!.keys.where((instr) => instr != AppTranslationConstants.moderator && instr != AppTranslationConstants.moderator.tr)
+                                                  .map((instr) => instr.tr)
+                                                  .join(', ').capitalizeFirst : '',
+                                                  textAlign: TextAlign.end,
+                                                  style: const TextStyle(
+                                                      fontSize: 16.0, decoration: TextDecoration.underline,
+                                                  )
+                                              ),
                                             )
-                                        ),
-                                      ]
-                                  ),
-                                  AppTheme.heightSpace20,
-                                  Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        Text(AppTranslationConstants.instruments.tr,
-                                          style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                                        ),
-                                        SizedBox(
-                                          width: AppTheme.fullWidth(context)*0.5,
-                                          child: Text(_.profile.value.instruments != null ?  _.profile.value.instruments!.keys.where((instr) => instr != AppTranslationConstants.moderator && instr != AppTranslationConstants.moderator.tr)
-                                              .map((instr) => instr.tr)
-                                              .join(', ').capitalizeFirst : '',
-                                              textAlign: TextAlign.end,
-                                              style: const TextStyle(
-                                                  fontSize: 16.0, decoration: TextDecoration.underline,
-                                              )
-                                          ),
-                                        )
 
-                                      ]
-                                  ),
+                                          ]
+                                      ),
 
-                                  AppTheme.heightSpace20,
-                                  Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        Text(
-                                          AppTranslationConstants.mainInstrument.tr,
-                                          style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(_.profile.value.mainFeature.tr.capitalize,
-                                            style: const TextStyle(
-                                                fontSize: 16.0, decoration: TextDecoration.underline
-                                            )
-                                        ),
-                                      ]
+                                      AppTheme.heightSpace20,
+                                      Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Text(
+                                              AppTranslationConstants.mainInstrument.tr,
+                                              style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                                            ),
+                                            Text(_.profile.value.mainFeature.tr.capitalize,
+                                                style: const TextStyle(
+                                                    fontSize: 16.0, decoration: TextDecoration.underline
+                                                )
+                                            ),
+                                          ]
+                                      ),
+                                    ],
+                                  ) : SizedBox.shrink()
+                                ]
+                              ) : AppFlavour.appInUse != AppInUse.c ? Center(
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColor.main50,
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                                    textStyle: const TextStyle(color: Colors.white),
+                                    elevation: 5,
+                                    shape: RoundedRectangleBorder(
+                                        side: const BorderSide(width: 1, color: Colors.white54), // Borde blanco
+                                        borderRadius: BorderRadius.circular(20.0)),
                                   ),
-                                ],
-                              ) : Center(child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColor.main50,
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                                  textStyle: const TextStyle(color: Colors.white),
-                                  elevation: 5,
-                                  shape: RoundedRectangleBorder(
-                                      side: const BorderSide(width: 1, color: Colors.white54), // Borde blanco
-                                      borderRadius: BorderRadius.circular(20.0)),
+                                  onPressed: () {
+                                    Get.toNamed(AppRouteConstants.instrumentsFav);
+                                  },
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(AppFlavour.getInstrumentIcon(), size: 16,),
+                                      AppTheme.widthSpace10,
+                                      Text(AppTranslationConstants.instrumentsPreferences.tr, style: const TextStyle(fontSize: 16.0)),
+                                    ],
+                                  )
                                 ),
-                                onPressed: () {
-                                  Get.toNamed(AppRouteConstants.instrumentsFav);
-                                },
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(AppFlavour.getInstrumentIcon(), size: 16,),
-                                    AppTheme.widthSpace10,
-                                    Text(AppTranslationConstants.instrumentsPreferences.tr, style: const TextStyle(fontSize: 16.0)),
-                                  ],
-                                )
-                              ),),
+                              ) : SizedBox.shrink()
                             ],
                           )
                       ),

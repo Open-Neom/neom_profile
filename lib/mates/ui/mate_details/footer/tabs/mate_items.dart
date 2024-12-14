@@ -48,6 +48,7 @@ class MateItems extends StatelessWidget {
             padding: const EdgeInsets.only(top: 10, bottom: 10.0),
             child: Text(
               AppTranslationConstants.noItemsYet.tr,
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 20.0,
                 fontWeight: FontWeight.bold,

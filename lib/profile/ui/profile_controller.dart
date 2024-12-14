@@ -179,7 +179,7 @@ class ProfileController extends GetxController implements ProfileService {
         for (var freq in profile.value.frequencies!.values) {
           totalPresets[freq.frequency.toString()] = ChamberPreset.custom(frequency: freq);
         }
-        totalPresets.addAll(CoreUtilities.getTotalPresets(profile.value.chambers!));
+        totalPresets.addAll(CoreUtilities.getTotalPresets(profile.value.chambers ?? {}));
       } else {
         totalReleaseItems.value = CoreUtilities.getTotalReleaseItems(profile.value.itemlists!);
         totalMediaItems.value = CoreUtilities.getTotalMediaItems(profile.value.itemlists!);
