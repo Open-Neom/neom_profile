@@ -11,6 +11,7 @@ import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
+import 'package:neom_commons/core/utils/enums/profile_type.dart';
 import 'profile_controller.dart';
 
 class ProfileEditPage extends StatelessWidget {
@@ -162,7 +163,7 @@ class ProfileEditPage extends StatelessWidget {
                                         ),
                                       ]
                                   ),
-                                  AppFlavour.appInUse != AppInUse.c ?
+                                  AppFlavour.appInUse != AppInUse.c && _.profile.value.type != ProfileType.general ?
                                   Column(
                                     children: [
                                       AppTheme.heightSpace20,
@@ -220,7 +221,7 @@ class ProfileEditPage extends StatelessWidget {
                                     ],
                                   ) : const SizedBox.shrink()
                                 ]
-                              ) : AppFlavour.appInUse != AppInUse.c ? Center(
+                              ) : AppFlavour.appInUse != AppInUse.c && _.profile.value.type != ProfileType.general ? Center(
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColor.main50,
