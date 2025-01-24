@@ -156,10 +156,16 @@ class ProfileEditPage extends StatelessWidget {
                                         Text(AppTranslationConstants.profileType.tr,
                                           style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                                         ),
-                                        Text(_.profile.value.type.value.tr.capitalize,
-                                            style: const TextStyle(
-                                                fontSize: 16.0, decoration: TextDecoration.underline
-                                            )
+                                        TextButton(
+                                          child: Text(
+                                              _.profile.value.type.value.tr.capitalize,
+                                              style: const TextStyle(
+                                                  fontSize: 16.0, decoration: TextDecoration.underline
+                                              )
+                                          ),
+                                          onPressed: () {
+                                            _.showUpdateProfileType(context);
+                                          },
                                         ),
                                       ]
                                   ),
@@ -174,10 +180,15 @@ class ProfileEditPage extends StatelessWidget {
                                               AppTranslationConstants.preferenceToPlay.tr,
                                               style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                                             ),
-                                            Text(_.profile.value.reason.name.tr,
-                                                style: const TextStyle(
-                                                    fontSize: 16.0, decoration: TextDecoration.underline
-                                                )
+                                            TextButton(
+                                              child: Text(_.profile.value.usageReason.name.tr.capitalize,
+                                                  style: const TextStyle(
+                                                      fontSize: 16.0, decoration: TextDecoration.underline
+                                                  )
+                                              ),
+                                              onPressed: () {
+                                                _.showUpdateUsageReason(context);
+                                              },
                                             ),
                                           ]
                                       ),

@@ -17,6 +17,7 @@ import 'package:neom_commons/core/domain/model/instrument.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/domain/model/post.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
+import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
@@ -24,9 +25,12 @@ import 'package:neom_commons/core/utils/constants/app_translation_constants.dart
 import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/core_utilities.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
+import 'package:neom_commons/core/utils/enums/profile_type.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
+import 'package:neom_commons/core/utils/enums/usage_reason.dart';
 import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
 import 'package:neom_posts/posts/ui/add/post_upload_controller.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../domain/use_cases/profile_service.dart';
 
@@ -65,7 +69,8 @@ class ProfileController extends GetxController implements ProfileService {
   bool isValidName = true;
   Map<String, Instrument> previousInstruments = {};
   String previousMainFeature = '';
-
+  Rx<ProfileType>  newProfileType = ProfileType.general.obs;
+  Rx<UsageReason>  newUsageReason = UsageReason.casual.obs;
 
 
   @override
@@ -77,6 +82,8 @@ class ProfileController extends GetxController implements ProfileService {
         profile.value = userController.profile;
         profileName = profile.value.name;
         profileAboutMe = profile.value.aboutMe;
+        newProfileType.value = profile.value.type;
+        newUsageReason.value = profile.value.usageReason;
       } catch (e) {
         AppUtilities.logger.e(e);
     }
@@ -437,6 +444,215 @@ class ProfileController extends GetxController implements ProfileService {
     );
   }
 
+  void showUpdateProfileType(BuildContext context) {
+    List<ProfileType> profileTypes = List.from(ProfileType.values);
 
+    profileTypes.removeWhere((type) => type == ProfileType.broadcaster);
+    switch(AppFlavour.appInUse) {
+      case AppInUse.g:
+        profileTypes.removeWhere((type) => type == ProfileType.band);
+        profileTypes.removeWhere((type) => type == ProfileType.researcher);
+      case AppInUse.e:
+        profileTypes.removeWhere((type) => type == ProfileType.band);
+        profileTypes.removeWhere((type) => type == ProfileType.researcher);
+      case AppInUse.c:
+        profileTypes.removeWhere((type) => type == ProfileType.band);
+    }
+
+    Alert(
+        context: context,
+        style: AlertStyle(
+          backgroundColor: AppColor.main50,
+          titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        title: AppTranslationConstants.updateProfileType.tr,
+        content: Column(
+          children: <Widget>[
+            AppTheme.heightSpace10,
+            Text(AppTranslationConstants.updateProfileTypeMsg.tr,
+              style: const TextStyle(fontSize: 15),
+            ),
+            Obx(() =>
+                DropdownButton<ProfileType>(
+                  items: profileTypes.map((ProfileType profileType) {
+                    return DropdownMenuItem<ProfileType>(
+                      value: profileType,
+                      child: Text(profileType.name.tr.capitalize),
+                    );
+                  }).toList(),
+                  onChanged: (ProfileType? selectedType) {
+                    if (selectedType == null) return;
+                    selectProfileType(selectedType);
+                  },
+                  value: newProfileType.value,
+                  alignment: Alignment.center,
+                  icon: const Icon(Icons.arrow_downward),
+                  iconSize: 20,
+                  elevation: 16,
+                  style: const TextStyle(color: Colors.white),
+                  dropdownColor: AppColor.main75,
+                  underline: Container(
+                    height: 1,
+                    color: Colors.grey,
+                  ),
+                ),
+            ),
+          ],
+        ),
+        buttons: [
+          DialogButton(
+            color: AppColor.bondiBlue75,
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(AppTranslationConstants.goBack.tr,
+              style: const TextStyle(fontSize: 15),
+            ),
+          ),
+          DialogButton(
+            color: AppColor.bondiBlue75,
+            onPressed: () async {
+              await updateProfileType();
+            },
+            child: Text(AppTranslationConstants.toUpdate.tr,
+              style: const TextStyle(fontSize: 15),
+            ),
+          )
+        ]
+    ).show();
+  }
+
+  @override
+  void selectProfileType(ProfileType type) {
+    try {
+      newProfileType.value = type;
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+  }
+
+  @override
+  Future<void> updateProfileType() async {
+    try {
+      if(newProfileType.value != profile.value.type && profile.value.id.isNotEmpty) {
+        if(await ProfileFirestore().updateType(profile.value.id, newProfileType.value)) {
+          Get.back();
+          AppUtilities.showSnackBar(
+              title: AppTranslationConstants.updateProfileType.tr,
+              message: AppTranslationConstants.updateProfileTypeSuccess.tr);
+          userController.profile.type = newProfileType.value;
+          profile.value.type = newProfileType.value;
+        }
+
+      } else {
+        AppUtilities.showSnackBar(
+            title: AppTranslationConstants.updateProfileType.tr,
+            message: AppTranslationConstants.updateProfileTypeSame.tr);
+      }
+
+
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+  }
+
+  void showUpdateUsageReason(BuildContext context) {
+    List<UsageReason> usageReasons = List.from(UsageReason.values);
+
+    Alert(
+        context: context,
+        style: AlertStyle(
+          backgroundColor: AppColor.main50,
+          titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        title: AppTranslationConstants.updateProfileType.tr,
+        content: Column(
+          children: <Widget>[
+            AppTheme.heightSpace10,
+            Text(AppTranslationConstants.updateProfileTypeMsg.tr,
+              style: const TextStyle(fontSize: 15),
+            ),
+            Obx(() =>
+                DropdownButton<UsageReason>(
+                  items: usageReasons.map((UsageReason usageReason) {
+                    return DropdownMenuItem<UsageReason>(
+                      value: usageReason,
+                      child: Text(usageReason.name.tr.capitalize),
+                    );
+                  }).toList(),
+                  onChanged: (UsageReason? selectedReason) {
+                    if (selectedReason == null) return;
+                    selectUsageReason(selectedReason);
+                  },
+                  value: newUsageReason.value,
+                  alignment: Alignment.center,
+                  icon: const Icon(Icons.arrow_downward),
+                  iconSize: 20,
+                  elevation: 16,
+                  style: const TextStyle(color: Colors.white),
+                  dropdownColor: AppColor.main75,
+                  underline: Container(
+                    height: 1,
+                    color: Colors.grey,
+                  ),
+                ),
+            ),
+          ],
+        ),
+        buttons: [
+          DialogButton(
+            color: AppColor.bondiBlue75,
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(AppTranslationConstants.goBack.tr,
+              style: const TextStyle(fontSize: 15),
+            ),
+          ),
+          DialogButton(
+            color: AppColor.bondiBlue75,
+            onPressed: () async {
+              await updateUsageReason();
+            },
+            child: Text(AppTranslationConstants.toUpdate.tr,
+              style: const TextStyle(fontSize: 15),
+            ),
+          )
+        ]
+    ).show();
+  }
+
+  @override
+  void selectUsageReason(UsageReason reason) {
+    try {
+      newUsageReason.value = reason;
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+  }
+
+  @override
+  Future<void> updateUsageReason() async {
+    try {
+      if(newUsageReason.value != profile.value.usageReason && profile.value.id.isNotEmpty) {
+        if(await ProfileFirestore().updateUsageReason(profile.value.id, newUsageReason.value)) {
+          Get.back();
+          AppUtilities.showSnackBar(
+              title: AppTranslationConstants.updateProfileType.tr,
+              message: AppTranslationConstants.updateProfileTypeSuccess.tr);
+          userController.profile.usageReason = newUsageReason.value;
+          profile.value.usageReason = newUsageReason.value;
+        }
+      } else {
+        AppUtilities.showSnackBar(
+            title: AppTranslationConstants.updateProfileType.tr,
+            message: AppTranslationConstants.updateProfileTypeSame.tr);
+      }
+
+
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+  }
 
 }
