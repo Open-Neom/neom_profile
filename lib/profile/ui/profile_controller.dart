@@ -148,16 +148,14 @@ class ProfileController extends GetxController implements ProfileService {
   }
 
   @override
-  void getItemDetails(AppMediaItem appMediaItem){
+  void getItemDetails(AppMediaItem appMediaItem) {
     AppUtilities.logger.d("getItemDetails for ${appMediaItem.name}");
     if(AppFlavour.appInUse != AppInUse.g) {
-      Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
+      Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
     } else {
       ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.downToUp);
       Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
     }
-
-
   }
 
   Future<void> getProfilePosts() async {
@@ -477,7 +475,7 @@ class ProfileController extends GetxController implements ProfileService {
                   items: profileTypes.map((ProfileType profileType) {
                     return DropdownMenuItem<ProfileType>(
                       value: profileType,
-                      child: Text(profileType.name.tr.capitalize),
+                      child: Text(profileType.value.tr.capitalize),
                     );
                   }).toList(),
                   onChanged: (ProfileType? selectedType) {

@@ -36,7 +36,7 @@ class ProfilePage extends StatelessWidget {
                           ? _.profile.value.coverImgUrl :_.profile.value.photoUrl.isNotEmpty
                           ? _.profile.value.photoUrl : AppFlavour.getNoImageUrl(),),
                       width: AppTheme.fullWidth(context),
-                      height: 250,
+                      height: 225,
                       fit: BoxFit.cover,
                     ),
                     color: AppColor.cutColoredImage,
@@ -54,7 +54,7 @@ class ProfilePage extends StatelessWidget {
                           child: CircleAvatar(
                             backgroundImage: CachedNetworkImageProvider(_.profile.value.photoUrl.isNotEmpty
                                 ? _.profile.value.photoUrl : AppFlavour.getNoImageUrl(),),
-                            radius: 50.0,
+                            radius: 75.0,
                           ),
                           onTap: () => Get.toNamed(AppRouteConstants.profileEdit),
                         ),

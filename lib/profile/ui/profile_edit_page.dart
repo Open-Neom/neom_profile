@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
+import 'package:neom_commons/core/utils/app_utilities.dart';
 
 import 'package:neom_commons/core/ui/widgets/appbar_child.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
@@ -10,6 +11,7 @@ import 'package:neom_commons/core/utils/constants/app_hero_tag_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/profile_type.dart';
 import 'profile_controller.dart';
@@ -164,12 +166,19 @@ class ProfileEditPage extends StatelessWidget {
                                               )
                                           ),
                                           onPressed: () {
-                                            _.showUpdateProfileType(context);
+                                            if(_.userController.userSubscription == null) {
+                                              _.showUpdateProfileType(context);
+                                            } else {
+                                              AppUtilities.showSnackBar(
+                                                title: AppTranslationConstants.profileDetails.tr,
+                                                message: MessageTranslationConstants.profileTypeRelatedWithASubscriptionMsg.tr,
+                                              );
+                                            }
                                           },
                                         ),
                                       ]
                                   ),
-                                  AppFlavour.appInUse != AppInUse.c && _.profile.value.type != ProfileType.general ?
+                                  AppFlavour.appInUse != AppInUse.c && _.profile.value.type == ProfileType.appArtist ?
                                   Column(
                                     children: [
                                       AppTheme.heightSpace20,
@@ -222,17 +231,22 @@ class ProfileEditPage extends StatelessWidget {
                                               AppTranslationConstants.mainInstrument.tr,
                                               style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                                             ),
-                                            Text(_.profile.value.mainFeature.tr.capitalize,
+                                            TextButton(
+                                              child: Text(_.profile.value.mainFeature == AppTranslationConstants.general ? AppTranslationConstants.add.tr : _.profile.value.mainFeature.tr.capitalize,
                                                 style: const TextStyle(
                                                     fontSize: 16.0, decoration: TextDecoration.underline
                                                 )
+                                            ),
+                                              onPressed: () {
+                                                Get.toNamed(AppRouteConstants.instrumentsFav);
+                                              },
                                             ),
                                           ]
                                       ),
                                     ],
                                   ) : const SizedBox.shrink()
                                 ]
-                              ) : AppFlavour.appInUse != AppInUse.c && _.profile.value.type != ProfileType.general ? Center(
+                              ) : AppFlavour.appInUse != AppInUse.c && _.profile.value.type != ProfileType.appArtist ? Center(
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColor.main50,

@@ -301,7 +301,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
       ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem), transition: Transition.downToUp);
       Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
     } else {
-      Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
+      Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
     }
   }
 
