@@ -2,11 +2,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
-import 'package:neom_commons/core/utils/app_utilities.dart';
-
 import 'package:neom_commons/core/ui/widgets/appbar_child.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
+import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_hero_tag_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
@@ -14,6 +13,7 @@ import 'package:neom_commons/core/utils/constants/app_translation_constants.dart
 import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/profile_type.dart';
+
 import 'profile_controller.dart';
 
 class ProfileEditPage extends StatelessWidget {
@@ -150,103 +150,7 @@ class ProfileEditPage extends StatelessWidget {
                           child: Column(
                             children: [
                               !_.editStatus.value ?
-                              Column(
-                                children: [
-                                  Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        Text(AppTranslationConstants.profileType.tr,
-                                          style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                                        ),
-                                        TextButton(
-                                          child: Text(
-                                              _.profile.value.type.value.tr.capitalize,
-                                              style: const TextStyle(
-                                                  fontSize: 16.0, decoration: TextDecoration.underline
-                                              )
-                                          ),
-                                          onPressed: () {
-                                            if(_.userController.userSubscription == null) {
-                                              _.showUpdateProfileType(context);
-                                            } else {
-                                              AppUtilities.showSnackBar(
-                                                title: AppTranslationConstants.profileDetails.tr,
-                                                message: MessageTranslationConstants.profileTypeRelatedWithASubscriptionMsg.tr,
-                                              );
-                                            }
-                                          },
-                                        ),
-                                      ]
-                                  ),
-                                  AppFlavour.appInUse != AppInUse.c && _.profile.value.type == ProfileType.appArtist ?
-                                  Column(
-                                    children: [
-                                      AppTheme.heightSpace20,
-                                      Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: <Widget>[
-                                            Text(
-                                              AppTranslationConstants.preferenceToPlay.tr,
-                                              style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                                            ),
-                                            TextButton(
-                                              child: Text(_.profile.value.usageReason.name.tr.capitalize,
-                                                  style: const TextStyle(
-                                                      fontSize: 16.0, decoration: TextDecoration.underline
-                                                  )
-                                              ),
-                                              onPressed: () {
-                                                _.showUpdateUsageReason(context);
-                                              },
-                                            ),
-                                          ]
-                                      ),
-                                      AppTheme.heightSpace20,
-                                      Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: <Widget>[
-                                            Text(AppTranslationConstants.instruments.tr,
-                                              style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                                            ),
-                                            SizedBox(
-                                              width: AppTheme.fullWidth(context)*0.5,
-                                              child: Text(_.profile.value.instruments != null ?  _.profile.value.instruments!.keys.where((instr) => instr != AppTranslationConstants.moderator && instr != AppTranslationConstants.moderator.tr)
-                                                  .map((instr) => instr.tr)
-                                                  .join(', ').capitalizeFirst : '',
-                                                  textAlign: TextAlign.end,
-                                                  style: const TextStyle(
-                                                      fontSize: 16.0, decoration: TextDecoration.underline,
-                                                  )
-                                              ),
-                                            )
-
-                                          ]
-                                      ),
-
-                                      AppTheme.heightSpace20,
-                                      Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: <Widget>[
-                                            Text(
-                                              AppTranslationConstants.mainInstrument.tr,
-                                              style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                                            ),
-                                            TextButton(
-                                              child: Text(_.profile.value.mainFeature == AppTranslationConstants.general ? AppTranslationConstants.add.tr : _.profile.value.mainFeature.tr.capitalize,
-                                                style: const TextStyle(
-                                                    fontSize: 16.0, decoration: TextDecoration.underline
-                                                )
-                                            ),
-                                              onPressed: () {
-                                                Get.toNamed(AppRouteConstants.instrumentsFav);
-                                              },
-                                            ),
-                                          ]
-                                      ),
-                                    ],
-                                  ) : const SizedBox.shrink()
-                                ]
-                              ) : AppFlavour.appInUse != AppInUse.c && _.profile.value.type != ProfileType.appArtist ? Center(
+                              buildProfileTypeColumn(_, context) : AppFlavour.appInUse != AppInUse.c && _.profile.value.type != ProfileType.appArtist ? Center(
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColor.main50,
@@ -322,5 +226,168 @@ class ProfileEditPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Column buildProfileTypeColumn(ProfileController _, BuildContext context) {
+    return Column(
+        children: [
+          Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(AppTranslationConstants.profileType.tr,
+                  style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                ),
+                TextButton(
+                  child: Text(
+                      _.profile.value.type.value.tr.capitalize,
+                      style: const TextStyle(
+                          fontSize: 16.0, decoration: TextDecoration.underline
+                      )
+                  ),
+                  onPressed: () {
+                    if(_.userController.userSubscription == null) {
+                      if((_.profile.value.places?.isEmpty ?? true) && (_.profile.value.places?.isEmpty ?? true)) {
+                        _.showUpdateProfileType(context);
+                      } else {
+                        AppUtilities.showSnackBar(
+                          title: AppTranslationConstants.profileDetails.tr,
+                          message: MessageTranslationConstants.profileTypeRelatedWithAFacilityOrPlaceMsg.tr,
+                        );
+                      }
+
+                    } else {
+                      AppUtilities.showSnackBar(
+                        title: AppTranslationConstants.profileDetails.tr,
+                        message: MessageTranslationConstants.profileTypeRelatedWithASubscriptionMsg.tr,
+                      );
+                    }
+                  },
+                ),
+              ]
+          ),
+          buildProfileTypeAddons(_, context)
+        ]
+    );
+  }
+
+  RenderObjectWidget buildProfileTypeAddons(ProfileController _, BuildContext context) {
+    switch(_.profile.value.type) {
+      case ProfileType.appArtist:
+        return AppFlavour.appInUse != AppInUse.c ? Column(
+          children: [
+            AppTheme.heightSpace20,
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    AppTranslationConstants.preferenceToPlay.tr,
+                    style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                  ),
+                  TextButton(
+                    child: Text(_.profile.value.usageReason.name.tr.capitalize,
+                        style: const TextStyle(
+                            fontSize: 16.0, decoration: TextDecoration.underline
+                        )
+                    ),
+                    onPressed: () {
+                      _.showUpdateUsageReason(context);
+                    },
+                  ),
+                ]
+            ),
+            AppTheme.heightSpace20,
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(AppTranslationConstants.instruments.tr,
+                    style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    width: AppTheme.fullWidth(context)*0.5,
+                    child: Text((_.profile.value.instruments?.isNotEmpty ?? false) ?  _.profile.value.instruments!.keys.where((instr) => instr != AppTranslationConstants.moderator && instr != AppTranslationConstants.moderator.tr)
+                        .map((instr) => instr.tr)
+                        .join(', ').capitalizeFirst : '',
+                        textAlign: TextAlign.end,
+                        style: const TextStyle(
+                          fontSize: 16.0, decoration: TextDecoration.underline,
+                        )
+                    ),
+                  )
+                ]
+            ),
+            AppTheme.heightSpace20,
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    AppTranslationConstants.mainInstrument.tr,
+                    style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                  ),
+                  TextButton(
+                    child: Text(_.profile.value.mainFeature == AppTranslationConstants.general ? AppTranslationConstants.add.tr : _.profile.value.mainFeature.tr.capitalize,
+                        style: const TextStyle(
+                            fontSize: 16.0, decoration: TextDecoration.underline
+                        )
+                    ),
+                    onPressed: () {
+                      Get.toNamed(AppRouteConstants.instrumentsFav);
+                    },
+                  ),
+                ]
+            ),
+          ],) : const SizedBox.shrink();
+      case ProfileType.facilitator:
+        return Column(
+          children: [
+            AppTheme.heightSpace20,
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(AppTranslationConstants.facilityType.tr,
+                    style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                  ),
+                  TextButton(
+                    child: Text((_.profile.value.facilities?.isNotEmpty ?? false) ? _.profile.value.facilities!.values.first.type.value.tr : AppTranslationConstants.add.tr,
+                        style: const TextStyle(
+                            fontSize: 16.0, decoration: TextDecoration.underline
+                        )
+                    ),
+                    onPressed: () {
+                      if(_.profile.value.facilities?.isEmpty ?? true) {
+                        _.showAddFacility(context);
+                      }
+                    },
+                  ),
+                ]
+            ),
+          ],);
+      case ProfileType.host:
+        return Column(
+          children: [
+            AppTheme.heightSpace20,
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(AppTranslationConstants.placeType.tr,
+                    style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                  ),
+                  TextButton(
+                    child: Text((_.profile.value.places?.isNotEmpty ?? false) ? _.profile.value.places!.values.first.type.value.tr : AppTranslationConstants.add.tr,
+                        style: const TextStyle(
+                            fontSize: 16.0, decoration: TextDecoration.underline
+                        )
+                    ),
+                    onPressed: () {
+                      if(_.profile.value.places?.isEmpty ?? true) {
+                        _.showAddPlace(context);
+                      }
+                    },
+                  ),
+                ]
+            ),
+          ],);
+      default:
+        return const SizedBox.shrink();
+    }
   }
 }

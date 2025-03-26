@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:neom_commons/auth/ui/login/login_controller.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/firestore/event_firestore.dart';
+import 'package:neom_commons/core/data/firestore/facility_firestore.dart';
+import 'package:neom_commons/core/data/firestore/place_firestore.dart';
 import 'package:neom_commons/core/data/firestore/post_firestore.dart';
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
 import 'package:neom_commons/core/data/firestore/user_firestore.dart';
@@ -13,8 +15,10 @@ import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 import 'package:neom_commons/core/domain/model/app_release_item.dart';
 import 'package:neom_commons/core/domain/model/event.dart';
+import 'package:neom_commons/core/domain/model/facility.dart';
 import 'package:neom_commons/core/domain/model/instrument.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
+import 'package:neom_commons/core/domain/model/place.dart';
 import 'package:neom_commons/core/domain/model/post.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
@@ -25,6 +29,8 @@ import 'package:neom_commons/core/utils/constants/app_translation_constants.dart
 import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/core_utilities.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
+import 'package:neom_commons/core/utils/enums/facilitator_type.dart';
+import 'package:neom_commons/core/utils/enums/place_type.dart';
 import 'package:neom_commons/core/utils/enums/profile_type.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 import 'package:neom_commons/core/utils/enums/usage_reason.dart';
@@ -71,7 +77,8 @@ class ProfileController extends GetxController implements ProfileService {
   String previousMainFeature = '';
   Rx<ProfileType>  newProfileType = ProfileType.general.obs;
   Rx<UsageReason>  newUsageReason = UsageReason.casual.obs;
-
+  Rx<FacilityType>  facilityType = FacilityType.general.obs;
+  Rx<PlaceType>  placeType = PlaceType.general.obs;
 
   @override
   void onInit() async {
@@ -360,7 +367,7 @@ class ProfileController extends GetxController implements ProfileService {
     update([AppPageIdConstants.profile]);
 
     try {
-      await postUploadController.handleImage(uploadImageType: UploadImageType.profile);
+      await postUploadController.handleImage(imageType: UploadImageType.profile);
       if(postUploadController.mediaFile.value.path.isNotEmpty) {
         String photoUrl = await postUploadController.handleUploadImage(
             uploadImageType);
@@ -647,6 +654,216 @@ class ProfileController extends GetxController implements ProfileService {
             message: AppTranslationConstants.updateProfileTypeSame.tr);
       }
 
+
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+  }
+
+  void showAddFacility(BuildContext context) {
+    List<FacilityType> facilityTypes = List.from(FacilityType.values);
+    if(AppFlavour.appInUse != AppInUse.g) {
+      facilityTypes.removeWhere((type)=> type == FacilityType.recordStudio
+          || type == FacilityType.rehearsalRoom
+          || type == FacilityType.soundRental
+      );
+    }
+
+    Alert(
+        context: context,
+        style: AlertStyle(
+          backgroundColor: AppColor.main50,
+          titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        title: AppTranslationConstants.updateProfileType.tr,
+        content: Column(
+          children: <Widget>[
+            AppTheme.heightSpace10,
+            Text(AppTranslationConstants.introFacilitatorType.tr,
+              style: const TextStyle(fontSize: 15),
+            ),
+            Obx(() =>
+                DropdownButton<FacilityType>(
+                  items: facilityTypes.map((FacilityType type) {
+                    return DropdownMenuItem<FacilityType>(
+                      value: type,
+                      child: Text(type.name.tr.capitalize),
+                    );
+                  }).toList(),
+                  onChanged: (FacilityType? selectedFacility) {
+                    if (selectedFacility == null) return;
+                    selectFacilityType(selectedFacility);
+                  },
+                  value: facilityType.value,
+                  alignment: Alignment.center,
+                  icon: const Icon(Icons.arrow_downward),
+                  iconSize: 20,
+                  elevation: 16,
+                  style: const TextStyle(color: Colors.white),
+                  dropdownColor: AppColor.main75,
+                  underline: Container(
+                    height: 1,
+                    color: Colors.grey,
+                  ),
+                ),
+            ),
+          ],
+        ),
+        buttons: [
+          DialogButton(
+            color: AppColor.bondiBlue75,
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(AppTranslationConstants.goBack.tr,
+              style: const TextStyle(fontSize: 15),
+            ),
+          ),
+          DialogButton(
+            color: AppColor.bondiBlue75,
+            onPressed: () async {
+              await updateFacilityType();
+            },
+            child: Text(AppTranslationConstants.toUpdate.tr,
+              style: const TextStyle(fontSize: 15),
+            ),
+          )
+        ]
+    ).show();
+  }
+
+  @override
+  void selectFacilityType(FacilityType type) {
+    try {
+      facilityType.value = type;
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+  }
+
+  @override
+  Future<void> updateFacilityType() async {
+    try {
+      if(profile.value.id.isNotEmpty) {
+        if(await FacilityFirestore().addFacility(profileId: profile.value.id, facilityType: facilityType.value)) {
+          Get.back();
+          AppUtilities.showSnackBar(
+              title: AppTranslationConstants.updateProfile.tr,
+              message: AppTranslationConstants.facilityAdded.tr);
+          userController.profile.facilities = {};
+          userController.profile.facilities![facilityType.value.name] = Facility(type: facilityType.value);
+        }
+      } else {
+        AppUtilities.showSnackBar(
+            title: AppTranslationConstants.updateProfileType.tr,
+            message: AppTranslationConstants.updateProfileTypeSame.tr);
+      }
+
+
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+  }
+
+  void showAddPlace(BuildContext context) {
+    List<PlaceType> placeTypes = List.from(PlaceType.values);
+    if(AppFlavour.appInUse != AppInUse.g) {
+      // placeTypes.removeWhere((type)=> type == PlaceType.recordStudio
+      //     || type == FacilityType.rehearsalRoom
+      //     || type == FacilityType.soundRental
+      // );
+    }
+
+    Alert(
+        context: context,
+        style: AlertStyle(
+          backgroundColor: AppColor.main50,
+          titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        title: AppTranslationConstants.updateProfileType.tr,
+        content: Column(
+          children: <Widget>[
+            AppTheme.heightSpace10,
+            Text(AppTranslationConstants.introFacilitatorType.tr,
+              style: const TextStyle(fontSize: 15),
+            ),
+            Obx(() =>
+                DropdownButton<PlaceType>(
+                  items: placeTypes.map((PlaceType type) {
+                    return DropdownMenuItem<PlaceType>(
+                      value: type,
+                      child: Text(type.name.tr.capitalize),
+                    );
+                  }).toList(),
+                  onChanged: (PlaceType? selectedPlace) {
+                    if (selectedPlace == null) return;
+                    selectPlaceType(selectedPlace);
+                  },
+                  value: placeType.value,
+                  alignment: Alignment.center,
+                  icon: const Icon(Icons.arrow_downward),
+                  iconSize: 20,
+                  elevation: 16,
+                  style: const TextStyle(color: Colors.white),
+                  dropdownColor: AppColor.main75,
+                  underline: Container(
+                    height: 1,
+                    color: Colors.grey,
+                  ),
+                ),
+            ),
+          ],
+        ),
+        buttons: [
+          DialogButton(
+            color: AppColor.bondiBlue75,
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(AppTranslationConstants.goBack.tr,
+              style: const TextStyle(fontSize: 15),
+            ),
+          ),
+          DialogButton(
+            color: AppColor.bondiBlue75,
+            onPressed: () async {
+              await updatePlaceType();
+            },
+            child: Text(AppTranslationConstants.toUpdate.tr,
+              style: const TextStyle(fontSize: 15),
+            ),
+          )
+        ]
+    ).show();
+  }
+
+
+  @override
+  void selectPlaceType(PlaceType type) {
+    try {
+      placeType.value = type;
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+  }
+
+  @override
+  Future<void> updatePlaceType() async {
+    try {
+      if(profile.value.id.isNotEmpty) {
+        if(await PlaceFirestore().addPlace(placeType: placeType.value, profileId: profile.value.id)) {
+          Get.back();
+          AppUtilities.showSnackBar(
+              title: AppTranslationConstants.updateProfile.tr,
+              message: AppTranslationConstants.placeAdded.tr);
+          userController.profile.places = {};
+          userController.profile.places![placeType.value.name] = Place(type: placeType.value);
+        }
+      } else {
+        AppUtilities.showSnackBar(
+            title: AppTranslationConstants.updateProfileType.tr,
+            message: AppTranslationConstants.updateProfileTypeSame.tr);
+      }
 
     } catch (e) {
       AppUtilities.logger.e(e.toString());
