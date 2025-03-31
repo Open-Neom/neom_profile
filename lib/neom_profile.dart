@@ -18,8 +18,8 @@ export 'mates/utils/mate_constants.dart';
 //PROFILE DOMAIN
 export 'profile/domain/use_cases/profile_service.dart';
 export 'profile/profile_routes.dart';
-export 'profile/ui/followers_list_page.dart';
-export 'profile/ui/following_list_page.dart';
+export 'profile/ui/follows/followers_list_page.dart';
+export 'profile/ui/follows/following_list_page.dart';
 export 'profile/ui/profile_controller.dart';
 export 'profile/ui/profile_edit_page.dart';
 export 'profile/ui/profile_page.dart';

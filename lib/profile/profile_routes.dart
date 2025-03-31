@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
-import 'ui/followers_list_page.dart';
-import 'ui/following_list_page.dart';
+import 'ui/follows/followers_list_page.dart';
+import 'ui/follows/following_list_page.dart';
 import 'ui/profile_edit_page.dart';
 import 'ui/profile_page.dart';
 

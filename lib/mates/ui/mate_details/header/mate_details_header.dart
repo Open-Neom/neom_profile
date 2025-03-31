@@ -40,26 +40,26 @@ class MateDetailHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<MateDetailsController>(
       id: AppPageIdConstants.mate,
-      init: MateDetailsController(),
+      // init: MateDetailsController(),
       builder: (_) => Stack(
       children: <Widget>[
         FutureBuilder(
-          future: CoreUtilities().isAvailableMediaUrl(_.mate.coverImgUrl.isNotEmpty ?
-            _.mate.coverImgUrl : _.mate.photoUrl.isNotEmpty
-            ? _.mate.photoUrl : AppFlavour.getAppLogoUrl()),
+          future: CoreUtilities().isAvailableMediaUrl(_.mate.value.coverImgUrl.isNotEmpty ?
+            _.mate.value.coverImgUrl : _.mate.value.photoUrl.isNotEmpty
+            ? _.mate.value.photoUrl : AppFlavour.getAppLogoUrl()),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
                 return DiagonallyCutColoredImage(
                   Image(
                       image: NetworkImage(
                           (snapshot.data == true) ?
-                          (_.mate.coverImgUrl.isNotEmpty ?
-                      _.mate.coverImgUrl : _.mate.photoUrl.isNotEmpty
-                          ? _.mate.photoUrl : AppFlavour.getAppLogoUrl()) : AppFlavour.getAppLogoUrl(),),
+                          (_.mate.value.coverImgUrl.isNotEmpty ?
+                      _.mate.value.coverImgUrl : _.mate.value.photoUrl.isNotEmpty
+                          ? _.mate.value.photoUrl : AppFlavour.getAppLogoUrl()) : AppFlavour.getAppLogoUrl(),),
                       width: MediaQuery.of(context).size.width,
                       height: 250.0,
                       fit: BoxFit.cover,
-                      errorBuilder:  (context, object, error) => Image.network(AppFlavour.getNoImageUrl())
+                      errorBuilder:  (context, object, error) => Image.network(AppFlavour.getAppLogoUrl())
                   ),
                   color: AppColor.cutColoredImage,);
             } else {
@@ -73,19 +73,19 @@ class MateDetailHeader extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Hero(
-                tag: _.mate.name,
+                tag: _.mate.value.name,
                 child: FutureBuilder(
-                  future: CoreUtilities().isAvailableMediaUrl(_.mate.photoUrl.isNotEmpty
-                      ? _.mate.photoUrl : AppFlavour.getNoImageUrl(),),
+                  future: CoreUtilities().isAvailableMediaUrl(_.mate.value.photoUrl.isNotEmpty
+                      ? _.mate.value.photoUrl : AppFlavour.getAppLogoUrl(),),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return CircleAvatar(
                         backgroundImage: NetworkImage((snapshot.data == true) ?
-                        (_.mate.photoUrl.isNotEmpty ? _.mate.photoUrl : AppFlavour.getNoImageUrl())
-                            : AppFlavour.getNoImageUrl(),),
+                        (_.mate.value.photoUrl.isNotEmpty ? _.mate.value.photoUrl : AppFlavour.getAppLogoUrl())
+                            : AppFlavour.getAppLogoUrl(),),
                         radius: 60.0,
-                        onBackgroundImageError: (object, error) => CachedNetworkImageProvider(_.mate.photoUrl.isNotEmpty ? _.mate.photoUrl
-                            : AppFlavour.getNoImageUrl(),),
+                        onBackgroundImageError: (object, error) => CachedNetworkImageProvider(_.mate.value.photoUrl.isNotEmpty ? _.mate.value.photoUrl
+                            : AppFlavour.getAppLogoUrl(),),
                       );
                     } else {
                       return const CircleAvatar(
@@ -186,7 +186,7 @@ class MateDetailHeader extends StatelessWidget {
                       backgroundColor: AppTheme.canvasColor75(context),
                       context: context,
                       builder: (context) {
-                        return _buildDotsMenu(context, _.mate, _.userController.user.userRole);
+                        return _buildDotsMenu(context, _.mate.value, _.userController.user.userRole);
                       }
                   ),
                   icon: const Icon(FontAwesomeIcons.ellipsisVertical, size: 20)
@@ -462,7 +462,7 @@ void showUpdateVerificationLevelAlert(BuildContext context) {
           color: AppColor.bondiBlue75,
           onPressed: () async {
             if (mateDetailsController.verificationLevel.value !=
-                mateDetailsController.mate.verificationLevel) {
+                mateDetailsController.mate.value.verificationLevel) {
               await mateDetailsController.updateVerificationLevel();
               Navigator.of(context).pop();
               Navigator.of(context).pop();

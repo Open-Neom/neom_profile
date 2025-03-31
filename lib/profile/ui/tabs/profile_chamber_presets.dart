@@ -17,7 +17,7 @@ class ProfileChamberPresets extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
-      init: ProfileController(),
+      // init: ProfileController(),
       builder: (_) => SizedBox(
         width: double.infinity,
         child: ListView.builder(

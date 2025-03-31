@@ -17,7 +17,7 @@ class MateShowcase extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<MateDetailsController>(
       id: AppPageIdConstants.mate,
-      init: MateDetailsController(),
+      /// init: MateDetailsController(),
       builder: (_) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -27,10 +27,11 @@ class MateShowcase extends StatelessWidget {
               children: <Widget>[
                 TabBar(
                   tabs: [
-                    Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${_.matePosts.length})'),
-                    Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${AppFlavour.appInUse == AppInUse.c ?
-                    _.totalPresets.length : (_.totalMediaItems.length + _.totalReleaseItems.length)})'),
-                    Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${_.events.length})')
+                    Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} ${_.matePosts.isNotEmpty ? '(${_.matePosts.length})':''}'),
+                    Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} ${_.totalPresets.isEmpty && _.totalMediaItems.length+_.totalReleaseItems.length==0
+                        ? '': '(${AppFlavour.appInUse == AppInUse.c ?
+                    _.totalPresets.length : (_.totalMediaItems.length + _.totalReleaseItems.length)})'}'),
+                    Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} ${_.events.isEmpty ? '' : '(${_.events.length})'}')
                   ],
                   indicatorColor: Colors.white,
                   labelStyle: const TextStyle(fontSize: 15),

@@ -23,7 +23,7 @@ class ProfileEditPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
-      init: ProfileController(),
+      // init: ProfileController(),
       builder: (_) => Scaffold(
         appBar: AppBarChild(title: AppTranslationConstants.profileDetails.tr),
         backgroundColor: AppColor.main50,
@@ -275,26 +275,26 @@ class ProfileEditPage extends StatelessWidget {
       case ProfileType.appArtist:
         return AppFlavour.appInUse != AppInUse.c ? Column(
           children: [
-            AppTheme.heightSpace20,
-            Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    AppTranslationConstants.preferenceToPlay.tr,
-                    style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                  ),
-                  TextButton(
-                    child: Text(_.profile.value.usageReason.name.tr.capitalize,
-                        style: const TextStyle(
-                            fontSize: 16.0, decoration: TextDecoration.underline
-                        )
-                    ),
-                    onPressed: () {
-                      _.showUpdateUsageReason(context);
-                    },
-                  ),
-                ]
-            ),
+            // AppTheme.heightSpace20,
+            // Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: <Widget>[
+            //       Text(
+            //         AppTranslationConstants.preferenceToPlay.tr,
+            //         style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+            //       ),
+            //       TextButton(
+            //         child: Text(_.profile.value.usageReason.name.tr.capitalize,
+            //             style: const TextStyle(
+            //                 fontSize: 16.0, decoration: TextDecoration.underline
+            //             )
+            //         ),
+            //         onPressed: () {
+            //           _.showUpdateUsageReason(context);
+            //         },
+            //       ),
+            //     ]
+            // ),
             AppTheme.heightSpace20,
             Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

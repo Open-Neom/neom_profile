@@ -15,8 +15,8 @@ class MateDetailsBody extends StatelessWidget {
     var textTheme = theme.textTheme;
     return GetBuilder<MateDetailsController>(
       id: AppPageIdConstants.mate,
-      init: MateDetailsController(),
-      builder: (_) => _.isLoading ? const Center(child: CircularProgressIndicator())
+      // init: MateDetailsController(),
+      builder: (_) => Obx(()=> _.isLoading.value ? const Center(child: CircularProgressIndicator())
       : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -25,21 +25,21 @@ class MateDetailsBody extends StatelessWidget {
               children: [
                 SizedBox(
                   height: 30,
-                  child: Text(CoreUtilities.capitalizeFirstLetter(_.mate.name),
+                  child: Text(CoreUtilities.capitalizeFirstLetter(_.mate.value.name),
                     style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.white),
                   ),
                 ),
                 AppTheme.widthSpace5,
-                if(_.mate.verificationLevel != VerificationLevel.none)
-                  SizedBox(height: 30, child: AppFlavour.getVerificationIcon(_.mate.verificationLevel, size: 18)),
+                if(_.mate.value.verificationLevel != VerificationLevel.none)
+                  SizedBox(height: 30, child: AppFlavour.getVerificationIcon(_.mate.value.verificationLevel, size: 18)),
               ]
           ),
-          _.mate.mainFeature.isNotEmpty ?
+          _.mate.value.mainFeature.isNotEmpty ?
           Row(
             children: [
               Icon(AppFlavour.getInstrumentIcon(), size: 15.0),
               AppTheme.widthSpace5,
-              Text(_.mate.mainFeature.tr.capitalize,
+              Text(_.mate.value.mainFeature.tr.capitalize,
                 style: const TextStyle(
                   fontSize: 15,
                   color: AppColor.white
@@ -47,8 +47,8 @@ class MateDetailsBody extends StatelessWidget {
               ),
             ],
           ) : const SizedBox.shrink(),
-          _.mate.genres != null ? GenresGridView(
-            _.mate.genres?.keys.toList() ?? [],
+          _.mate.value.genres != null ? GenresGridView(
+            _.mate.value.genres?.keys.toList() ?? [],
             AppColor.white,
             alignment: Alignment.centerLeft,
             fontSize: 15,
@@ -61,14 +61,14 @@ class MateDetailsBody extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 10.0),
             child: ReadMoreContainer(
-              text: _.mate.aboutMe.isEmpty
+              text: _.mate.value.aboutMe.isEmpty
                   ? AppTranslationConstants.noProfileDesc.tr
-                  : CoreUtilities.capitalizeFirstLetter(_.mate.aboutMe),
+                  : CoreUtilities.capitalizeFirstLetter(_.mate.value.aboutMe),
               color: Colors.white70,
             )
           ),
         ]
-      ),
+      ),),
     );
   }
 

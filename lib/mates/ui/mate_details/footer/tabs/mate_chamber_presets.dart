@@ -17,7 +17,7 @@ class MateChamberPresets extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<MateDetailsController>(
       id: AppPageIdConstants.profile,
-      init: MateDetailsController(),
+      /// init: MateDetailsController(),
       builder: (_) => SizedBox(
         width: double.infinity,
         child: ListView.builder(

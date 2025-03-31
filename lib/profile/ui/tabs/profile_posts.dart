@@ -16,7 +16,7 @@ class ProfilePosts extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ProfileController>(
       id: AppPageIdConstants.profilePosts,
-      init: ProfileController(),
+      // init: ProfileController(),
       builder: (_) {
         if (_.isLoading.value) {
           return const Center(child: CircularProgressIndicator());

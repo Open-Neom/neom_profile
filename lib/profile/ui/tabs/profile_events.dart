@@ -17,7 +17,7 @@ class ProfileEvents extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
-      init: ProfileController(),
+      // init: ProfileController(),
       builder: (_) => _.events.isNotEmpty ?
       ListView.builder(
           padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),

@@ -18,7 +18,7 @@ class MateItems extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<MateDetailsController>(
       id: AppPageIdConstants.mate,
-      init: MateDetailsController(),
+      /// init: MateDetailsController(),
       builder: (_) => _.totalMixedItems.isNotEmpty ? ListView.builder(
         padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
         itemCount: _.totalMixedItems.length,

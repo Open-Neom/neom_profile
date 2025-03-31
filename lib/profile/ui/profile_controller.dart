@@ -81,33 +81,40 @@ class ProfileController extends GetxController implements ProfileService {
   Rx<PlaceType>  placeType = PlaceType.general.obs;
 
   @override
-  void onInit() async {
+  void onInit() {
     super.onInit();
     AppUtilities.logger.t("Profile Controller");
 
     try {
-        profile.value = userController.profile;
-        profileName = profile.value.name;
-        profileAboutMe = profile.value.aboutMe;
-        newProfileType.value = profile.value.type;
-        newUsageReason.value = profile.value.usageReason;
+        setProfileInfo();
       } catch (e) {
         AppUtilities.logger.e(e);
     }
+  }
 
+  Future<void> setProfileInfo() async {
+    profile.value = userController.profile;
+    profileName = profile.value.name;
+    profileAboutMe = profile.value.aboutMe;
+    newProfileType.value = profile.value.type;
+    newUsageReason.value = profile.value.usageReason;
     if(profile.value.position != null) {
       location.value = await GeoLocatorController().getAddressSimple(profile.value.position!);
     }
-
     aboutMeController.text = profile.value.aboutMe;
     nameController.text = profile.value.name;
   }
 
 
   @override
-  void onReady() async {
+  void onReady() {
     super.onReady();
     AppUtilities.logger.t("Profile Controller Ready");
+    loadProfileActivity();
+    // update([AppPageIdConstants.profile]);
+  }
+
+  Future<void> loadProfileActivity() async {
     try {
       if(profile.value.posts?.isNotEmpty ?? false) {
         await getProfilePosts();
@@ -127,7 +134,6 @@ class ProfileController extends GetxController implements ProfileService {
     previousInstruments = Map.from(profile.value.instruments ?? {});
     previousMainFeature = profile.value.mainFeature;
     isLoading.value = false;
-    update([AppPageIdConstants.profile]);
   }
 
 
