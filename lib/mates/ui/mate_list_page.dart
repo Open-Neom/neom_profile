@@ -41,7 +41,7 @@ class MateListPage extends StatelessWidget {
                 title: Text(mate.name),
                 subtitle: Row(
                   children: [
-                    Text(mate.favoriteItems!.length.toString()),
+                    if(mate.favoriteItems?.isNotEmpty ?? false) Text(mate.favoriteItems!.length.toString()),
                     Icon(AppFlavour.getAppItemIcon(),
                       color: Colors.blueGrey, size: 20,),
                     Text(mate.mainFeature.tr.capitalize),
