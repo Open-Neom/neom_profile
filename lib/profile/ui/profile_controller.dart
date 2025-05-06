@@ -35,7 +35,7 @@ import 'package:neom_commons/core/utils/enums/profile_type.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 import 'package:neom_commons/core/utils/enums/usage_reason.dart';
 import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
-import 'package:neom_posts/posts/ui/add/post_upload_controller.dart';
+import 'package:neom_posts/posts/ui/upload/post_upload_controller.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../domain/use_cases/profile_service.dart';
@@ -111,7 +111,6 @@ class ProfileController extends GetxController implements ProfileService {
     super.onReady();
     AppUtilities.logger.t("Profile Controller Ready");
     loadProfileActivity();
-    // update([AppPageIdConstants.profile]);
   }
 
   Future<void> loadProfileActivity() async {
@@ -248,7 +247,7 @@ class ProfileController extends GetxController implements ProfileService {
           profile.value.position = newPosition;
           location.value = await GeoLocatorController().getAddressSimple(profile.value.position!);
         }
-        AppUtilities.logger.d("Location retrieved and updated successfully");
+        AppUtilities.logger.d("Location retrieved and updated successfully for ${location.value}");
       } else {
         AppUtilities.logger.d("Location was not updated as access is deniedForever");
       }

@@ -20,7 +20,7 @@ dependencies:
       url: git@github.com:Cyberneom/neom_posts.git
   neom_frequencies:
     git:
-      url: https://github.com/Cyberneom/neom_frequencies.git
+      url: git@github.com:Cyberneom/neom_frequencies.git
 
 dev_dependencies:
   flutter_test:
