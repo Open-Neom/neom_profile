@@ -110,10 +110,17 @@ class ProfileController extends GetxController implements ProfileService {
   void onReady() {
     super.onReady();
     AppUtilities.logger.t("Profile Controller Ready");
-    loadProfileActivity();
+    if(!userController.isNewUser) {
+      loadProfileActivity();
+    } else {
+      AppUtilities.logger.t("User is new, skipping profile activity load");
+      isLoading.value = false;
+    }
+
   }
 
   Future<void> loadProfileActivity() async {
+    AppUtilities.logger.t("Loading Profile Activity");
     try {
       if(profile.value.posts?.isNotEmpty ?? false) {
         await getProfilePosts();

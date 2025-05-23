@@ -53,7 +53,7 @@ class ProfilePage extends StatelessWidget {
                         child: GestureDetector(
                           child: CircleAvatar(
                             backgroundImage: CachedNetworkImageProvider(_.profile.value.photoUrl.isNotEmpty
-                                ? _.profile.value.photoUrl : AppFlavour.getNoImageUrl(),),
+                                ? _.profile.value.photoUrl : AppFlavour.getAppLogoUrl(),),
                             radius: 75.0,
                           ),
                           onTap: () => Get.toNamed(AppRouteConstants.profileEdit),
