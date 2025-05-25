@@ -121,7 +121,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
         referenceId: profile.id,
       );
 
-      FirebaseMessagingCalls.sendGlobalPushNotification(
+      FirebaseMessagingCalls.sendPublicPushNotification(
         fromProfile: profile,
         toProfile: mate.value,
         notificationType: PushNotificationType.viewProfile,
@@ -133,7 +133,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> retrieveDetails() async {
-    AppUtilities.logger.t("retrieveDetails");
+    AppUtilities.logger.d("retrieveDetails");
     try {
       verificationLevel.value = mate.value.verificationLevel;
 
@@ -175,7 +175,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> getMatePosts() async {
-    AppUtilities.logger.t("getMatePosts");
+    AppUtilities.logger.d("getMatePosts");
 
     try {
       matePosts.value = await postFirestore.getProfilePosts(mate.value.id);
@@ -340,7 +340,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
           referenceId: profile.id,
         );
 
-        FirebaseMessagingCalls.sendGlobalPushNotification(
+        FirebaseMessagingCalls.sendPublicPushNotification(
           fromProfile: profile,
           toProfile: mate.value,
           notificationType: PushNotificationType.following,

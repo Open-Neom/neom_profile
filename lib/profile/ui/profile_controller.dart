@@ -178,7 +178,7 @@ class ProfileController extends GetxController implements ProfileService {
   }
 
   Future<void> getProfilePosts() async {
-    AppUtilities.logger.t("getProfilePosts");
+    AppUtilities.logger.d("getProfilePosts");
     profilePosts.value = await PostFirestore().getProfilePosts(profile.value.id);
 
     for (var post in profilePosts) {
