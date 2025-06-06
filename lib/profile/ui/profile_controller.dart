@@ -349,28 +349,6 @@ class ProfileController extends GetxController implements ProfileService {
     update([AppPageIdConstants.profile, AppPageIdConstants.appDrawer]);
   }
 
-
-  @override
-  void addFollowing(String followingId) {
-    userController.profile.following!.add(followingId);
-    update([AppPageIdConstants.profile]);
-  }
-
-
-  @override
-  void removeFollowing(String followingId) {
-    userController.profile.following!.remove(followingId);
-    update([AppPageIdConstants.profile]);
-  }
-
-
-  @override
-  void addBlockTo(String itemmateId) {
-    userController.profile.blockTo!.add(itemmateId);
-    update([AppPageIdConstants.profile]);
-  }
-
-
   @override
   Future<void> handleAndUploadImage(UploadImageType uploadImageType) async {
     AppUtilities.logger.t("Entering handleAndUploadImage method");
@@ -539,7 +517,6 @@ class ProfileController extends GetxController implements ProfileService {
     ).show();
   }
 
-  @override
   void selectProfileType(ProfileType type) {
     try {
       newProfileType.value = type;
@@ -548,7 +525,6 @@ class ProfileController extends GetxController implements ProfileService {
     }
   }
 
-  @override
   Future<void> updateProfileType() async {
     try {
       if(newProfileType.value != profile.value.type && profile.value.id.isNotEmpty) {
@@ -639,7 +615,6 @@ class ProfileController extends GetxController implements ProfileService {
     ).show();
   }
 
-  @override
   void selectUsageReason(UsageReason reason) {
     try {
       newUsageReason.value = reason;
@@ -648,7 +623,6 @@ class ProfileController extends GetxController implements ProfileService {
     }
   }
 
-  @override
   Future<void> updateUsageReason() async {
     try {
       if(newUsageReason.value != profile.value.usageReason && profile.value.id.isNotEmpty) {
@@ -744,7 +718,6 @@ class ProfileController extends GetxController implements ProfileService {
     ).show();
   }
 
-  @override
   void selectFacilityType(FacilityType type) {
     try {
       facilityType.value = type;
@@ -753,7 +726,6 @@ class ProfileController extends GetxController implements ProfileService {
     }
   }
 
-  @override
   Future<void> updateFacilityType() async {
     try {
       if(profile.value.id.isNotEmpty) {
@@ -849,8 +821,6 @@ class ProfileController extends GetxController implements ProfileService {
     ).show();
   }
 
-
-  @override
   void selectPlaceType(PlaceType type) {
     try {
       placeType.value = type;
@@ -859,7 +829,6 @@ class ProfileController extends GetxController implements ProfileService {
     }
   }
 
-  @override
   Future<void> updatePlaceType() async {
     try {
       if(profile.value.id.isNotEmpty) {

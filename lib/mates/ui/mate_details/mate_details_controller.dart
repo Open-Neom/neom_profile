@@ -8,12 +8,10 @@ import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/utils/enums/verification_level.dart';
 import 'package:neom_commons/neom_commons.dart';
 import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
-import '../../../profile/ui/profile_controller.dart';
 import '../../domain/use_cases/mate_details_service.dart';
 
 class MateDetailsController extends GetxController implements MateDetailsService {
-
-  final loginController = Get.find<LoginController>();
+  
   final userController = Get.find<UserController>();
 
   Map<String, AppProfile> mates = <String, AppProfile>{};
@@ -32,7 +30,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
   Map<String, AppMediaItem>  totalMixedItems = <String, AppMediaItem>{};
   Map<String, ChamberPreset> totalPresets = <String, ChamberPreset>{};
 
-  bool following = false;
+  RxBool following = false.obs;
   bool blockedProfile = false;
 
   Map<Post, Event> eventPosts = <Post, Event>{};
@@ -85,7 +83,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
   @override
   void onReady() {
     super.onReady();
-    AppUtilities.logger.d("Itemmate Controller Ready");
+    AppUtilities.logger.d("MateDetails Controller Ready");
     try {
       sendViewProfileNotification();
     } catch (e) {
@@ -98,13 +96,13 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> loadMate(String id) async {
-    AppUtilities.logger.t("loadMate $id}");
+    AppUtilities.logger.d("loadMate $id");
 
     try {
       mate.value = await ProfileFirestore().retrieve(id);
       if(mate.value.id.isNotEmpty) {
         retrieveDetails();
-        following = profile.following!.contains(mate.value.id);
+        following.value = profile.following!.contains(mate.value.id);
       }
       isLoading.value = false;
     } catch (e) {
@@ -310,16 +308,22 @@ class MateDetailsController extends GetxController implements MateDetailsService
   @override
   Future<void> follow() async {
     AppUtilities.logger.t("Follow profile ${mate.value.id}");
-
+    following.value = true;
     try {
       if(await ProfileFirestore().followProfile(profileId: profile.id, followedProfileId:  mate.value.id)) {
-        following = true;
         mate.value.followers!.add(profile.id);
 
         try {
-          Get.find<ProfileController>().addFollowing(mate.value.id);
+          if(userController.profile.following != null) {
+            if(!userController.profile.following!.contains(mate.value.id)) {
+              userController.profile.following!.add(mate.value.id);
+            }
+          } else {
+            userController.profile.following = [mate.value.id];
+          }
+
         } catch (e) {
-          Get.put(ProfileController()).addFollowing(mate.value.id);
+          AppUtilities.logger.e(e.toString());
         }
 
         ActivityFeed activityFeed = ActivityFeed();
@@ -347,6 +351,8 @@ class MateDetailsController extends GetxController implements MateDetailsService
           referenceId: mate.value.id,
         );
 
+      } else {
+        following.value = false;
       }
 
     } catch (e) {
@@ -360,12 +366,18 @@ class MateDetailsController extends GetxController implements MateDetailsService
   @override
   Future<void> unfollow() async {
     AppUtilities.logger.t("Unfollow ${mate.value.id}");
+    following.value = false;
     try {
       if (await ProfileFirestore().unfollowProfile(profileId: profile.id,unfollowProfileId:  mate.value.id)) {
-        following = false;
-        userController.profile.following!.remove(mate.value.id);
+
+        if(userController.profile.following != null) {
+          if(userController.profile.following!.contains(mate.value.id)) {
+            userController.profile.following!.remove(mate.value.id);
+          }
+        }
         mate.value.followers!.remove(profile.id,);
-        Get.find<ProfileController>().removeFollowing(mate.value.id);
+      } else {
+        following.value = true;
       }
     } catch (e) {
       AppUtilities.logger.e(e.toString());
@@ -380,9 +392,8 @@ class MateDetailsController extends GetxController implements MateDetailsService
     AppUtilities.logger.d("");
     try {
       if (await ProfileFirestore().blockProfile(
-          profileId: profile.id,
-          profileToBlock: mate.value.id)) {
-        following = false;
+          profileId: profile.id, profileToBlock: mate.value.id)) {
+        following.value = false;
         userController.profile.following!.remove(mate.value.id);
         mate.value.followers?.remove(profile.id);
         mate.value.blockedBy?.add(profile.id);
@@ -450,7 +461,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
       AppUser userFromProfile = await UserFirestore().getByProfileId(mate.value.id);
 
       if (await ProfileFirestore().remove(userId: userFromProfile.id, profileId: mate.value.id)) {
-        if(following) {
+        if(following.value) {
           ProfileFirestore().unfollowProfile(profileId: profile.id, unfollowProfileId: mate.value.id);
           userController.profile.following!.remove(mate.value.id);
         }

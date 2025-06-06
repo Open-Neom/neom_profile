@@ -4,7 +4,6 @@ import 'package:neom_commons/core/ui/widgets/app_circular_progress_indicator.dar
 import 'package:neom_commons/core/utils/app_color.dart';
 
 import 'package:neom_commons/core/utils/app_theme.dart';
-import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'footer/mate_detail_footer.dart';
 import 'header/mate_details_header.dart';
@@ -16,11 +15,6 @@ class MateDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    try {
-      Get.delete<MateDetailsController>();
-    } catch (e) {
-      AppUtilities.logger.e(e.toString());
-    }
     return GetBuilder<MateDetailsController>(
       id: AppPageIdConstants.mate,
       init: MateDetailsController(),

@@ -1,34 +1,25 @@
-// ignore_for_file: unused_import, use_build_context_synchronously
-
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
-import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
-import 'package:neom_commons/core/data/firestore/user_firestore.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 import 'package:neom_commons/core/domain/model/menu_three_dots.dart';
 import 'package:neom_commons/core/ui/reports/report_controller.dart';
-import 'package:neom_commons/core/ui/widgets/custom_image.dart';
 import 'package:neom_commons/core/ui/widgets/diagonally_cut_colored_image.dart';
-import 'package:neom_commons/core/ui/widgets/position_back_button.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/constants/url_constants.dart';
 import 'package:neom_commons/core/utils/core_utilities.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/reference_type.dart';
 import 'package:neom_commons/core/utils/enums/report_type.dart';
 import 'package:neom_commons/core/utils/enums/user_role.dart';
 import 'package:neom_commons/core/utils/enums/verification_level.dart';
-import 'package:neom_timeline/timeline/ui/widgets/timeline_widgets.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../mate_details_controller.dart';
@@ -40,7 +31,6 @@ class MateDetailHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<MateDetailsController>(
       id: AppPageIdConstants.mate,
-      // init: MateDetailsController(),
       builder: (_) => Stack(
       children: <Widget>[
         FutureBuilder(
@@ -97,14 +87,6 @@ class MateDetailHeader extends StatelessWidget {
                   },
                 ),
               ),
-              ///DEPRECATED AS APP IS NOT SHOWING FOLLOWING & FOLLOWERS
-              // const Padding(
-              //   padding: EdgeInsets.only(top: 10.0),
-              //   child: Column(children: [
-              //     // TODO VERIFY IF SHOWING FOLLOWERS FOLLOWING
-              //     Divider()
-              //   ]),
-              // ),
               AppTheme.heightSpace30,
               AppFlavour.appInUse != AppInUse.e || _.mateBlogEntries.isEmpty
                   ? const SizedBox.shrink() : TextButton(
@@ -144,15 +126,15 @@ class MateDetailHeader extends StatelessWidget {
                       decoration: AppTheme.appBoxDecorationBlueGrey,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(30.0),
-                        child: MaterialButton(
+                        child: Obx(()=> MaterialButton(
                           minWidth: 140.0,
                           color: Colors.transparent,
-                          child: _.following ? Text(AppTranslationConstants.unfollow.tr.toUpperCase()) :
-                          Text(AppTranslationConstants.follow.tr.toUpperCase()),
+                          child: Text((_.following.value ? AppTranslationConstants.unfollow
+                              : AppTranslationConstants.follow).tr.toUpperCase()),
                           onPressed: () {
-                            _.following ? _.unfollow() : _.follow();
+                            _.following.value ? _.unfollow() : _.follow();
                           },
-                        ),
+                        ),),
                       ),
                     ),
                     DecoratedBox(

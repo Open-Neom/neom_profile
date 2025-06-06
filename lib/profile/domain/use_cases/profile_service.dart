@@ -12,10 +12,6 @@ abstract class ProfileService {
   Future<void> updateLocation();
   Future<void> updateProfileData();
 
-  void addFollowing(String followingId);
-  void removeFollowing(String followingId);
-  void addBlockTo(String followingId);
-
   Future<void> handleAndUploadImage(UploadImageType uploadType);
 
   Future<void> showUpdatePhotoDialog(BuildContext context);

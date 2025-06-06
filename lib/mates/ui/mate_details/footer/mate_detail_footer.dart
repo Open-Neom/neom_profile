@@ -14,16 +14,8 @@ class MateShowcase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    late MateDetailsController controller;
-
-    if (Get.isRegistered<MateDetailsController>()) {
-      controller = Get.find<MateDetailsController>();
-    } else {
-      controller = Get.put(MateDetailsController());
-    }
-
-    return Padding(
+    return GetBuilder<MateDetailsController>(
+      builder: (_) => Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: DefaultTabController(
         length: AppConstants.profileTabs.length,
@@ -31,11 +23,11 @@ class MateShowcase extends StatelessWidget {
           children: <Widget>[
             TabBar(
               tabs: [
-                Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} ${controller.matePosts.isNotEmpty ? '(${controller.matePosts.length})':''}'),
-                Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} ${controller.totalPresets.isEmpty && controller.totalMediaItems.length+controller.totalReleaseItems.length==0
+                Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} ${_.matePosts.isNotEmpty ? '(${_.matePosts.length})':''}'),
+                Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} ${_.totalPresets.isEmpty && _.totalMediaItems.length+_.totalReleaseItems.length==0
                     ? '': '(${AppFlavour.appInUse == AppInUse.c ?
-                controller.totalPresets.length : (controller.totalMediaItems.length + controller.totalReleaseItems.length)})'}'),
-                Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} ${controller.events.isEmpty ? '' : '(${controller.events.length})'}')
+                _.totalPresets.length : (_.totalMediaItems.length + _.totalReleaseItems.length)})'}'),
+                Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} ${_.events.isEmpty ? '' : '(${_.events.length})'}')
               ],
               indicatorColor: Colors.white,
               labelStyle: const TextStyle(fontSize: 15),
@@ -51,7 +43,7 @@ class MateShowcase extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      ),),
     );
   }
 

@@ -15,7 +15,6 @@ class MateDetailsBody extends StatelessWidget {
     var textTheme = theme.textTheme;
     return GetBuilder<MateDetailsController>(
       id: AppPageIdConstants.mate,
-      // init: MateDetailsController(),
       builder: (_) => Obx(()=> _.isLoading.value ? const Center(child: CircularProgressIndicator())
       : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
