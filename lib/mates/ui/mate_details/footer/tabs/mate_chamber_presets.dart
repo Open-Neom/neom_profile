@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/commons/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/commons/ui/widgets/rating_heart_bar.dart';
+import 'package:neom_commons/commons/utils/app_utilities.dart';
+import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_core/core/domain/model/neom/chamber_preset.dart';
+import 'package:neom_core/core/utils/constants/app_route_constants.dart';
 
-import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
-import 'package:neom_commons/core/ui/widgets/handled_cached_network_image.dart';
-import 'package:neom_commons/core/ui/widgets/rating_heart_bar.dart';
-import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/core_utilities.dart';
 import '../../mate_details_controller.dart';
 
 class MateChamberPresets extends StatelessWidget {
@@ -30,7 +30,7 @@ class MateChamberPresets extends StatelessWidget {
               child: ListTile(
                 contentPadding: const EdgeInsets.all(8.0),
                 leading: Hero(
-                    tag: CoreUtilities.getAppItemHeroTag(index),
+                    tag: AppUtilities.getAppItemHeroTag(index),
                     child: HandledCachedNetworkImage(chamberPreset.imgUrl,
                       width: 50, enableFullScreen: false,
                     ),

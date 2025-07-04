@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/core/domain/model/app_media_item.dart';
-import 'package:neom_commons/core/ui/widgets/handled_cached_network_image.dart';
-import 'package:neom_commons/core/ui/widgets/rating_heart_bar.dart';
-import 'package:neom_commons/core/utils/constants/app_assets.dart';
-import 'package:neom_commons/core/utils/constants/app_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/commons/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/commons/ui/widgets/rating_heart_bar.dart';
+import 'package:neom_commons/commons/utils/constants/app_assets.dart';
+import 'package:neom_commons/commons/utils/constants/app_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_core/core/domain/model/app_media_item.dart';
+
 import '../profile_controller.dart';
 
 class ProfileItems extends StatelessWidget {

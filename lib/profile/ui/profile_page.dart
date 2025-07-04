@@ -1,10 +1,24 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/core/ui/widgets/app_circular_progress_indicator.dart';
-import 'package:neom_commons/core/ui/widgets/read_more_container.dart';
-import 'package:neom_commons/core/utils/enums/verification_level.dart';
-import 'package:neom_commons/neom_commons.dart';
+import 'package:neom_commons/commons/app_flavour.dart';
+import 'package:neom_commons/commons/ui/theme/app_color.dart';
+import 'package:neom_commons/commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/commons/ui/widgets/app_circular_progress_indicator.dart';
+import 'package:neom_commons/commons/ui/widgets/diagonally_cut_colored_image.dart';
+import 'package:neom_commons/commons/ui/widgets/genres_grid_view.dart';
+import 'package:neom_commons/commons/ui/widgets/position_back_button.dart';
+import 'package:neom_commons/commons/ui/widgets/read_more_container.dart';
+import 'package:neom_commons/commons/utils/app_utilities.dart';
+import 'package:neom_commons/commons/utils/constants/app_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_core/core/app_properties.dart';
+import 'package:neom_core/core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/core/utils/constants/core_constants.dart';
+import 'package:neom_core/core/utils/enums/app_in_use.dart';
+import 'package:neom_core/core/utils/enums/verification_level.dart';
+
 import '../utils/profile_constants.dart';
 import 'profile_controller.dart';
 import 'widgets/profile_widgets.dart';
@@ -34,7 +48,7 @@ class ProfilePage extends StatelessWidget {
                     Image(
                       image: CachedNetworkImageProvider(_.profile.value.coverImgUrl.isNotEmpty
                           ? _.profile.value.coverImgUrl :_.profile.value.photoUrl.isNotEmpty
-                          ? _.profile.value.photoUrl : AppFlavour.getNoImageUrl(),),
+                          ? _.profile.value.photoUrl : AppProperties.getNoImageUrl(),),
                       width: AppTheme.fullWidth(context),
                       height: 225,
                       fit: BoxFit.cover,
@@ -53,7 +67,7 @@ class ProfilePage extends StatelessWidget {
                         child: GestureDetector(
                           child: CircleAvatar(
                             backgroundImage: CachedNetworkImageProvider(_.profile.value.photoUrl.isNotEmpty
-                                ? _.profile.value.photoUrl : AppFlavour.getAppLogoUrl(),),
+                                ? _.profile.value.photoUrl : AppProperties.getAppLogoUrl(),),
                             radius: 75.0,
                           ),
                           onTap: () => Get.toNamed(AppRouteConstants.profileEdit),
@@ -72,7 +86,7 @@ class ProfilePage extends StatelessWidget {
                                   Container(
                                     height: 30,
                                     alignment: Alignment.center,
-                                    child: Text(CoreUtilities.capitalizeFirstLetter(_.profile.value.name),
+                                    child: Text(AppUtilities.capitalizeFirstLetter(_.profile.value.name),
                                       style: Theme.of(context).textTheme.titleLarge!
                                           .copyWith(color: Colors.white
                                       ),
@@ -103,8 +117,8 @@ class ProfilePage extends StatelessWidget {
                                     size: 15,
                                   ),
                                   AppTheme.widthSpace5,
-                                  Text(_.location.value.isNotEmpty ? _.location.value.length > AppConstants.maxLocationNameLength
-                                      ? "${_.location.value.substring(0,AppConstants.maxLocationNameLength)}..." : _.location.value
+                                  Text(_.location.value.isNotEmpty ? _.location.value.length > CoreConstants.maxLocationNameLength
+                                      ? "${_.location.value.substring(0, CoreConstants.maxLocationNameLength)}..." : _.location.value
                                       : AppTranslationConstants.notSpecified.tr,
                                   ),
                                 ],
@@ -116,7 +130,7 @@ class ProfilePage extends StatelessWidget {
                               padding: 0,
                               text:_.profile.value.aboutMe.isEmpty
                                   ? AppTranslationConstants.noProfileDesc.tr
-                                  : CoreUtilities.capitalizeFirstLetter(_.profile.value.aboutMe),
+                                  : AppUtilities.capitalizeFirstLetter(_.profile.value.aboutMe),
                             ),
                           ],
                         ),

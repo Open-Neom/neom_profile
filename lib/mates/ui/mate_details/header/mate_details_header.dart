@@ -3,23 +3,25 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/core/app_flavour.dart';
-import 'package:neom_commons/core/domain/model/app_profile.dart';
-import 'package:neom_commons/core/domain/model/menu_three_dots.dart';
-import 'package:neom_commons/core/ui/reports/report_controller.dart';
-import 'package:neom_commons/core/ui/widgets/diagonally_cut_colored_image.dart';
-import 'package:neom_commons/core/utils/app_color.dart';
-import 'package:neom_commons/core/utils/app_theme.dart';
-import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/core_utilities.dart';
-import 'package:neom_commons/core/utils/enums/app_in_use.dart';
-import 'package:neom_commons/core/utils/enums/reference_type.dart';
-import 'package:neom_commons/core/utils/enums/report_type.dart';
-import 'package:neom_commons/core/utils/enums/user_role.dart';
-import 'package:neom_commons/core/utils/enums/verification_level.dart';
+import 'package:neom_commons/commons/app_flavour.dart';
+import 'package:neom_commons/commons/ui/theme/app_color.dart';
+import 'package:neom_commons/commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/commons/ui/widgets/diagonally_cut_colored_image.dart';
+import 'package:neom_commons/commons/utils/app_alerts.dart';
+import 'package:neom_commons/commons/utils/app_utilities.dart';
+import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_core/core/app_properties.dart';
+import 'package:neom_core/core/data/implementations/report_controller.dart';
+import 'package:neom_core/core/domain/model/app_profile.dart';
+import 'package:neom_core/core/domain/model/menu_three_dots.dart';
+import 'package:neom_core/core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/core/utils/core_utilities.dart';
+import 'package:neom_core/core/utils/enums/app_in_use.dart';
+import 'package:neom_core/core/utils/enums/reference_type.dart';
+import 'package:neom_core/core/utils/enums/report_type.dart';
+import 'package:neom_core/core/utils/enums/user_role.dart';
+import 'package:neom_core/core/utils/enums/verification_level.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../mate_details_controller.dart';
@@ -36,7 +38,7 @@ class MateDetailHeader extends StatelessWidget {
         FutureBuilder(
           future: CoreUtilities().isAvailableMediaUrl(_.mate.value.coverImgUrl.isNotEmpty ?
             _.mate.value.coverImgUrl : _.mate.value.photoUrl.isNotEmpty
-            ? _.mate.value.photoUrl : AppFlavour.getAppLogoUrl()),
+            ? _.mate.value.photoUrl : AppProperties.getAppLogoUrl()),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
                 return DiagonallyCutColoredImage(
@@ -45,11 +47,11 @@ class MateDetailHeader extends StatelessWidget {
                           (snapshot.data == true) ?
                           (_.mate.value.coverImgUrl.isNotEmpty ?
                       _.mate.value.coverImgUrl : _.mate.value.photoUrl.isNotEmpty
-                          ? _.mate.value.photoUrl : AppFlavour.getAppLogoUrl()) : AppFlavour.getAppLogoUrl(),),
+                          ? _.mate.value.photoUrl : AppProperties.getAppLogoUrl()) : AppProperties.getAppLogoUrl(),),
                       width: MediaQuery.of(context).size.width,
                       height: 250.0,
                       fit: BoxFit.cover,
-                      errorBuilder:  (context, object, error) => Image.network(AppFlavour.getAppLogoUrl())
+                      errorBuilder:  (context, object, error) => Image.network(AppProperties.getAppLogoUrl())
                   ),
                   color: AppColor.cutColoredImage,);
             } else {
@@ -66,16 +68,16 @@ class MateDetailHeader extends StatelessWidget {
                 tag: _.mate.value.name,
                 child: FutureBuilder(
                   future: CoreUtilities().isAvailableMediaUrl(_.mate.value.photoUrl.isNotEmpty
-                      ? _.mate.value.photoUrl : AppFlavour.getAppLogoUrl(),),
+                      ? _.mate.value.photoUrl : AppProperties.getAppLogoUrl(),),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return CircleAvatar(
                         backgroundImage: NetworkImage((snapshot.data == true) ?
-                        (_.mate.value.photoUrl.isNotEmpty ? _.mate.value.photoUrl : AppFlavour.getAppLogoUrl())
-                            : AppFlavour.getAppLogoUrl(),),
+                        (_.mate.value.photoUrl.isNotEmpty ? _.mate.value.photoUrl : AppProperties.getAppLogoUrl())
+                            : AppProperties.getAppLogoUrl(),),
                         radius: 60.0,
                         onBackgroundImageError: (object, error) => CachedNetworkImageProvider(_.mate.value.photoUrl.isNotEmpty ? _.mate.value.photoUrl
-                            : AppFlavour.getAppLogoUrl(),),
+                            : AppProperties.getAppLogoUrl(),),
                       );
                     } else {
                       return const CircleAvatar(
@@ -374,7 +376,7 @@ void showReportProfileAlert(BuildContext context, AppProfile itemmate) {
           onPressed: () async {
             if(!reportController.isButtonDisabled.value) {
               await reportController.sendReport(ReferenceType.profile, itemmate.id);
-              AppUtilities.showAlert(context, title: AppTranslationConstants.report.tr,
+              AppAlerts.showAlert(context, title: AppTranslationConstants.report.tr,
                   message: AppTranslationConstants.hasSentReport.tr);
             }
           },

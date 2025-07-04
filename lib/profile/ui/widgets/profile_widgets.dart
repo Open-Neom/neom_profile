@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/commons/ui/theme/app_color.dart';
+import 'package:neom_commons/commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/commons/utils/app_alerts.dart';
+import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_core/core/domain/model/app_profile.dart';
+import 'package:neom_core/core/utils/constants/app_route_constants.dart';
 
-import 'package:neom_commons/core/domain/model/app_profile.dart';
-import 'package:neom_commons/core/utils/app_color.dart';
-import 'package:neom_commons/core/utils/app_theme.dart';
-import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
+
 
 Widget buildTitleLabel(BuildContext context, String title, String msg){
   return Padding(
@@ -45,7 +46,7 @@ Widget buildFollowerInfo(context, AppProfile profile) {
             ),
             onTap: () => profile.following!.isNotEmpty
                 ? Get.toNamed(AppRouteConstants.following, arguments: profile.following)
-                : AppUtilities.showAlert(context, title: AppTranslationConstants.following.tr,
+                : AppAlerts.showAlert(context, title: AppTranslationConstants.following.tr,
                 message: AppTranslationConstants.followingMsg.tr),
           ),
           Text(' | ', style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)
@@ -55,7 +56,7 @@ Widget buildFollowerInfo(context, AppProfile profile) {
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)),
             onTap: () => profile.followers!.isNotEmpty
                 ? Get.toNamed(AppRouteConstants.followers, arguments: profile.followers)
-                : AppUtilities.showAlert(context, title: AppTranslationConstants.followers.tr,
+                : AppAlerts.showAlert(context, title: AppTranslationConstants.followers.tr,
                 message: AppTranslationConstants.followersMsg.tr),
           ),
         ],

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/commons/ui/widgets/post_tile.dart';
+import 'package:neom_commons/commons/utils/constants/app_assets.dart';
+import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_core/core/domain/model/event.dart';
+import 'package:neom_core/core/utils/enums/post_type.dart';
 
-import 'package:neom_commons/core/domain/model/event.dart';
-import 'package:neom_commons/core/ui/widgets/post_tile.dart';
-import 'package:neom_commons/core/utils/constants/app_assets.dart';
-import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/enums/post_type.dart';
 import '../profile_controller.dart';
 
 class ProfilePosts extends StatelessWidget {

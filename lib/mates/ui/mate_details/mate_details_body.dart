@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/core/ui/widgets/read_more_container.dart';
-import 'package:neom_commons/core/utils/enums/verification_level.dart';
-import 'package:neom_commons/neom_commons.dart';
+import 'package:neom_commons/commons/app_flavour.dart';
+import 'package:neom_commons/commons/ui/theme/app_color.dart';
+import 'package:neom_commons/commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/commons/ui/widgets/genres_grid_view.dart';
+import 'package:neom_commons/commons/ui/widgets/read_more_container.dart';
+import 'package:neom_commons/commons/utils/app_utilities.dart';
+import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_core/core/utils/constants/core_constants.dart';
+import 'package:neom_core/core/utils/enums/verification_level.dart';
 
 import 'mate_details_controller.dart';
 
@@ -24,7 +31,7 @@ class MateDetailsBody extends StatelessWidget {
               children: [
                 SizedBox(
                   height: 30,
-                  child: Text(CoreUtilities.capitalizeFirstLetter(_.mate.value.name),
+                  child: Text(AppUtilities.capitalizeFirstLetter(_.mate.value.name),
                     style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.white),
                   ),
                 ),
@@ -62,7 +69,7 @@ class MateDetailsBody extends StatelessWidget {
             child: ReadMoreContainer(
               text: _.mate.value.aboutMe.isEmpty
                   ? AppTranslationConstants.noProfileDesc.tr
-                  : CoreUtilities.capitalizeFirstLetter(_.mate.value.aboutMe),
+                  : AppUtilities.capitalizeFirstLetter(_.mate.value.aboutMe),
               color: Colors.white70,
             )
           ),
@@ -79,13 +86,13 @@ class MateDetailsBody extends StatelessWidget {
             size: 16.0,
           ),
           AppTheme.widthSpace5,
-          Text(addressSimple.isEmpty ? AppTranslationConstants.notSpecified.tr : addressSimple.length > AppConstants.maxLocationNameLength
-              ? "${addressSimple.substring(0,AppConstants.maxLocationNameLength)}..." : addressSimple,
+          Text(addressSimple.isEmpty ? AppTranslationConstants.notSpecified.tr : addressSimple.length > CoreConstants.maxLocationNameLength
+              ? "${addressSimple.substring(0, CoreConstants.maxLocationNameLength)}..." : addressSimple,
             style: textTheme.titleSmall!.copyWith(color: AppColor.white80),
           ),
           Padding(
             padding: const EdgeInsets.only(left: 5.0),
-            child: Text(distance == 0 ? "" : "- ${distance.ceil().toString()} ${AppConstants.km}",
+            child: Text(distance == 0 ? "" : "- ${distance.ceil().toString()} ${CoreConstants.km}",
               style: textTheme.titleSmall!.copyWith(color: AppColor.white80),
             ),
           ),

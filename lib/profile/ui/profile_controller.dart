@@ -1,41 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/auth/ui/login/login_controller.dart';
-import 'package:neom_commons/core/app_flavour.dart';
-import 'package:neom_commons/core/data/firestore/event_firestore.dart';
-import 'package:neom_commons/core/data/firestore/facility_firestore.dart';
-import 'package:neom_commons/core/data/firestore/place_firestore.dart';
-import 'package:neom_commons/core/data/firestore/post_firestore.dart';
-import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
-import 'package:neom_commons/core/data/firestore/user_firestore.dart';
-import 'package:neom_commons/core/data/implementations/geolocator_controller.dart';
-import 'package:neom_commons/core/data/implementations/user_controller.dart';
-import 'package:neom_commons/core/domain/model/app_media_item.dart';
-import 'package:neom_commons/core/domain/model/app_profile.dart';
-import 'package:neom_commons/core/domain/model/app_release_item.dart';
-import 'package:neom_commons/core/domain/model/event.dart';
-import 'package:neom_commons/core/domain/model/facility.dart';
-import 'package:neom_commons/core/domain/model/instrument.dart';
-import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
-import 'package:neom_commons/core/domain/model/place.dart';
-import 'package:neom_commons/core/domain/model/post.dart';
-import 'package:neom_commons/core/utils/app_color.dart';
-import 'package:neom_commons/core/utils/app_theme.dart';
-import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
-import 'package:neom_commons/core/utils/core_utilities.dart';
-import 'package:neom_commons/core/utils/enums/app_in_use.dart';
-import 'package:neom_commons/core/utils/enums/facilitator_type.dart';
-import 'package:neom_commons/core/utils/enums/place_type.dart';
-import 'package:neom_commons/core/utils/enums/profile_type.dart';
-import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
-import 'package:neom_commons/core/utils/enums/usage_reason.dart';
-import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
-import 'package:neom_posts/posts/ui/upload/post_upload_controller.dart';
+import 'package:neom_commons/commons/app_flavour.dart';
+import 'package:neom_commons/commons/ui/theme/app_color.dart';
+import 'package:neom_commons/commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/commons/utils/app_utilities.dart';
+import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/commons/utils/constants/message_translation_constants.dart';
+import 'package:neom_commons/commons/utils/mappers/app_media_item_mapper.dart';
+import 'package:neom_core/core/app_config.dart';
+import 'package:neom_core/core/data/firestore/event_firestore.dart';
+import 'package:neom_core/core/data/firestore/facility_firestore.dart';
+import 'package:neom_core/core/data/firestore/frequency_firestore.dart';
+import 'package:neom_core/core/data/firestore/place_firestore.dart';
+import 'package:neom_core/core/data/firestore/post_firestore.dart';
+import 'package:neom_core/core/data/firestore/profile_firestore.dart';
+import 'package:neom_core/core/data/firestore/user_firestore.dart';
+import 'package:neom_core/core/data/implementations/geolocator_controller.dart';
+import 'package:neom_core/core/data/implementations/user_controller.dart';
+import 'package:neom_core/core/domain/model/app_media_item.dart';
+import 'package:neom_core/core/domain/model/app_profile.dart';
+import 'package:neom_core/core/domain/model/app_release_item.dart';
+import 'package:neom_core/core/domain/model/event.dart';
+import 'package:neom_core/core/domain/model/facility.dart';
+import 'package:neom_core/core/domain/model/instrument.dart';
+import 'package:neom_core/core/domain/model/neom/chamber_preset.dart';
+import 'package:neom_core/core/domain/model/place.dart';
+import 'package:neom_core/core/domain/model/post.dart';
+import 'package:neom_core/core/domain/use_cases/post_upload_service.dart';
+import 'package:neom_core/core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/core/utils/core_utilities.dart';
+import 'package:neom_core/core/utils/enums/app_in_use.dart';
+import 'package:neom_core/core/utils/enums/facilitator_type.dart';
+import 'package:neom_core/core/utils/enums/place_type.dart';
+import 'package:neom_core/core/utils/enums/profile_type.dart';
+import 'package:neom_core/core/utils/enums/upload_image_type.dart';
+import 'package:neom_core/core/utils/enums/usage_reason.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../domain/use_cases/profile_service.dart';
@@ -43,7 +44,6 @@ import '../domain/use_cases/profile_service.dart';
 class ProfileController extends GetxController implements ProfileService {
   
   final userController = Get.find<UserController>();
-  final loginController = Get.find<LoginController>();
 
   final Rx<AppProfile> profile = AppProfile().obs;
   final RxBool editStatus = false.obs;
@@ -62,7 +62,7 @@ class ProfileController extends GetxController implements ProfileService {
   int postCount = 0;
   bool isFollowing = false;
 
-  final postUploadController = Get.put(PostUploadController());
+  PostUploadService postUploadController = Get.find<PostUploadService>();
 
   TextEditingController nameController = TextEditingController();
   TextEditingController aboutMeController = TextEditingController();
@@ -83,12 +83,12 @@ class ProfileController extends GetxController implements ProfileService {
   @override
   void onInit() {
     super.onInit();
-    AppUtilities.logger.t("Profile Controller");
+    AppConfig.logger.t("Profile Controller");
 
     try {
         setProfileInfo();
       } catch (e) {
-        AppUtilities.logger.e(e);
+        AppConfig.logger.e(e);
     }
   }
 
@@ -109,18 +109,18 @@ class ProfileController extends GetxController implements ProfileService {
   @override
   void onReady() {
     super.onReady();
-    AppUtilities.logger.t("Profile Controller Ready");
+    AppConfig.logger.t("Profile Controller Ready");
     if(!userController.isNewUser) {
       loadProfileActivity();
     } else {
-      AppUtilities.logger.t("User is new, skipping profile activity load");
+      AppConfig.logger.t("User is new, skipping profile activity load");
       isLoading.value = false;
     }
 
   }
 
   Future<void> loadProfileActivity() async {
-    AppUtilities.logger.t("Loading Profile Activity");
+    AppConfig.logger.t("Loading Profile Activity");
     try {
       if(profile.value.posts?.isNotEmpty ?? false) {
         await getProfilePosts();
@@ -134,7 +134,7 @@ class ProfileController extends GetxController implements ProfileService {
 
       await getTotalItems();
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     previousInstruments = Map.from(profile.value.instruments ?? {});
@@ -151,12 +151,12 @@ class ProfileController extends GetxController implements ProfileService {
 
   @override
   Future<void> editProfile() async {
-    AppUtilities.logger.d("");
+    AppConfig.logger.d("");
   }
 
 
   void changeEditStatus(){
-    AppUtilities.logger.t("Changing edit status from $editStatus");
+    AppConfig.logger.t("Changing edit status from $editStatus");
 
     editStatus.value ? editStatus.value = false
         : editStatus.value = true;
@@ -168,7 +168,7 @@ class ProfileController extends GetxController implements ProfileService {
 
   @override
   void getItemDetails(AppMediaItem appMediaItem) {
-    AppUtilities.logger.d("getItemDetails for ${appMediaItem.name}");
+    AppConfig.logger.d("getItemDetails for ${appMediaItem.name}");
     if(AppFlavour.appInUse != AppInUse.g) {
       Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
     } else {
@@ -178,7 +178,7 @@ class ProfileController extends GetxController implements ProfileService {
   }
 
   Future<void> getProfilePosts() async {
-    AppUtilities.logger.d("getProfilePosts");
+    AppConfig.logger.d("getProfilePosts");
     profilePosts.value = await PostFirestore().getProfilePosts(profile.value.id);
 
     for (var post in profilePosts) {
@@ -189,13 +189,13 @@ class ProfileController extends GetxController implements ProfileService {
       eventPosts[post] = event;
     }
 
-    AppUtilities.logger.d("${profilePosts.length} Total Posts for Profile");
+    AppConfig.logger.d("${profilePosts.length} Total Posts for Profile");
     update([AppPageIdConstants.profile, AppPageIdConstants.profilePosts]);
   }
 
   @override
   Future<void> getTotalItems() async {
-    AppUtilities.logger.t('getTotal ${AppFlavour.appInUse == AppInUse.c ? 'Presets': 'AppMediaItems & AppReleaseItems'}');
+    AppConfig.logger.t('getTotal ${AppFlavour.appInUse == AppInUse.c ? 'Presets': 'AppMediaItems & AppReleaseItems'}');
 
     if(profile.value.itemlists != null) {
       if(AppFlavour.appInUse == AppInUse.c) {
@@ -208,44 +208,44 @@ class ProfileController extends GetxController implements ProfileService {
         totalReleaseItems.value = CoreUtilities.getTotalReleaseItems(profile.value.itemlists!);
         totalMediaItems.value = CoreUtilities.getTotalMediaItems(profile.value.itemlists!);
         for (var item in totalReleaseItems.values) {
-          totalMixedItems[item.id] = AppMediaItem.fromAppReleaseItem(item);
+          totalMixedItems[item.id] = AppMediaItemMapper.fromAppReleaseItem(item);
         }
         totalMixedItems.addAll(totalMediaItems);
       }
     }
 
-    AppUtilities.logger.d("${totalMixedItems.length} Total Items for Profile");
+    AppConfig.logger.d("${totalMixedItems.length} Total Items for Profile");
     update([AppPageIdConstants.profile]);
   }
 
   Future<void> getTotalEvents() async {
-    AppUtilities.logger.t("getTotalEvents");
+    AppConfig.logger.t("getTotalEvents");
 
     if(profile.value.events != null && profile.value.events!.isNotEmpty) {
       Map<String, Event> createdEvents = await EventFirestore().getEventsById(profile.value.events!);
-      AppUtilities.logger.d("${createdEvents.length} created events founds for profile ${profile.value.id}");
+      AppConfig.logger.d("${createdEvents.length} created events founds for profile ${profile.value.id}");
       events.addAll(createdEvents);
     }
 
     if(profile.value.playingEvents != null && profile.value.playingEvents!.isNotEmpty) {
       Map<String, Event> playingEvents = await EventFirestore().getEventsById(profile.value.playingEvents!);
-      AppUtilities.logger.d("${playingEvents.length} playing events founds for profile ${profile.value.id}");
+      AppConfig.logger.d("${playingEvents.length} playing events founds for profile ${profile.value.id}");
       events.addAll(playingEvents);
     }
 
     if(profile.value.goingEvents != null && profile.value.goingEvents!.isNotEmpty) {
       Map<String, Event> goingEvents = await EventFirestore().getEventsById(profile.value.goingEvents!);
-      AppUtilities.logger.d("${goingEvents.length} going events founds for profile ${profile.value.id}");
+      AppConfig.logger.d("${goingEvents.length} going events founds for profile ${profile.value.id}");
       events.addAll(goingEvents);
     }
 
-    AppUtilities.logger.d("${events.length} Total Events found for Profile");
+    AppConfig.logger.d("${events.length} Total Events found for Profile");
     update([AppPageIdConstants.profile]);
   }
 
   @override
   Future<void> updateLocation() async {
-    AppUtilities.logger.t("Updating location");
+    AppConfig.logger.t("Updating location");
     try {
 
       Position? newPosition =  await GeoLocatorController().getCurrentPosition();
@@ -254,12 +254,12 @@ class ProfileController extends GetxController implements ProfileService {
           profile.value.position = newPosition;
           location.value = await GeoLocatorController().getAddressSimple(profile.value.position!);
         }
-        AppUtilities.logger.d("Location retrieved and updated successfully for ${location.value}");
+        AppConfig.logger.d("Location retrieved and updated successfully for ${location.value}");
       } else {
-        AppUtilities.logger.d("Location was not updated as access is deniedForever");
+        AppConfig.logger.d("Location was not updated as access is deniedForever");
       }
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     update([AppPageIdConstants.profile]);
@@ -267,11 +267,11 @@ class ProfileController extends GetxController implements ProfileService {
 
   @override
   Future<void> updateProfileData() async {
-    AppUtilities.logger.t("Updating Profile Data");
+    AppConfig.logger.t("Updating Profile Data");
 
     bool nameChanged = profileName != nameController.text.trim();
     bool aboutMeChanged = profileAboutMe != aboutMeController.text.trim();
-    bool profileInstrumentsChanged = !CoreUtilities.mapKeysEquals(previousInstruments, profile.value.instruments ?? {});
+    bool profileInstrumentsChanged = !AppUtilities.mapKeysEquals(previousInstruments, profile.value.instruments ?? {});
     bool mainFeatureChanged = previousMainFeature != profile.value.mainFeature;
 
     if(nameChanged || aboutMeChanged || mainFeatureChanged || profileInstrumentsChanged) {
@@ -351,14 +351,14 @@ class ProfileController extends GetxController implements ProfileService {
 
   @override
   Future<void> handleAndUploadImage(UploadImageType uploadImageType) async {
-    AppUtilities.logger.t("Entering handleAndUploadImage method");
+    AppConfig.logger.t("Entering handleAndUploadImage method");
 
     isLoading.value = true;
     update([AppPageIdConstants.profile]);
 
     try {
       await postUploadController.handleImage(imageType: UploadImageType.profile);
-      if(postUploadController.mediaFile.value.path.isNotEmpty) {
+      if(postUploadController.getMediaFile().path.isNotEmpty) {
         String photoUrl = await postUploadController.handleUploadImage(
             uploadImageType);
 
@@ -378,7 +378,7 @@ class ProfileController extends GetxController implements ProfileService {
           }
         }
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     isLoading.value = false;
@@ -452,6 +452,8 @@ class ProfileController extends GetxController implements ProfileService {
         profileTypes.removeWhere((type) => type == ProfileType.researcher);
       case AppInUse.c:
         profileTypes.removeWhere((type) => type == ProfileType.band);
+      default:
+        break;
     }
 
     Alert(
@@ -521,7 +523,7 @@ class ProfileController extends GetxController implements ProfileService {
     try {
       newProfileType.value = type;
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 
@@ -545,7 +547,7 @@ class ProfileController extends GetxController implements ProfileService {
 
 
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 
@@ -619,7 +621,7 @@ class ProfileController extends GetxController implements ProfileService {
     try {
       newUsageReason.value = reason;
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 
@@ -642,7 +644,7 @@ class ProfileController extends GetxController implements ProfileService {
 
 
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 
@@ -722,7 +724,7 @@ class ProfileController extends GetxController implements ProfileService {
     try {
       facilityType.value = type;
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 
@@ -745,7 +747,7 @@ class ProfileController extends GetxController implements ProfileService {
 
 
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 
@@ -825,7 +827,7 @@ class ProfileController extends GetxController implements ProfileService {
     try {
       placeType.value = type;
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 
@@ -847,7 +849,7 @@ class ProfileController extends GetxController implements ProfileService {
       }
 
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 

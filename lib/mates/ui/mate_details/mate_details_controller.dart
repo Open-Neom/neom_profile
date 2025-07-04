@@ -1,13 +1,44 @@
 import 'package:get/get.dart';
-import 'package:neom_commons/core/data/firestore/app_media_item_firestore.dart';
-import 'package:neom_commons/core/data/firestore/app_release_item_firestore.dart';
-import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
-import 'package:neom_commons/core/domain/model/app_media_item.dart';
-import 'package:neom_commons/core/domain/model/app_release_item.dart';
-import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
-import 'package:neom_commons/core/utils/enums/verification_level.dart';
-import 'package:neom_commons/neom_commons.dart';
-import 'package:neom_frequencies/frequencies/data/firestore/frequency_firestore.dart';
+import 'package:neom_commons/commons/app_flavour.dart';
+import 'package:neom_commons/commons/utils/app_utilities.dart';
+import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/commons/utils/mappers/app_media_item_mapper.dart';
+import 'package:neom_core/core/app_config.dart';
+import 'package:neom_core/core/data/api_services/push_notification/firebase_messaging_calls.dart';
+import 'package:neom_core/core/data/firestore/activity_feed_firestore.dart';
+import 'package:neom_core/core/data/firestore/app_media_item_firestore.dart';
+import 'package:neom_core/core/data/firestore/app_release_item_firestore.dart';
+import 'package:neom_core/core/data/firestore/event_firestore.dart';
+import 'package:neom_core/core/data/firestore/frequency_firestore.dart';
+import 'package:neom_core/core/data/firestore/inbox_firestore.dart';
+import 'package:neom_core/core/data/firestore/instrument_firestore.dart';
+import 'package:neom_core/core/data/firestore/itemlist_firestore.dart';
+import 'package:neom_core/core/data/firestore/post_firestore.dart';
+import 'package:neom_core/core/data/firestore/profile_firestore.dart';
+import 'package:neom_core/core/data/firestore/user_firestore.dart';
+import 'package:neom_core/core/data/implementations/geolocator_controller.dart';
+import 'package:neom_core/core/data/implementations/user_controller.dart';
+import 'package:neom_core/core/domain/model/activity_feed.dart';
+import 'package:neom_core/core/domain/model/app_media_item.dart';
+import 'package:neom_core/core/domain/model/app_profile.dart';
+import 'package:neom_core/core/domain/model/app_release_item.dart';
+import 'package:neom_core/core/domain/model/app_user.dart';
+import 'package:neom_core/core/domain/model/event.dart';
+import 'package:neom_core/core/domain/model/inbox.dart';
+import 'package:neom_core/core/domain/model/neom/chamber_preset.dart';
+import 'package:neom_core/core/domain/model/post.dart';
+import 'package:neom_core/core/domain/use_cases/geolocator_service.dart';
+import 'package:neom_core/core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/core/utils/core_utilities.dart';
+import 'package:neom_core/core/utils/enums/activity_feed_type.dart';
+import 'package:neom_core/core/utils/enums/app_in_use.dart';
+import 'package:neom_core/core/utils/enums/post_type.dart';
+import 'package:neom_core/core/utils/enums/push_notification_type.dart';
+import 'package:neom_core/core/utils/enums/user_role.dart';
+import 'package:neom_core/core/utils/enums/verification_level.dart';
+import 'package:neom_core/core/utils/position_utilities.dart';
+
 import '../../domain/use_cases/mate_details_service.dart';
 
 class MateDetailsController extends GetxController implements MateDetailsService {
@@ -53,7 +84,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
   @override
   void onInit() {
     super.onInit();
-    AppUtilities.logger.t("onInit");
+    AppConfig.logger.t("onInit");
 
     String mateId = '';
 
@@ -72,10 +103,10 @@ class MateDetailsController extends GetxController implements MateDetailsService
       if(mateId.isNotEmpty && !blockedProfile) {
         loadMate(mateId);
       } else {
-        AppUtilities.logger.i("Profile $mateId is blocked");
+        AppConfig.logger.i("Profile $mateId is blocked");
       }
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 
@@ -83,11 +114,11 @@ class MateDetailsController extends GetxController implements MateDetailsService
   @override
   void onReady() {
     super.onReady();
-    AppUtilities.logger.d("MateDetails Controller Ready");
+    AppConfig.logger.d("MateDetails Controller Ready");
     try {
       sendViewProfileNotification();
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     // update([AppPageIdConstants.mate]);
@@ -96,7 +127,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> loadMate(String id) async {
-    AppUtilities.logger.d("loadMate $id");
+    AppConfig.logger.d("loadMate $id");
 
     try {
       mate.value = await ProfileFirestore().retrieve(id);
@@ -106,7 +137,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
       }
       isLoading.value = false;
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 
@@ -116,13 +147,16 @@ class MateDetailsController extends GetxController implements MateDetailsService
         toProfileId: mate.value.id,
         fromProfile: profile,
         notificationType: PushNotificationType.viewProfile,
+        title: AppTranslationConstants.viewedYourProfile,
+        message: '',
         referenceId: profile.id,
       );
 
       FirebaseMessagingCalls.sendPublicPushNotification(
         fromProfile: profile,
-        toProfile: mate.value,
+        toProfileId: mate.value.id,
         notificationType: PushNotificationType.viewProfile,
+        title: "${AppTranslationConstants.viewedProfileOf.tr} ${mate.value.name}",
         referenceId: mate.value.id,
       );
     }
@@ -131,7 +165,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> retrieveDetails() async {
-    AppUtilities.logger.d("retrieveDetails");
+    AppConfig.logger.d("retrieveDetails");
     try {
       verificationLevel.value = mate.value.verificationLevel;
 
@@ -151,7 +185,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
         eventPosts[post] = events[post.referenceId] ?? Event();
       }
 
-      instrumentsText = CoreUtilities.getInstruments(mate.value.instruments ?? {});
+      instrumentsText = AppUtilities.getInstruments(mate.value.instruments ?? {});
 
       Future.wait([
         getAddressSimple(),
@@ -160,7 +194,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
       ]);
 
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     isLoadingDetails.value = false;
@@ -173,7 +207,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> getMatePosts() async {
-    AppUtilities.logger.d("getMatePosts");
+    AppConfig.logger.d("getMatePosts");
 
     try {
       matePosts.value = await postFirestore.getProfilePosts(mate.value.id);
@@ -186,10 +220,10 @@ class MateDetailsController extends GetxController implements MateDetailsService
       matePosts.removeWhere((element) => element.type == PostType.blogEntry);
       matePosts.removeWhere((element) => element.type == PostType.caption);
       matePosts.removeWhere((element) => element.type == PostType.youtube);
-      AppUtilities.logger.d("${mateBlogEntries.length} Total Blog Entries for Profile");
-      AppUtilities.logger.d("${matePosts.length} Total Posts for Profile");
+      AppConfig.logger.d("${mateBlogEntries.length} Total Blog Entries for Profile");
+      AppConfig.logger.d("${matePosts.length} Total Posts for Profile");
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     isLoadingPosts.value = false;
@@ -204,23 +238,23 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> getAddressSimple() async {
-    AppUtilities.logger.t('getAddressSimple');
+    AppConfig.logger.t('getAddressSimple');
 
     try {
       if(mate.value.position != null && mate.value.position!.latitude != 0 && mate.value.position!.longitude != 0) {
         address = await geoLocatorService.getAddressSimple(mate.value.position!);
-        distance = AppUtilities.distanceBetweenPositionsRounded(profile.position!, mate.value.position!);
+        distance = PositionUtilities.distanceBetweenPositionsRounded(profile.position!, mate.value.position!);
       }
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
-    AppUtilities.logger.d("$address and $distance km");
+    AppConfig.logger.d("$address and $distance km");
   }
 
   @override
   Future<void> getTotalItems() async {
-    AppUtilities.logger.t("getTotalItems");
+    AppConfig.logger.t("getTotalItems");
 
     mate.value.itemlists = await ItemlistFirestore().fetchAll(ownerId: mate.value.id);
 
@@ -241,54 +275,54 @@ class MateDetailsController extends GetxController implements MateDetailsService
     }
 
     for (var item in totalReleaseItems.values) {
-      totalMixedItems[item.id] = AppMediaItem.fromAppReleaseItem(item);
+      totalMixedItems[item.id] = AppMediaItemMapper.fromAppReleaseItem(item);
     }
     totalMixedItems.addAll(totalMediaItems);
-    AppUtilities.logger.d("${totalMixedItems.length} Total Items for Profile");
+    AppConfig.logger.d("${totalMixedItems.length} Total Items for Profile");
 
     update([AppPageIdConstants.mate]);
   }
 
   Future<void> getTotalEvents()  async{
-    AppUtilities.logger.t("getTotalEvents for mate");
+    AppConfig.logger.t("getTotalEvents for mate");
 
     try {
       if(mate.value.events != null && mate.value.events!.isNotEmpty) {
         Map<String, Event> createdEvents = await EventFirestore().getEventsById(mate.value.events!);
-        AppUtilities.logger.d("${createdEvents.length} created events founds for mate ${mate.value.id}");
+        AppConfig.logger.d("${createdEvents.length} created events founds for mate ${mate.value.id}");
         events.addAll(createdEvents);
       }
 
       if(mate.value.playingEvents != null && mate.value.playingEvents!.isNotEmpty) {
         Map<String, Event> playingEvents = await EventFirestore().getEventsById(mate.value.playingEvents!);
-        AppUtilities.logger.d("${playingEvents.length} playing events founds for mate ${mate.value.id}");
+        AppConfig.logger.d("${playingEvents.length} playing events founds for mate ${mate.value.id}");
         events.addAll(playingEvents);
       }
 
       if(mate.value.goingEvents != null && mate.value.goingEvents!.isNotEmpty) {
         Map<String, Event> goingEvents = await EventFirestore().getEventsById(mate.value.goingEvents!);
-        AppUtilities.logger.d("${goingEvents.length} going events founds for mate ${mate.value.id}");
+        AppConfig.logger.d("${goingEvents.length} going events founds for mate ${mate.value.id}");
         events.addAll(goingEvents);
       }
 
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
-    AppUtilities.logger.d("${events.length} Total Events for Itemmate");
+    AppConfig.logger.d("${events.length} Total Events for Itemmate");
     update([AppPageIdConstants.mate]);
   }
 
 
   @override
   Future<void> getTotalInstruments() async {
-    AppUtilities.logger.t('getTotalInstruments');
+    AppConfig.logger.t('getTotalInstruments');
 
     try {
       mate.value.instruments = await InstrumentFirestore().retrieveInstruments(mate.value.id);
-      AppUtilities.logger.t("${mate.value.instruments?.length ?? 0} Total Instruments for Profile");
+      AppConfig.logger.t("${mate.value.instruments?.length ?? 0} Total Instruments for Profile");
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     update([AppPageIdConstants.mate]);
@@ -296,7 +330,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   void getItemDetails(AppMediaItem appMediaItem) {
-    AppUtilities.logger.d("getItemDetails for ${appMediaItem.name}");
+    AppConfig.logger.d("getItemDetails for ${appMediaItem.name}");
     if (AppFlavour.appInUse == AppInUse.g) {
       ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem), transition: Transition.downToUp);
       Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
@@ -307,7 +341,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> follow() async {
-    AppUtilities.logger.t("Follow profile ${mate.value.id}");
+    AppConfig.logger.t("Follow profile ${mate.value.id}");
     following.value = true;
     try {
       if(await ProfileFirestore().followProfile(profileId: profile.id, followedProfileId:  mate.value.id)) {
@@ -323,7 +357,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
           }
 
         } catch (e) {
-          AppUtilities.logger.e(e.toString());
+          AppConfig.logger.e(e.toString());
         }
 
         ActivityFeed activityFeed = ActivityFeed();
@@ -341,12 +375,15 @@ class MateDetailsController extends GetxController implements MateDetailsService
           toProfileId: mate.value.id,
           fromProfile: profile,
           notificationType: PushNotificationType.following,
+          title: AppTranslationConstants.startedFollowingYou,
+          message: '',
           referenceId: profile.id,
         );
 
         FirebaseMessagingCalls.sendPublicPushNotification(
           fromProfile: profile,
-          toProfile: mate.value,
+          toProfileId: mate.value.id,
+          title: "${AppTranslationConstants.isFollowingTo.tr} ${mate.value.name}",
           notificationType: PushNotificationType.following,
           referenceId: mate.value.id,
         );
@@ -356,7 +393,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
       }
 
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     update([AppPageIdConstants.mate]);
@@ -365,7 +402,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> unfollow() async {
-    AppUtilities.logger.t("Unfollow ${mate.value.id}");
+    AppConfig.logger.t("Unfollow ${mate.value.id}");
     following.value = false;
     try {
       if (await ProfileFirestore().unfollowProfile(profileId: profile.id,unfollowProfileId:  mate.value.id)) {
@@ -380,7 +417,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
         following.value = true;
       }
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     update([AppPageIdConstants.mate, AppPageIdConstants.profile]);
@@ -389,7 +426,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> blockProfile() async {
-    AppUtilities.logger.d("");
+    AppConfig.logger.d("");
     try {
       if (await ProfileFirestore().blockProfile(
           profileId: profile.id, profileToBlock: mate.value.id)) {
@@ -404,10 +441,10 @@ class MateDetailsController extends GetxController implements MateDetailsService
             title: AppTranslationConstants.blockProfile.tr,
             message: AppTranslationConstants.blockedProfileMsg.tr);
       } else {
-        AppUtilities.logger.i("Something happened while blocking profile");
+        AppConfig.logger.i("Something happened while blocking profile");
       }
     } catch (e) {
-        AppUtilities.logger.e(e.toString());
+        AppConfig.logger.e(e.toString());
     }
 
     Get.back();
@@ -417,7 +454,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> unblockProfile(AppProfile blockedProfile) async {
-    AppUtilities.logger.d("");
+    AppConfig.logger.d("");
     try {
       if (await ProfileFirestore().unblockProfile(profileId: userController.profile.id, profileToUnblock:  blockedProfile.id)) {
         userController.profile.blockTo!.remove(blockedProfile.id);
@@ -427,10 +464,10 @@ class MateDetailsController extends GetxController implements MateDetailsService
             message: AppTranslationConstants.unblockedProfileMsg.tr
         );
       } else {
-        AppUtilities.logger.i("Somethnig happened while unblocking profile");
+        AppConfig.logger.i("Somethnig happened while unblocking profile");
       }
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     Get.back();
@@ -440,7 +477,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
 
   @override
   Future<void> sendMessage() async {
-    AppUtilities.logger.d("");
+    AppConfig.logger.d("");
 
     Inbox inbox = Inbox();
 
@@ -450,13 +487,13 @@ class MateDetailsController extends GetxController implements MateDetailsService
       inbox.id.isNotEmpty ? Get.toNamed(AppRouteConstants.inboxRoom, arguments: [inbox])
         : Get.toNamed(AppRouteConstants.home);
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 
   @override
   Future<void> removeProfile() async {
-    AppUtilities.logger.d("Remove Profile from Application - Admin Function");
+    AppConfig.logger.d("Remove Profile from Application - Admin Function");
     try {
       AppUser userFromProfile = await UserFirestore().getByProfileId(mate.value.id);
 
@@ -471,10 +508,10 @@ class MateDetailsController extends GetxController implements MateDetailsService
           message: AppTranslationConstants.removedProfileMsg.tr
         );
       } else {
-        AppUtilities.logger.i("Something happened while removing profile");
+        AppConfig.logger.i("Something happened while removing profile");
       }
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     Get.back();
@@ -487,7 +524,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
     try {
       verificationLevel.value = level;
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 
@@ -498,7 +535,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
         mate.value.verificationLevel = verificationLevel.value;
       }
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     update([AppPageIdConstants.mate]);
@@ -509,7 +546,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
     try {
       newUserRole.value = role;
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
   }
 
@@ -528,7 +565,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
             message: AppTranslationConstants.updateUserRoleSame.tr);
       }
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
   }
@@ -539,7 +576,7 @@ class MateDetailsController extends GetxController implements MateDetailsService
       mateUser = await UserFirestore().getByProfileId(mate.value.id);
       newUserRole.value = mateUser.userRole;
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     update([AppPageIdConstants.mate]);

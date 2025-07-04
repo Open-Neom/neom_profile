@@ -1,7 +1,7 @@
-import 'package:neom_commons/core/domain/model/app_media_item.dart';
-import 'package:neom_commons/core/domain/model/app_profile.dart';
-import 'package:neom_commons/core/utils/enums/user_role.dart';
-import 'package:neom_commons/core/utils/enums/verification_level.dart';
+import 'package:neom_core/core/domain/model/app_media_item.dart';
+import 'package:neom_core/core/domain/model/app_profile.dart';
+import 'package:neom_core/core/utils/enums/user_role.dart';
+import 'package:neom_core/core/utils/enums/verification_level.dart';
 
 abstract class MateDetailsService {
 

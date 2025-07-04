@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/core/app_flavour.dart';
+import 'package:neom_commons/commons/app_flavour.dart';
+import 'package:neom_commons/commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/commons/utils/constants/app_constants.dart';
+import 'package:neom_core/core/utils/enums/app_in_use.dart';
 
-// ignore: unused_import
-import 'package:neom_commons/core/utils/app_theme.dart';
-import 'package:neom_commons/core/utils/constants/app_constants.dart';
-import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import '../../../utils/mate_constants.dart';
 import '../mate_details_controller.dart';
 

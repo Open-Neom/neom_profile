@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:neom_commons/core/domain/model/app_media_item.dart';
-import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
+import 'package:neom_core/core/domain/model/app_media_item.dart';
+import 'package:neom_core/core/utils/enums/upload_image_type.dart';
 
 abstract class ProfileService {
 
