@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/commons/ui/widgets/handled_cached_network_image.dart';
-import 'package:neom_commons/commons/ui/widgets/rating_heart_bar.dart';
-import 'package:neom_commons/commons/utils/app_utilities.dart';
-import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_core/core/domain/model/neom/chamber_preset.dart';
-import 'package:neom_core/core/utils/constants/app_route_constants.dart';
+import 'package:neom_commons/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/ui/widgets/rating_heart_bar.dart';
+import 'package:neom_commons/utils/app_utilities.dart';
+import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_core/domain/model/neom/chamber_preset.dart';
+import 'package:neom_core/utils/constants/app_route_constants.dart';
 
-import '../../mate_details_controller.dart';
+import '../profile_controller.dart';
 
-class MateChamberPresets extends StatelessWidget {
-  const MateChamberPresets({super.key});
+class ProfileChamberPresets extends StatelessWidget {
+  const ProfileChamberPresets({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<MateDetailsController>(
+    return GetBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
-      /// init: MateDetailsController(),
+      // init: ProfileController(),
       builder: (_) => SizedBox(
         width: double.infinity,
         child: ListView.builder(
@@ -40,7 +40,7 @@ class MateChamberPresets extends StatelessWidget {
                     "X: ${chamberPreset.neomParameter!.x.toStringAsFixed(1)} | "
                     "Y:${chamberPreset.neomParameter!.y.toStringAsFixed(1)} | "
                     "Z:${chamberPreset.neomParameter!.z.toStringAsFixed(1)}", style: const TextStyle(fontSize: 10),)
-                      : Text(AppTranslationConstants.rootFrequency.tr),
+                    : Text(AppTranslationConstants.rootFrequency.tr),
                 trailing: RatingHeartBar(state: chamberPreset.state.toDouble(),),
                 onTap: () {
                   Get.toNamed(AppRouteConstants.generator,  arguments: [chamberPreset.clone()]);

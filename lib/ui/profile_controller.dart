@@ -1,54 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/commons/app_flavour.dart';
-import 'package:neom_commons/commons/ui/theme/app_color.dart';
-import 'package:neom_commons/commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/commons/utils/app_utilities.dart';
-import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/commons/utils/constants/message_translation_constants.dart';
-import 'package:neom_commons/commons/utils/mappers/app_media_item_mapper.dart';
-import 'package:neom_core/core/app_config.dart';
-import 'package:neom_core/core/data/firestore/event_firestore.dart';
-import 'package:neom_core/core/data/firestore/facility_firestore.dart';
-import 'package:neom_core/core/data/firestore/frequency_firestore.dart';
-import 'package:neom_core/core/data/firestore/place_firestore.dart';
-import 'package:neom_core/core/data/firestore/post_firestore.dart';
-import 'package:neom_core/core/data/firestore/profile_firestore.dart';
-import 'package:neom_core/core/data/firestore/user_firestore.dart';
-import 'package:neom_core/core/data/implementations/geolocator_controller.dart';
-import 'package:neom_core/core/data/implementations/user_controller.dart';
-import 'package:neom_core/core/domain/model/app_media_item.dart';
-import 'package:neom_core/core/domain/model/app_profile.dart';
-import 'package:neom_core/core/domain/model/app_release_item.dart';
-import 'package:neom_core/core/domain/model/event.dart';
-import 'package:neom_core/core/domain/model/facility.dart';
-import 'package:neom_core/core/domain/model/instrument.dart';
-import 'package:neom_core/core/domain/model/neom/chamber_preset.dart';
-import 'package:neom_core/core/domain/model/place.dart';
-import 'package:neom_core/core/domain/model/post.dart';
-import 'package:neom_core/core/domain/use_cases/post_upload_service.dart';
-import 'package:neom_core/core/utils/constants/app_route_constants.dart';
-import 'package:neom_core/core/utils/core_utilities.dart';
-import 'package:neom_core/core/utils/enums/app_in_use.dart';
-import 'package:neom_core/core/utils/enums/facilitator_type.dart';
-import 'package:neom_core/core/utils/enums/place_type.dart';
-import 'package:neom_core/core/utils/enums/profile_type.dart';
-import 'package:neom_core/core/utils/enums/upload_image_type.dart';
-import 'package:neom_core/core/utils/enums/usage_reason.dart';
+import 'package:neom_commons/app_flavour.dart';
+import 'package:neom_commons/ui/theme/app_color.dart';
+import 'package:neom_commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/utils/app_utilities.dart';
+import 'package:neom_commons/utils/collection_utilities.dart';
+import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/message_translation_constants.dart';
+import 'package:neom_commons/utils/datetime_utilities.dart';
+import 'package:neom_commons/utils/mappers/app_media_item_mapper.dart';
+import 'package:neom_core/app_config.dart';
+import 'package:neom_core/data/firestore/app_upload_firestore.dart';
+import 'package:neom_core/data/firestore/event_firestore.dart';
+import 'package:neom_core/data/firestore/facility_firestore.dart';
+import 'package:neom_core/data/firestore/frequency_firestore.dart';
+import 'package:neom_core/data/firestore/place_firestore.dart';
+import 'package:neom_core/data/firestore/post_firestore.dart';
+import 'package:neom_core/data/firestore/profile_firestore.dart';
+import 'package:neom_core/data/firestore/user_firestore.dart';
+import 'package:neom_core/data/implementations/geolocator_controller.dart';
+import 'package:neom_core/data/implementations/user_controller.dart';
+import 'package:neom_core/domain/model/app_media_item.dart';
+import 'package:neom_core/domain/model/app_profile.dart';
+import 'package:neom_core/domain/model/app_release_item.dart';
+import 'package:neom_core/domain/model/event.dart';
+import 'package:neom_core/domain/model/facility.dart';
+import 'package:neom_core/domain/model/instrument.dart';
+import 'package:neom_core/domain/model/neom/chamber_preset.dart';
+import 'package:neom_core/domain/model/place.dart';
+import 'package:neom_core/domain/model/post.dart';
+import 'package:neom_core/domain/use_cases/media_upload_service.dart';
+import 'package:neom_core/domain/use_cases/profile_service.dart';
+import 'package:neom_core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/utils/core_utilities.dart';
+import 'package:neom_core/utils/enums/app_in_use.dart';
+import 'package:neom_core/utils/enums/facilitator_type.dart';
+import 'package:neom_core/utils/enums/media_type.dart';
+import 'package:neom_core/utils/enums/media_upload_destination.dart';
+import 'package:neom_core/utils/enums/place_type.dart';
+import 'package:neom_core/utils/enums/profile_type.dart';
+import 'package:neom_core/utils/enums/usage_reason.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-
-import '../domain/use_cases/profile_service.dart';
 
 class ProfileController extends GetxController implements ProfileService {
   
   final userController = Get.find<UserController>();
+  final mediaUploadServiceImpl = Get.find<MediaUploadService>();
 
   final Rx<AppProfile> profile = AppProfile().obs;
   final RxBool editStatus = false.obs;
-  final RxString location = "".obs;
+  final RxString _location = "".obs;
   final RxBool isLoading = true.obs;
+
+  @override
+  String get location => _location.value;
 
   final RxMap<String, AppMediaItem> totalMediaItems = <String, AppMediaItem>{}.obs;
   final RxMap<String, AppReleaseItem> totalReleaseItems = <String, AppReleaseItem>{}.obs;
@@ -61,8 +68,6 @@ class ProfileController extends GetxController implements ProfileService {
 
   int postCount = 0;
   bool isFollowing = false;
-
-  PostUploadService postUploadController = Get.find<PostUploadService>();
 
   TextEditingController nameController = TextEditingController();
   TextEditingController aboutMeController = TextEditingController();
@@ -99,7 +104,7 @@ class ProfileController extends GetxController implements ProfileService {
     newProfileType.value = profile.value.type;
     newUsageReason.value = profile.value.usageReason;
     if(profile.value.position != null) {
-      location.value = await GeoLocatorController().getAddressSimple(profile.value.position!);
+      _location.value = await GeoLocatorController().getAddressSimple(profile.value.position!);
     }
     aboutMeController.text = profile.value.aboutMe;
     nameController.text = profile.value.name;
@@ -169,7 +174,7 @@ class ProfileController extends GetxController implements ProfileService {
   @override
   void getItemDetails(AppMediaItem appMediaItem) {
     AppConfig.logger.d("getItemDetails for ${appMediaItem.name}");
-    if(AppFlavour.appInUse != AppInUse.g) {
+    if(AppConfig.instance.appInUse != AppInUse.g) {
       Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
     } else {
       ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.downToUp);
@@ -195,10 +200,10 @@ class ProfileController extends GetxController implements ProfileService {
 
   @override
   Future<void> getTotalItems() async {
-    AppConfig.logger.t('getTotal ${AppFlavour.appInUse == AppInUse.c ? 'Presets': 'AppMediaItems & AppReleaseItems'}');
+    AppConfig.logger.t('getTotal ${AppConfig.instance.appInUse == AppInUse.c ? 'Presets': 'AppMediaItems & AppReleaseItems'}');
 
     if(profile.value.itemlists != null) {
-      if(AppFlavour.appInUse == AppInUse.c) {
+      if(AppConfig.instance.appInUse == AppInUse.c) {
         profile.value.frequencies = await FrequencyFirestore().retrieveFrequencies(profile.value.id);
         for (var freq in profile.value.frequencies!.values) {
           totalPresets[freq.frequency.toString()] = ChamberPreset.custom(frequency: freq);
@@ -252,9 +257,9 @@ class ProfileController extends GetxController implements ProfileService {
       if(newPosition != null) {
         if(await ProfileFirestore().updatePosition(profile.value.id, newPosition)){
           profile.value.position = newPosition;
-          location.value = await GeoLocatorController().getAddressSimple(profile.value.position!);
+          _location.value = await GeoLocatorController().getAddressSimple(profile.value.position!);
         }
-        AppConfig.logger.d("Location retrieved and updated successfully for ${location.value}");
+        AppConfig.logger.d("Location retrieved and updated successfully for ${_location.value}");
       } else {
         AppConfig.logger.d("Location was not updated as access is deniedForever");
       }
@@ -271,14 +276,14 @@ class ProfileController extends GetxController implements ProfileService {
 
     bool nameChanged = profileName != nameController.text.trim();
     bool aboutMeChanged = profileAboutMe != aboutMeController.text.trim();
-    bool profileInstrumentsChanged = !AppUtilities.mapKeysEquals(previousInstruments, profile.value.instruments ?? {});
+    bool profileInstrumentsChanged = !CollectionUtilities.mapKeysEquals(previousInstruments, profile.value.instruments ?? {});
     bool mainFeatureChanged = previousMainFeature != profile.value.mainFeature;
 
     if(nameChanged || aboutMeChanged || mainFeatureChanged || profileInstrumentsChanged) {
       if(nameChanged) {
         profileName = nameController.text.trim();
 
-        if(!AppUtilities.isWithinLastSevenDays(profile.value.lastNameUpdate)) {
+        if(!DateTimeUtilities.isWithinLastSevenDays(profile.value.lastNameUpdate)) {
           if(profileName.length > 3 && profileName.isNotEmpty) {
             isValidName = await ProfileFirestore().isAvailableName(profileName);
             if(isValidName) {
@@ -350,19 +355,18 @@ class ProfileController extends GetxController implements ProfileService {
   }
 
   @override
-  Future<void> handleAndUploadImage(UploadImageType uploadImageType) async {
+  Future<void> handleAndUploadImage(MediaUploadDestination uploadDestination) async {
     AppConfig.logger.t("Entering handleAndUploadImage method");
 
     isLoading.value = true;
     update([AppPageIdConstants.profile]);
 
     try {
-      await postUploadController.handleImage(imageType: UploadImageType.profile);
-      if(postUploadController.getMediaFile().path.isNotEmpty) {
-        String photoUrl = await postUploadController.handleUploadImage(
-            uploadImageType);
+      await mediaUploadServiceImpl.handleImage(uploadDestination: MediaUploadDestination.profile);
+      if(mediaUploadServiceImpl.getMediaFile().path.isNotEmpty) {
+        String photoUrl = await AppUploadFirestore().uploadMediaFile(mediaUploadServiceImpl.getMediaId(), mediaUploadServiceImpl.getMediaFile(), MediaType.image, MediaUploadDestination.post);
 
-        if(uploadImageType == UploadImageType.profile) {
+        if(uploadDestination == MediaUploadDestination.profile) {
           if (await ProfileFirestore().updatePhotoUrl(profile.value.id, photoUrl)) {
             if (await UserFirestore().updatePhotoUrl(userController.user.id, photoUrl)) {
               userController.user.photoUrl = photoUrl;
@@ -370,7 +374,7 @@ class ProfileController extends GetxController implements ProfileService {
               profile.value.photoUrl = photoUrl;
             }
           }
-        } else if(uploadImageType == UploadImageType.cover) {
+        } else if(uploadDestination == MediaUploadDestination.cover) {
           if (await ProfileFirestore().updateCoverImgUrl(profile.value.id, photoUrl)) {
               userController.user.profiles.first.coverImgUrl = photoUrl;
               profile.value.coverImgUrl = photoUrl;
@@ -400,7 +404,7 @@ class ProfileController extends GetxController implements ProfileService {
                   ),
                   onPressed: () async {
                     Navigator.pop(context);
-                    await handleAndUploadImage(UploadImageType.profile);
+                    await handleAndUploadImage(MediaUploadDestination.profile);
                   }
               ),
               SimpleDialogOption(
@@ -426,7 +430,7 @@ class ProfileController extends GetxController implements ProfileService {
                   child: Text(AppTranslationConstants.uploadImage.tr),
                   onPressed: () async {
                     Navigator.pop(context);
-                    await handleAndUploadImage(UploadImageType.cover);
+                    await handleAndUploadImage(MediaUploadDestination.cover);
                   }
               ),
               SimpleDialogOption(
@@ -443,7 +447,7 @@ class ProfileController extends GetxController implements ProfileService {
     List<ProfileType> profileTypes = List.from(ProfileType.values);
 
     profileTypes.removeWhere((type) => type == ProfileType.broadcaster);
-    switch(AppFlavour.appInUse) {
+    switch(AppConfig.instance.appInUse) {
       case AppInUse.g:
         profileTypes.removeWhere((type) => type == ProfileType.band);
         profileTypes.removeWhere((type) => type == ProfileType.researcher);
@@ -650,7 +654,7 @@ class ProfileController extends GetxController implements ProfileService {
 
   void showAddFacility(BuildContext context) {
     List<FacilityType> facilityTypes = List.from(FacilityType.values);
-    if(AppFlavour.appInUse != AppInUse.g) {
+    if(AppConfig.instance.appInUse != AppInUse.g) {
       facilityTypes.removeWhere((type)=> type == FacilityType.recordStudio
           || type == FacilityType.rehearsalRoom
           || type == FacilityType.soundRental
@@ -753,7 +757,7 @@ class ProfileController extends GetxController implements ProfileService {
 
   void showAddPlace(BuildContext context) {
     List<PlaceType> placeTypes = List.from(PlaceType.values);
-    if(AppFlavour.appInUse != AppInUse.g) {
+    if(AppConfig.instance.appInUse != AppInUse.g) {
       // placeTypes.removeWhere((type)=> type == PlaceType.recordStudio
       //     || type == FacilityType.rehearsalRoom
       //     || type == FacilityType.soundRental

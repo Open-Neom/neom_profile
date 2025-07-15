@@ -1,18 +1,19 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/commons/app_flavour.dart';
-import 'package:neom_commons/commons/ui/theme/app_color.dart';
-import 'package:neom_commons/commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/commons/ui/widgets/appbar_child.dart';
-import 'package:neom_commons/commons/utils/app_utilities.dart';
-import 'package:neom_commons/commons/utils/constants/app_hero_tag_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/commons/utils/constants/message_translation_constants.dart';
-import 'package:neom_core/core/utils/constants/app_route_constants.dart';
-import 'package:neom_core/core/utils/enums/app_in_use.dart';
-import 'package:neom_core/core/utils/enums/profile_type.dart';
+import 'package:neom_commons/app_flavour.dart';
+import 'package:neom_commons/ui/theme/app_color.dart';
+import 'package:neom_commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/ui/widgets/appbar_child.dart';
+import 'package:neom_commons/utils/app_utilities.dart';
+import 'package:neom_commons/utils/constants/app_hero_tag_constants.dart';
+import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/message_translation_constants.dart';
+import 'package:neom_core/app_config.dart';
+import 'package:neom_core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/utils/enums/app_in_use.dart';
+import 'package:neom_core/utils/enums/profile_type.dart';
 
 import 'profile_controller.dart';
 
@@ -150,7 +151,7 @@ class ProfileEditPage extends StatelessWidget {
                           child: Column(
                             children: [
                               !_.editStatus.value ?
-                              buildProfileTypeColumn(_, context) : AppFlavour.appInUse != AppInUse.c && _.profile.value.type != ProfileType.appArtist ? Center(
+                              buildProfileTypeColumn(_, context) : AppConfig.instance.appInUse != AppInUse.c && _.profile.value.type != ProfileType.appArtist ? Center(
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColor.main50,
@@ -273,7 +274,7 @@ class ProfileEditPage extends StatelessWidget {
   RenderObjectWidget buildProfileTypeAddons(ProfileController _, BuildContext context) {
     switch(_.profile.value.type) {
       case ProfileType.appArtist:
-        return AppFlavour.appInUse != AppInUse.c ? Column(
+        return AppConfig.instance.appInUse != AppInUse.c ? Column(
           children: [
             // AppTheme.heightSpace20,
             // Row(

@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/commons/app_flavour.dart';
-import 'package:neom_commons/commons/ui/widgets/event_tile.dart';
-import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_core/core/domain/model/event.dart';
-import 'package:neom_core/core/utils/constants/app_route_constants.dart';
+import 'package:neom_commons/app_flavour.dart';
+import 'package:neom_commons/ui/widgets/event_tile.dart';
+import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_core/domain/model/event.dart';
+import 'package:neom_core/utils/constants/app_route_constants.dart';
 
 import '../profile_controller.dart';
 

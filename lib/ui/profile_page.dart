@@ -1,23 +1,24 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/commons/app_flavour.dart';
-import 'package:neom_commons/commons/ui/theme/app_color.dart';
-import 'package:neom_commons/commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/commons/ui/widgets/app_circular_progress_indicator.dart';
-import 'package:neom_commons/commons/ui/widgets/diagonally_cut_colored_image.dart';
-import 'package:neom_commons/commons/ui/widgets/genres_grid_view.dart';
-import 'package:neom_commons/commons/ui/widgets/position_back_button.dart';
-import 'package:neom_commons/commons/ui/widgets/read_more_container.dart';
-import 'package:neom_commons/commons/utils/app_utilities.dart';
-import 'package:neom_commons/commons/utils/constants/app_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_core/core/app_properties.dart';
-import 'package:neom_core/core/utils/constants/app_route_constants.dart';
-import 'package:neom_core/core/utils/constants/core_constants.dart';
-import 'package:neom_core/core/utils/enums/app_in_use.dart';
-import 'package:neom_core/core/utils/enums/verification_level.dart';
+import 'package:neom_commons/app_flavour.dart';
+import 'package:neom_commons/ui/theme/app_color.dart';
+import 'package:neom_commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/ui/widgets/app_circular_progress_indicator.dart';
+import 'package:neom_commons/ui/widgets/diagonally_cut_colored_image.dart';
+import 'package:neom_commons/ui/widgets/genres_grid_view.dart';
+import 'package:neom_commons/ui/widgets/position_back_button.dart';
+import 'package:neom_commons/ui/widgets/read_more_container.dart';
+import 'package:neom_commons/utils/constants/app_constants.dart';
+import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/utils/text_utilities.dart';
+import 'package:neom_core/app_config.dart';
+import 'package:neom_core/app_properties.dart';
+import 'package:neom_core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/utils/constants/core_constants.dart';
+import 'package:neom_core/utils/enums/app_in_use.dart';
+import 'package:neom_core/utils/enums/verification_level.dart';
 
 import '../utils/profile_constants.dart';
 import 'profile_controller.dart';
@@ -86,7 +87,7 @@ class ProfilePage extends StatelessWidget {
                                   Container(
                                     height: 30,
                                     alignment: Alignment.center,
-                                    child: Text(AppUtilities.capitalizeFirstLetter(_.profile.value.name),
+                                    child: Text(TextUtilities.capitalizeFirstLetter(_.profile.value.name),
                                       style: Theme.of(context).textTheme.titleLarge!
                                           .copyWith(color: Colors.white
                                       ),
@@ -117,8 +118,8 @@ class ProfilePage extends StatelessWidget {
                                     size: 15,
                                   ),
                                   AppTheme.widthSpace5,
-                                  Text(_.location.value.isNotEmpty ? _.location.value.length > CoreConstants.maxLocationNameLength
-                                      ? "${_.location.value.substring(0, CoreConstants.maxLocationNameLength)}..." : _.location.value
+                                  Text(_.location.isNotEmpty ? _.location.length > CoreConstants.maxLocationNameLength
+                                      ? "${_.location.substring(0, CoreConstants.maxLocationNameLength)}..." : _.location
                                       : AppTranslationConstants.notSpecified.tr,
                                   ),
                                 ],
@@ -130,7 +131,7 @@ class ProfilePage extends StatelessWidget {
                               padding: 0,
                               text:_.profile.value.aboutMe.isEmpty
                                   ? AppTranslationConstants.noProfileDesc.tr
-                                  : AppUtilities.capitalizeFirstLetter(_.profile.value.aboutMe),
+                                  : TextUtilities.capitalizeFirstLetter(_.profile.value.aboutMe),
                             ),
                           ],
                         ),
@@ -144,7 +145,7 @@ class ProfilePage extends StatelessWidget {
                               TabBar(
                                 tabs: [
                                   Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${_.profile.value.posts?.length ?? 0})'),
-                                  Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${AppFlavour.appInUse == AppInUse.c ?
+                                  Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${AppConfig.instance.appInUse == AppInUse.c ?
                                   _.totalPresets.length : (_.totalMediaItems.length + _.totalReleaseItems.length)})'),
                                   Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${_.events.length})'),
                                 ],
@@ -156,7 +157,7 @@ class ProfilePage extends StatelessWidget {
                               SizedBox(
                                 height: AppTheme.fullHeight(context)/2.5,
                                 child: TabBarView(
-                                  children: AppFlavour.appInUse == AppInUse.c
+                                  children: AppConfig.instance.appInUse == AppInUse.c
                                       ? ProfileConstants.neomProfileTabPages : ProfileConstants.profileTabPages,
                                 ),
                               ),
