@@ -7,7 +7,7 @@ import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/ui/widgets/appbar_child.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
 import 'package:neom_core/data/implementations/mate_controller.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
 
@@ -24,10 +24,10 @@ class FollowingListPage extends StatelessWidget {
       init: MateController(),
       builder: (_) => Scaffold(
         backgroundColor: AppColor.main50,
-        appBar:AppBarChild(title: AppTranslationConstants.following.tr),
+        appBar: AppBarChild(title: AppTranslationConstants.following.tr),
       body: Container(
         decoration: AppTheme.appBoxDecoration,
-        child: _.mates.isEmpty ?
+        child: Obx(()=> _.isLoading.value ?
           const Center(child: CircularProgressIndicator())
             : ListView.builder(
           itemCount: _.mates.length,
@@ -64,7 +64,7 @@ class FollowingListPage extends StatelessWidget {
               onLongPress: () => {},
             ) : const SizedBox.shrink();
           },
-        ),
+        ),),
       )
     ));
   }

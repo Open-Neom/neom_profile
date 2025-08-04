@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:neom_commons/ui/widgets/post_tile.dart';
 import 'package:neom_commons/utils/constants/app_assets.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
 import 'package:neom_core/domain/model/event.dart';
 import 'package:neom_core/utils/enums/post_type.dart';
 
@@ -27,7 +27,7 @@ class ProfilePosts extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 10.0),
                 child: Text(
-                  AppTranslationConstants.noPostsYet.tr,
+                  CommonTranslationConstants.noPostsYet.tr,
                   style: const TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.bold,

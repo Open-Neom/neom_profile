@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/ui/widgets/images/handled_cached_network_image.dart';
 import 'package:neom_commons/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
 import 'package:neom_core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 
@@ -17,7 +17,6 @@ class ProfileChamberPresets extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
-      // init: ProfileController(),
       builder: (_) => SizedBox(
         width: double.infinity,
         child: ListView.builder(

@@ -5,13 +5,14 @@ import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/ui/widgets/app_circular_progress_indicator.dart';
-import 'package:neom_commons/ui/widgets/diagonally_cut_colored_image.dart';
+import 'package:neom_commons/ui/widgets/buttons/position_back_button.dart';
 import 'package:neom_commons/ui/widgets/genres_grid_view.dart';
-import 'package:neom_commons/ui/widgets/position_back_button.dart';
+import 'package:neom_commons/ui/widgets/images/diagonally_cut_colored_image.dart';
 import 'package:neom_commons/ui/widgets/read_more_container.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
 import 'package:neom_commons/utils/text_utilities.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/app_properties.dart';
@@ -20,7 +21,7 @@ import 'package:neom_core/utils/constants/core_constants.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/enums/verification_level.dart';
 
-import '../utils/profile_constants.dart';
+import '../utils/constants/profile_constants.dart';
 import 'profile_controller.dart';
 import 'widgets/profile_widgets.dart';
 
@@ -130,7 +131,7 @@ class ProfilePage extends StatelessWidget {
                             ReadMoreContainer(
                               padding: 0,
                               text:_.profile.value.aboutMe.isEmpty
-                                  ? AppTranslationConstants.noProfileDesc.tr
+                                  ? CommonTranslationConstants.noProfileDesc.tr
                                   : TextUtilities.capitalizeFirstLetter(_.profile.value.aboutMe),
                             ),
                           ],
@@ -157,7 +158,7 @@ class ProfilePage extends StatelessWidget {
                               SizedBox(
                                 height: AppTheme.fullHeight(context)/2.5,
                                 child: TabBarView(
-                                  children: AppConfig.instance.appInUse == AppInUse.c
+                                  children: (AppConfig.instance.appInUse == AppInUse.c || AppConfig.instance.appInUse == AppInUse.o)
                                       ? ProfileConstants.neomProfileTabPages : ProfileConstants.profileTabPages,
                                 ),
                               ),

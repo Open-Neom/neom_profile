@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/utils/app_alerts.dart';
-import 'package:neom_commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 
@@ -47,7 +48,7 @@ Widget buildFollowerInfo(context, AppProfile profile) {
             onTap: () => profile.following!.isNotEmpty
                 ? Get.toNamed(AppRouteConstants.following, arguments: profile.following)
                 : AppAlerts.showAlert(context, title: AppTranslationConstants.following.tr,
-                message: AppTranslationConstants.followingMsg.tr),
+                message: MessageTranslationConstants.followingMsg.tr),
           ),
           Text(' | ', style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)
           ),
@@ -57,7 +58,7 @@ Widget buildFollowerInfo(context, AppProfile profile) {
             onTap: () => profile.followers!.isNotEmpty
                 ? Get.toNamed(AppRouteConstants.followers, arguments: profile.followers)
                 : AppAlerts.showAlert(context, title: AppTranslationConstants.followers.tr,
-                message: AppTranslationConstants.followersMsg.tr),
+                message: MessageTranslationConstants.followersMsg.tr),
           ),
         ],
       ),

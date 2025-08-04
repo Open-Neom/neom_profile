@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/ui/widgets/images/handled_cached_network_image.dart';
 import 'package:neom_commons/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/utils/constants/app_assets.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
 
 import '../profile_controller.dart';
@@ -50,7 +50,7 @@ class ProfileItems extends StatelessWidget {
             Container(
               padding: const EdgeInsets.only(top: 10, bottom: 10.0),
               child: Text(
-                AppTranslationConstants.noItemsYet.tr,
+                CommonTranslationConstants.noItemsYet.tr,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 20.0,

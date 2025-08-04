@@ -8,13 +8,14 @@ import 'package:neom_commons/ui/widgets/appbar_child.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_hero_tag_constants.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/utils/constants/message_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/enums/profile_type.dart';
 
+import '../utils/constants/profile_translation_constants.dart';
 import 'profile_controller.dart';
 
 class ProfileEditPage extends StatelessWidget {
@@ -24,9 +25,8 @@ class ProfileEditPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
-      // init: ProfileController(),
       builder: (_) => Scaffold(
-        appBar: AppBarChild(title: AppTranslationConstants.profileDetails.tr),
+        appBar: AppBarChild(title: ProfileTranslationConstants.profileDetails.tr),
         backgroundColor: AppColor.main50,
         body: SingleChildScrollView(
           child: Container(
@@ -88,7 +88,7 @@ class ProfileEditPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
                               Text(
-                                AppTranslationConstants.profileInformation.tr,
+                                ProfileTranslationConstants.profileInformation.tr,
                                 style: const TextStyle(
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.bold
@@ -130,7 +130,7 @@ class ProfileEditPage extends StatelessWidget {
                       AppTheme.heightSpace10,
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: AppTheme.padding25),
-                        child: Text(AppTranslationConstants.aboutMe.tr,
+                        child: Text(ProfileTranslationConstants.aboutMe.tr,
                           style: const TextStyle(
                               fontSize: 16.0,
                               fontWeight: FontWeight.bold),
@@ -246,19 +246,19 @@ class ProfileEditPage extends StatelessWidget {
                       )
                   ),
                   onPressed: () {
-                    if(_.userController.userSubscription == null) {
+                    if(_.userServiceImpl.userSubscription == null) {
                       if((_.profile.value.places?.isEmpty ?? true) && (_.profile.value.places?.isEmpty ?? true)) {
                         _.showUpdateProfileType(context);
                       } else {
                         AppUtilities.showSnackBar(
-                          title: AppTranslationConstants.profileDetails.tr,
+                          title: ProfileTranslationConstants.profileDetails.tr,
                           message: MessageTranslationConstants.profileTypeRelatedWithAFacilityOrPlaceMsg.tr,
                         );
                       }
 
                     } else {
                       AppUtilities.showSnackBar(
-                        title: AppTranslationConstants.profileDetails.tr,
+                        title: ProfileTranslationConstants.profileDetails.tr,
                         message: MessageTranslationConstants.profileTypeRelatedWithASubscriptionMsg.tr,
                       );
                     }
@@ -344,7 +344,7 @@ class ProfileEditPage extends StatelessWidget {
             Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text(AppTranslationConstants.facilityType.tr,
+                  Text(ProfileTranslationConstants.facilityType.tr,
                     style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                   ),
                   TextButton(
@@ -369,7 +369,7 @@ class ProfileEditPage extends StatelessWidget {
             Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text(AppTranslationConstants.placeType.tr,
+                  Text(ProfileTranslationConstants.placeType.tr,
                     style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                   ),
                   TextButton(

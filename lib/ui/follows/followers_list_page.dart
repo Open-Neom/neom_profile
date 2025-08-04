@@ -7,15 +7,12 @@ import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/ui/widgets/appbar_child.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
 import 'package:neom_core/data/implementations/mate_controller.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
 
-
-
 class FollowersListPage extends StatelessWidget {
   const FollowersListPage({super.key});
-
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +24,7 @@ class FollowersListPage extends StatelessWidget {
       appBar: AppBarChild(title: AppTranslationConstants.followers.tr),
       body: Container(
         decoration: AppTheme.appBoxDecoration,
-        child: _.mates.isEmpty ?
+        child: Obx(() =>_.isLoading.value ?
           const Center(child: CircularProgressIndicator(),)
             : ListView.builder(
           itemCount: _.mates.length,
@@ -64,7 +61,7 @@ class FollowersListPage extends StatelessWidget {
               onLongPress: () => {},
             ) : const SizedBox.shrink();
           },
-        ),
+        ),),
       )
     ));
   }

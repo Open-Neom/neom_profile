@@ -1,7 +1,7 @@
-import '../ui/tabs/profile_chamber_presets.dart';
-import '../ui/tabs/profile_events.dart';
-import '../ui/tabs/profile_items.dart';
-import '../ui/tabs/profile_posts.dart';
+import '../../ui/tabs/profile_chamber_presets.dart';
+import '../../ui/tabs/profile_events.dart';
+import '../../ui/tabs/profile_items.dart';
+import '../../ui/tabs/profile_posts.dart';
 
 class ProfileConstants {
 

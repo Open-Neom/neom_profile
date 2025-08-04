@@ -7,8 +7,9 @@ import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/collection_utilities.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/utils/constants/message_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
 import 'package:neom_commons/utils/datetime_utilities.dart';
 import 'package:neom_commons/utils/mappers/app_media_item_mapper.dart';
 import 'package:neom_core/app_config.dart';
@@ -20,8 +21,6 @@ import 'package:neom_core/data/firestore/place_firestore.dart';
 import 'package:neom_core/data/firestore/post_firestore.dart';
 import 'package:neom_core/data/firestore/profile_firestore.dart';
 import 'package:neom_core/data/firestore/user_firestore.dart';
-import 'package:neom_core/data/implementations/geolocator_controller.dart';
-import 'package:neom_core/data/implementations/user_controller.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
 import 'package:neom_core/domain/model/app_release_item.dart';
@@ -31,8 +30,10 @@ import 'package:neom_core/domain/model/instrument.dart';
 import 'package:neom_core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_core/domain/model/place.dart';
 import 'package:neom_core/domain/model/post.dart';
+import 'package:neom_core/domain/use_cases/geolocator_service.dart';
 import 'package:neom_core/domain/use_cases/media_upload_service.dart';
 import 'package:neom_core/domain/use_cases/profile_service.dart';
+import 'package:neom_core/domain/use_cases/user_service.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/core_utilities.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
@@ -44,10 +45,13 @@ import 'package:neom_core/utils/enums/profile_type.dart';
 import 'package:neom_core/utils/enums/usage_reason.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import '../utils/constants/profile_translation_constants.dart';
+
 class ProfileController extends GetxController implements ProfileService {
   
-  final userController = Get.find<UserController>();
+  final userServiceImpl = Get.find<UserService>();
   final mediaUploadServiceImpl = Get.find<MediaUploadService>();
+  final geoLocatorServiceImpl = Get.find<GeoLocatorService>();
 
   final Rx<AppProfile> profile = AppProfile().obs;
   final RxBool editStatus = false.obs;
@@ -98,13 +102,13 @@ class ProfileController extends GetxController implements ProfileService {
   }
 
   Future<void> setProfileInfo() async {
-    profile.value = userController.profile;
+    profile.value = userServiceImpl.profile;
     profileName = profile.value.name;
     profileAboutMe = profile.value.aboutMe;
     newProfileType.value = profile.value.type;
     newUsageReason.value = profile.value.usageReason;
     if(profile.value.position != null) {
-      _location.value = await GeoLocatorController().getAddressSimple(profile.value.position!);
+      _location.value = await geoLocatorServiceImpl.getAddressSimple(profile.value.position!);
     }
     aboutMeController.text = profile.value.aboutMe;
     nameController.text = profile.value.name;
@@ -115,7 +119,7 @@ class ProfileController extends GetxController implements ProfileService {
   void onReady() {
     super.onReady();
     AppConfig.logger.t("Profile Controller Ready");
-    if(!userController.isNewUser) {
+    if(!userServiceImpl.isNewUser) {
       loadProfileActivity();
     } else {
       AppConfig.logger.t("User is new, skipping profile activity load");
@@ -253,11 +257,11 @@ class ProfileController extends GetxController implements ProfileService {
     AppConfig.logger.t("Updating location");
     try {
 
-      Position? newPosition =  await GeoLocatorController().getCurrentPosition();
+      Position? newPosition =  await geoLocatorServiceImpl.getCurrentPosition();
       if(newPosition != null) {
         if(await ProfileFirestore().updatePosition(profile.value.id, newPosition)){
           profile.value.position = newPosition;
-          _location.value = await GeoLocatorController().getAddressSimple(profile.value.position!);
+          _location.value = await geoLocatorServiceImpl.getAddressSimple(profile.value.position!);
         }
         AppConfig.logger.d("Location retrieved and updated successfully for ${_location.value}");
       } else {
@@ -288,18 +292,18 @@ class ProfileController extends GetxController implements ProfileService {
             isValidName = await ProfileFirestore().isAvailableName(profileName);
             if(isValidName) {
               if(await ProfileFirestore().updateName(profile.value.id, profileName)) {
-                userController.profile.name = profileName;
+                userServiceImpl.profile.name = profileName;
                 profile.value.name = profileName;
                 profile.value.lastNameUpdate = DateTime.now().millisecondsSinceEpoch;
                 AppUtilities.showSnackBar(
-                  title: AppTranslationConstants.profileDetails.tr,
+                  title: ProfileTranslationConstants.profileDetails.tr,
                   message: MessageTranslationConstants.profileNameUpdated.tr,
                 );
 
               }
             } else {
               AppUtilities.showSnackBar(
-                title: AppTranslationConstants.profileDetails.tr,
+                title: ProfileTranslationConstants.profileDetails.tr,
                 message: MessageTranslationConstants.profileNameUsed.tr,
               );
               return;
@@ -309,7 +313,7 @@ class ProfileController extends GetxController implements ProfileService {
           profileName = profile.value.name;
           nameController.text = profile.value.name;
           AppUtilities.showSnackBar(
-            title: AppTranslationConstants.profileDetails.tr,
+            title: ProfileTranslationConstants.profileDetails.tr,
             message: MessageTranslationConstants.nameRecentlyUpdate.tr,
             duration: const Duration(seconds: 5)
           );
@@ -322,16 +326,16 @@ class ProfileController extends GetxController implements ProfileService {
         aboutMeValid = profileAboutMe.length > 150 ? false : true;
         if (aboutMeValid) {
           if(await ProfileFirestore().updateAboutMe(profile.value.id, profileAboutMe)) {
-            userController.profile.aboutMe = profileAboutMe;
+            userServiceImpl.profile.aboutMe = profileAboutMe;
             profile.value.aboutMe = profileAboutMe;
             AppUtilities.showSnackBar(
-              title: AppTranslationConstants.profileDetails.tr,
+              title: ProfileTranslationConstants.profileDetails.tr,
               message: MessageTranslationConstants.profileAboutMeUpdated.tr,
             );
           }
         } else {
           AppUtilities.showSnackBar(
-            title: AppTranslationConstants.profileDetails.tr,
+            title: ProfileTranslationConstants.profileDetails.tr,
             message: MessageTranslationConstants.descriptionTooLong.tr,
           );
           return;
@@ -342,8 +346,8 @@ class ProfileController extends GetxController implements ProfileService {
       if(mainFeatureChanged) previousMainFeature = profile.value.mainFeature;
     } else {
       AppUtilities.showSnackBar(
-        title: AppTranslationConstants.profileDetails.tr,
-        message: AppTranslationConstants.thereWasNoChanges.tr,
+        title: ProfileTranslationConstants.profileDetails.tr,
+        message: ProfileTranslationConstants.thereWasNoChanges.tr,
       );
       return;
     }
@@ -368,15 +372,15 @@ class ProfileController extends GetxController implements ProfileService {
 
         if(uploadDestination == MediaUploadDestination.profile) {
           if (await ProfileFirestore().updatePhotoUrl(profile.value.id, photoUrl)) {
-            if (await UserFirestore().updatePhotoUrl(userController.user.id, photoUrl)) {
-              userController.user.photoUrl = photoUrl;
-              userController.user.profiles.first.photoUrl = photoUrl;
+            if (await UserFirestore().updatePhotoUrl(userServiceImpl.user.id, photoUrl)) {
+              userServiceImpl.user.photoUrl = photoUrl;
+              userServiceImpl.user.profiles.first.photoUrl = photoUrl;
               profile.value.photoUrl = photoUrl;
             }
           }
         } else if(uploadDestination == MediaUploadDestination.cover) {
           if (await ProfileFirestore().updateCoverImgUrl(profile.value.id, photoUrl)) {
-              userController.user.profiles.first.coverImgUrl = photoUrl;
+              userServiceImpl.user.profiles.first.coverImgUrl = photoUrl;
               profile.value.coverImgUrl = photoUrl;
             }
           }
@@ -396,11 +400,11 @@ class ProfileController extends GetxController implements ProfileService {
         builder: (context){
           return SimpleDialog(
             backgroundColor: AppColor.getMain(),
-            title: Text(AppTranslationConstants.updateProfilePicture.tr),
+            title: Text(ProfileTranslationConstants.updateProfilePicture.tr),
             children: <Widget>[
               SimpleDialogOption(
                   child: Text(
-                      AppTranslationConstants.uploadImage.tr
+                      CommonTranslationConstants.uploadImage.tr
                   ),
                   onPressed: () async {
                     Navigator.pop(context);
@@ -424,10 +428,10 @@ class ProfileController extends GetxController implements ProfileService {
         builder: (context){
           return SimpleDialog(
             backgroundColor: AppColor.getMain(),
-            title: Text(AppTranslationConstants.updateCoverImage.tr),
+            title: Text(CommonTranslationConstants.updateCoverImage.tr),
             children: <Widget>[
               SimpleDialogOption(
-                  child: Text(AppTranslationConstants.uploadImage.tr),
+                  child: Text(CommonTranslationConstants.uploadImage.tr),
                   onPressed: () async {
                     Navigator.pop(context);
                     await handleAndUploadImage(MediaUploadDestination.cover);
@@ -466,11 +470,11 @@ class ProfileController extends GetxController implements ProfileService {
           backgroundColor: AppColor.main50,
           titleStyle: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        title: AppTranslationConstants.updateProfileType.tr,
+        title: ProfileTranslationConstants.updateProfileType.tr,
         content: Column(
           children: <Widget>[
             AppTheme.heightSpace10,
-            Text(AppTranslationConstants.updateProfileTypeMsg.tr,
+            Text(ProfileTranslationConstants.updateProfileTypeMsg.tr,
               style: const TextStyle(fontSize: 15),
             ),
             Obx(() =>
@@ -537,16 +541,16 @@ class ProfileController extends GetxController implements ProfileService {
         if(await ProfileFirestore().updateType(profile.value.id, newProfileType.value)) {
           Get.back();
           AppUtilities.showSnackBar(
-              title: AppTranslationConstants.updateProfileType.tr,
-              message: AppTranslationConstants.updateProfileTypeSuccess.tr);
-          userController.profile.type = newProfileType.value;
+              title: ProfileTranslationConstants.updateProfileType.tr,
+              message: ProfileTranslationConstants.updateProfileTypeSuccess.tr);
+          userServiceImpl.profile.type = newProfileType.value;
           profile.value.type = newProfileType.value;
         }
 
       } else {
         AppUtilities.showSnackBar(
-            title: AppTranslationConstants.updateProfileType.tr,
-            message: AppTranslationConstants.updateProfileTypeSame.tr);
+            title: ProfileTranslationConstants.updateProfileType.tr,
+            message: ProfileTranslationConstants.updateProfileTypeSame.tr);
       }
 
 
@@ -564,11 +568,11 @@ class ProfileController extends GetxController implements ProfileService {
           backgroundColor: AppColor.main50,
           titleStyle: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        title: AppTranslationConstants.updateProfileType.tr,
+        title: ProfileTranslationConstants.updateProfileType.tr,
         content: Column(
           children: <Widget>[
             AppTheme.heightSpace10,
-            Text(AppTranslationConstants.updateProfileTypeMsg.tr,
+            Text(ProfileTranslationConstants.updateProfileTypeMsg.tr,
               style: const TextStyle(fontSize: 15),
             ),
             Obx(() =>
@@ -635,15 +639,15 @@ class ProfileController extends GetxController implements ProfileService {
         if(await ProfileFirestore().updateUsageReason(profile.value.id, newUsageReason.value)) {
           Get.back();
           AppUtilities.showSnackBar(
-              title: AppTranslationConstants.updateProfileType.tr,
-              message: AppTranslationConstants.updateProfileTypeSuccess.tr);
-          userController.profile.usageReason = newUsageReason.value;
+              title: ProfileTranslationConstants.updateProfileType.tr,
+              message: ProfileTranslationConstants.updateProfileTypeSuccess.tr);
+          userServiceImpl.profile.usageReason = newUsageReason.value;
           profile.value.usageReason = newUsageReason.value;
         }
       } else {
         AppUtilities.showSnackBar(
-            title: AppTranslationConstants.updateProfileType.tr,
-            message: AppTranslationConstants.updateProfileTypeSame.tr);
+            title: ProfileTranslationConstants.updateProfileType.tr,
+            message: ProfileTranslationConstants.updateProfileTypeSame.tr);
       }
 
 
@@ -667,11 +671,11 @@ class ProfileController extends GetxController implements ProfileService {
           backgroundColor: AppColor.main50,
           titleStyle: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        title: AppTranslationConstants.updateProfileType.tr,
+        title: ProfileTranslationConstants.updateProfileType.tr,
         content: Column(
           children: <Widget>[
             AppTheme.heightSpace10,
-            Text(AppTranslationConstants.introFacilitatorType.tr,
+            Text(CommonTranslationConstants.whatFacilitatorType.tr,
               style: const TextStyle(fontSize: 15),
             ),
             Obx(() =>
@@ -738,15 +742,15 @@ class ProfileController extends GetxController implements ProfileService {
         if(await FacilityFirestore().addFacility(profileId: profile.value.id, facilityType: facilityType.value)) {
           Get.back();
           AppUtilities.showSnackBar(
-              title: AppTranslationConstants.updateProfile.tr,
-              message: AppTranslationConstants.facilityAdded.tr);
-          userController.profile.facilities = {};
-          userController.profile.facilities![facilityType.value.name] = Facility(type: facilityType.value);
+              title: ProfileTranslationConstants.updateProfile.tr,
+              message: ProfileTranslationConstants.facilityAdded.tr);
+          userServiceImpl.profile.facilities = {};
+          userServiceImpl.profile.facilities![facilityType.value.name] = Facility(type: facilityType.value);
         }
       } else {
         AppUtilities.showSnackBar(
-            title: AppTranslationConstants.updateProfileType.tr,
-            message: AppTranslationConstants.updateProfileTypeSame.tr);
+            title: ProfileTranslationConstants.updateProfileType.tr,
+            message: ProfileTranslationConstants.updateProfileTypeSame.tr);
       }
 
 
@@ -770,11 +774,11 @@ class ProfileController extends GetxController implements ProfileService {
           backgroundColor: AppColor.main50,
           titleStyle: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        title: AppTranslationConstants.updateProfileType.tr,
+        title: ProfileTranslationConstants.updateProfileType.tr,
         content: Column(
           children: <Widget>[
             AppTheme.heightSpace10,
-            Text(AppTranslationConstants.introFacilitatorType.tr,
+            Text(CommonTranslationConstants.whatFacilitatorType.tr,
               style: const TextStyle(fontSize: 15),
             ),
             Obx(() =>
@@ -841,15 +845,15 @@ class ProfileController extends GetxController implements ProfileService {
         if(await PlaceFirestore().addPlace(placeType: placeType.value, profileId: profile.value.id)) {
           Get.back();
           AppUtilities.showSnackBar(
-              title: AppTranslationConstants.updateProfile.tr,
-              message: AppTranslationConstants.placeAdded.tr);
-          userController.profile.places = {};
-          userController.profile.places![placeType.value.name] = Place(type: placeType.value);
+              title: ProfileTranslationConstants.updateProfile.tr,
+              message: ProfileTranslationConstants.placeAdded.tr);
+          userServiceImpl.profile.places = {};
+          userServiceImpl.profile.places![placeType.value.name] = Place(type: placeType.value);
         }
       } else {
         AppUtilities.showSnackBar(
-            title: AppTranslationConstants.updateProfileType.tr,
-            message: AppTranslationConstants.updateProfileTypeSame.tr);
+            title: ProfileTranslationConstants.updateProfileType.tr,
+            message: ProfileTranslationConstants.updateProfileTypeSame.tr);
       }
 
     } catch (e) {
