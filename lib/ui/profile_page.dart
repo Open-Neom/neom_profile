@@ -33,12 +33,12 @@ class ProfilePage extends StatelessWidget {
     return GetBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
       init: ProfileController(),
-      builder: (_) => Scaffold(
-        backgroundColor: AppColor.main50,
+      builder: (controller) => Scaffold(
+        backgroundColor: AppFlavour.getBackgroundColor(),
         body: Container(
         height: AppTheme.fullHeight(context),
         decoration: AppTheme.appBoxDecoration,
-        child: _.isLoading.value ? const AppCircularProgressIndicator()
+        child: controller.isLoading.value ? const AppCircularProgressIndicator()
             : SingleChildScrollView(
           child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,16 +48,16 @@ class ProfilePage extends StatelessWidget {
                 GestureDetector(
                   child: DiagonallyCutColoredImage(
                     Image(
-                      image: CachedNetworkImageProvider(_.profile.value.coverImgUrl.isNotEmpty
-                          ? _.profile.value.coverImgUrl :_.profile.value.photoUrl.isNotEmpty
-                          ? _.profile.value.photoUrl : AppProperties.getNoImageUrl(),),
+                      image: CachedNetworkImageProvider(controller.profile.value.coverImgUrl.isNotEmpty
+                          ? controller.profile.value.coverImgUrl :controller.profile.value.photoUrl.isNotEmpty
+                          ? controller.profile.value.photoUrl : AppProperties.getNoImageUrl(),),
                       width: AppTheme.fullWidth(context),
                       height: 225,
                       fit: BoxFit.cover,
                     ),
                     color: AppColor.cutColoredImage,
                     ),
-                  onTap: () async => await _.showUpdateCoverImgDialog(context),
+                  onTap: () async => await controller.showUpdateCoverImgDialog(context),
                 ),
                 Align(
                   alignment: FractionalOffset.bottomCenter,
@@ -65,17 +65,17 @@ class ProfilePage extends StatelessWidget {
                   child: Column(
                     children: <Widget>[
                       Hero(
-                        tag: _.profile.value.name,
+                        tag: controller.profile.value.name,
                         child: GestureDetector(
                           child: CircleAvatar(
-                            backgroundImage: CachedNetworkImageProvider(_.profile.value.photoUrl.isNotEmpty
-                                ? _.profile.value.photoUrl : AppProperties.getAppLogoUrl(),),
+                            backgroundImage: CachedNetworkImageProvider(controller.profile.value.photoUrl.isNotEmpty
+                                ? controller.profile.value.photoUrl : AppProperties.getAppLogoUrl(),),
                             radius: 75.0,
                           ),
                           onTap: () => Get.toNamed(AppRouteConstants.profileEdit),
                         ),
                       ),
-                      buildFollowerInfo(context, _.profile.value),
+                      buildFollowerInfo(context, controller.profile.value),
                       AppTheme.heightSpace20,
                       Padding(
                         padding: const EdgeInsets.all(AppTheme.padding20),
@@ -88,25 +88,25 @@ class ProfilePage extends StatelessWidget {
                                   Container(
                                     height: 30,
                                     alignment: Alignment.center,
-                                    child: Text(TextUtilities.capitalizeFirstLetter(_.profile.value.name),
+                                    child: Text(TextUtilities.capitalizeFirstLetter(controller.profile.value.name),
                                       style: Theme.of(context).textTheme.titleLarge!
                                           .copyWith(color: Colors.white
                                       ),
                                     ),
                                   ),
                                   AppTheme.widthSpace5,
-                                  if(_.profile.value.verificationLevel != VerificationLevel.none)
+                                  if(controller.profile.value.verificationLevel != VerificationLevel.none)
                                     Container(
                                       height: 30,
                                       alignment: Alignment.center,
-                                      child: AppFlavour.getVerificationIcon(_.profile.value.verificationLevel, size: 18,)
+                                      child: AppFlavour.getVerificationIcon(controller.profile.value.verificationLevel, size: 18,)
                                     ),
                                 ]
                             ),
                             const Divider(),
-                            (_.profile.value.genres?.isNotEmpty ?? false) ?
+                            (controller.profile.value.genres?.isNotEmpty ?? false) ?
                             GenresGridView(
-                              _.profile.value.genres?.keys.toList() ?? [],
+                              controller.profile.value.genres?.keys.toList() ?? [],
                               AppColor.white,
                               alignment: Alignment.centerLeft,
                               fontSize: 12,
@@ -119,20 +119,20 @@ class ProfilePage extends StatelessWidget {
                                     size: 15,
                                   ),
                                   AppTheme.widthSpace5,
-                                  Text(_.location.isNotEmpty ? _.location.length > CoreConstants.maxLocationNameLength
-                                      ? "${_.location.substring(0, CoreConstants.maxLocationNameLength)}..." : _.location
+                                  Text(controller.location.isNotEmpty ? controller.location.length > CoreConstants.maxLocationNameLength
+                                      ? "${controller.location.substring(0, CoreConstants.maxLocationNameLength)}..." : controller.location
                                       : AppTranslationConstants.notSpecified.tr,
                                   ),
                                 ],
                               ),
-                              onTap: ()=> _.updateLocation(),
+                              onTap: ()=> controller.updateLocation(),
                             ),
                             const Divider(),
                             ReadMoreContainer(
                               padding: 0,
-                              text:_.profile.value.aboutMe.isEmpty
+                              text:controller.profile.value.aboutMe.isEmpty
                                   ? CommonTranslationConstants.noProfileDesc.tr
-                                  : TextUtilities.capitalizeFirstLetter(_.profile.value.aboutMe),
+                                  : TextUtilities.capitalizeFirstLetter(controller.profile.value.aboutMe),
                             ),
                           ],
                         ),
@@ -145,10 +145,10 @@ class ProfilePage extends StatelessWidget {
                             children: <Widget>[
                               TabBar(
                                 tabs: [
-                                  Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${_.profile.value.posts?.length ?? 0})'),
+                                  Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${controller.profile.value.posts?.length ?? 0})'),
                                   Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${AppConfig.instance.appInUse == AppInUse.c ?
-                                  _.totalPresets.length : (_.totalMediaItems.length + _.totalReleaseItems.length)})'),
-                                  Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${_.events.length})'),
+                                  controller.totalPresets.length : (controller.totalMixedItems.length)})'),
+                                  Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${controller.events.length})'),
                                 ],
                                 indicatorColor: Colors.white,
                                 labelStyle: const TextStyle(fontSize: 15),

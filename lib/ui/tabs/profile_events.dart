@@ -18,12 +18,12 @@ class ProfileEvents extends StatelessWidget {
     return GetBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
       // init: ProfileController(),
-      builder: (_) => _.events.isNotEmpty ?
+      builder: (controller) => controller.events.isNotEmpty ?
       ListView.builder(
           padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
-          itemCount: _.events.length,
+          itemCount: controller.events.length,
           itemBuilder: (context, index){
-            Event event = _.events.values.elementAt(index);
+            Event event = controller.events.values.elementAt(index);
             return event.eventDate <= 0 ? const SizedBox.shrink() :
             GestureDetector(
               onTap: () => Get.toNamed(AppRouteConstants.eventDetails, arguments: [event]),

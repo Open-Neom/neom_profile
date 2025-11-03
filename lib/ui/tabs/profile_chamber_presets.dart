@@ -17,14 +17,14 @@ class ProfileChamberPresets extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
-      builder: (_) => SizedBox(
+      builder: (controller) => SizedBox(
         width: double.infinity,
         child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
-          itemCount: _.totalPresets.length,
+          itemCount: controller.totalPresets.length,
           itemBuilder: (context, index) {
-            String presetKey = _.totalPresets.keys.elementAt(index);
-            ChamberPreset chamberPreset = _.totalPresets[presetKey]!;
+            String presetKey = controller.totalPresets.keys.elementAt(index);
+            ChamberPreset chamberPreset = controller.totalPresets[presetKey]!;
             return GestureDetector(
               child: ListTile(
                 contentPadding: const EdgeInsets.all(8.0),

@@ -16,11 +16,10 @@ class ProfilePosts extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ProfileController>(
       id: AppPageIdConstants.profilePosts,
-      // init: ProfileController(),
-      builder: (_) {
-        if (_.isLoading.value) {
+      builder: (controller) {
+        if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
-        } else if (_.profilePosts.isEmpty) {
+        } else if (controller.profilePosts.isEmpty) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
@@ -40,13 +39,11 @@ class ProfilePosts extends StatelessWidget {
           );
         } else {
           List<GridTile> gridTiles = [];
-          for (var post in _.profilePosts) {
+          for (var post in controller.profilePosts) {
             if(post.type != PostType.caption && post.type != PostType.blogEntry) {
-              Event event = _.eventPosts[post] ?? Event();
+              Event event = controller.eventPosts[post] ?? Event();
               gridTiles.add(
-                  GridTile(
-                      child: PostTile(post, event)
-                  )
+                  GridTile(child: PostTile(post, event))
               );
             }
           }

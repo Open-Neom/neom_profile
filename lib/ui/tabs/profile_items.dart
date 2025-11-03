@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/ui/widgets/images/handled_cached_network_image.dart';
 import 'package:neom_commons/ui/widgets/rating_heart_bar.dart';
+import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_assets.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
-import 'package:neom_core/domain/model/app_media_item.dart';
+import 'package:neom_commons/utils/mappers/base_item_mapper.dart';
+import 'package:neom_core/domain/model/base_item.dart';
 
 import '../profile_controller.dart';
 
@@ -17,31 +19,32 @@ class ProfileItems extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
-      // init: ProfileController(),
-      builder: (_) => SizedBox(
+      builder: (controller) => SizedBox(
         width: double.infinity,
-        child: _.totalMixedItems.isNotEmpty ? ListView.builder(
+        child: controller.totalMixedItems.isNotEmpty ? ListView.builder(
           padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
-          itemCount: _.totalMixedItems.length,
+          itemCount: controller.totalMixedItems.length,
           itemBuilder: (context, index) {
-            AppMediaItem appMediaItem = _.totalMixedItems.values.elementAt(index);
+            dynamic item = controller.totalMixedItems.values.elementAt(index);
+            BaseItem baseItem = BaseItemMapper.fromDynamicItem(item);
+
             return ListTile(
               contentPadding: const EdgeInsets.all(8.0),
-              leading: HandledCachedNetworkImage(appMediaItem.imgUrl,
+              leading: HandledCachedNetworkImage(baseItem.imgUrl,
                 width: 50, enableFullScreen: false,
               ),
-              title: Text(appMediaItem.name.isEmpty ? "" : appMediaItem.name),
+              title: Text(baseItem.name.isEmpty ? "" : baseItem.name),
               subtitle: Row(
                 children: [
-                  Text(appMediaItem.artist.isEmpty ? ""
-                  : appMediaItem.artist.length > AppConstants.maxArtistNameLength
-                  ? "${appMediaItem.artist.substring(0,AppConstants.maxArtistNameLength)}..."
-                  : appMediaItem.artist),
+                  Text(baseItem.ownerName.isEmpty ? ""
+                  : baseItem.ownerName.length > AppConstants.maxArtistNameLength
+                  ? "${baseItem.ownerName.substring(0,AppConstants.maxArtistNameLength)}..."
+                  : baseItem.ownerName),
                   const SizedBox(width:5,),
-                  RatingHeartBar(state: appMediaItem.state.toDouble(),),
+                  RatingHeartBar(state: baseItem.state.toDouble(),),
                 ]
               ),
-              onTap: () => _.getItemDetails(appMediaItem),
+              onTap: () => AppUtilities.gotoItemDetails(item),
             );
           },
         )  : Column(

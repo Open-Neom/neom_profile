@@ -11,12 +11,12 @@ import 'package:neom_commons/utils/constants/translations/app_translation_consta
 import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
 import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
 import 'package:neom_commons/utils/datetime_utilities.dart';
-import 'package:neom_commons/utils/mappers/app_media_item_mapper.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/data/firestore/app_upload_firestore.dart';
 import 'package:neom_core/data/firestore/event_firestore.dart';
 import 'package:neom_core/data/firestore/facility_firestore.dart';
 import 'package:neom_core/data/firestore/frequency_firestore.dart';
+import 'package:neom_core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_core/data/firestore/place_firestore.dart';
 import 'package:neom_core/data/firestore/post_firestore.dart';
 import 'package:neom_core/data/firestore/profile_firestore.dart';
@@ -25,6 +25,7 @@ import 'package:neom_core/domain/model/app_media_item.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
 import 'package:neom_core/domain/model/app_release_item.dart';
 import 'package:neom_core/domain/model/event.dart';
+import 'package:neom_core/domain/model/external_item.dart';
 import 'package:neom_core/domain/model/facility.dart';
 import 'package:neom_core/domain/model/instrument.dart';
 import 'package:neom_core/domain/model/neom/chamber_preset.dart';
@@ -61,10 +62,8 @@ class ProfileController extends GetxController implements ProfileService {
   @override
   String get location => _location.value;
 
-  final RxMap<String, AppMediaItem> totalMediaItems = <String, AppMediaItem>{}.obs;
-  final RxMap<String, AppReleaseItem> totalReleaseItems = <String, AppReleaseItem>{}.obs;
-  final RxMap<String, AppMediaItem>  totalMixedItems = <String, AppMediaItem>{}.obs;
   final RxMap<String, ChamberPreset> totalPresets = <String, ChamberPreset>{}.obs;
+  final RxMap<String, dynamic>  totalMixedItems = <String, dynamic>{}.obs;
 
   final RxList<Post> profilePosts = <Post>[].obs;
   final RxMap<String, Event> events = <String, Event>{}.obs;
@@ -110,10 +109,13 @@ class ProfileController extends GetxController implements ProfileService {
     if(profile.value.position != null) {
       _location.value = await geoLocatorServiceImpl.getAddressSimple(profile.value.position!);
     }
+
+    if((profile.value.itemlists?.isEmpty ?? true) || profile.value.itemlists?.values.first.type != AppFlavour.getDefaultItemlistType()) {
+      profile.value.itemlists = await ItemlistFirestore().getByOwnerId(profile.value.id, itemlistType: AppFlavour.getDefaultItemlistType());
+    }
     aboutMeController.text = profile.value.aboutMe;
     nameController.text = profile.value.name;
   }
-
 
   @override
   void onReady() {
@@ -214,12 +216,24 @@ class ProfileController extends GetxController implements ProfileService {
         }
         totalPresets.addAll(CoreUtilities.getTotalPresets(profile.value.chambers ?? {}));
       } else {
-        totalReleaseItems.value = CoreUtilities.getTotalReleaseItems(profile.value.itemlists!);
-        totalMediaItems.value = CoreUtilities.getTotalMediaItems(profile.value.itemlists!);
+        Map<String, AppMediaItem> totalMediaItems = {};
+        Map<String, AppReleaseItem> totalReleaseItems = {};
+        Map<String, ExternalItem> totalExternalItems = {};
+        totalReleaseItems = CoreUtilities.getTotalReleaseItems(profile.value.itemlists!);
+        totalMediaItems = CoreUtilities.getTotalMediaItems(profile.value.itemlists!);
+        totalExternalItems = CoreUtilities.getTotalExternalItems(profile.value.itemlists!);
+
         for (var item in totalReleaseItems.values) {
-          totalMixedItems[item.id] = AppMediaItemMapper.fromAppReleaseItem(item);
+          totalMixedItems[item.id] = item;
         }
-        totalMixedItems.addAll(totalMediaItems);
+
+        for (var item in totalMediaItems.values) {
+          totalMixedItems[item.id] = item;
+        }
+
+        for (var item in totalExternalItems.values) {
+          totalMixedItems[item.id] = item;
+        }
       }
     }
 

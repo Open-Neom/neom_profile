@@ -22,20 +22,20 @@ class FollowingListPage extends StatelessWidget {
     return GetBuilder<MateController>(
       id: AppPageIdConstants.following,
       init: MateController(),
-      builder: (_) => Scaffold(
+      builder: (controller) => Scaffold(
         backgroundColor: AppColor.main50,
         appBar: AppBarChild(title: AppTranslationConstants.following.tr),
       body: Container(
         decoration: AppTheme.appBoxDecoration,
-        child: Obx(()=> _.isLoading.value ?
+        child: Obx(()=> controller.isLoading.value ?
           const Center(child: CircularProgressIndicator())
             : ListView.builder(
-          itemCount: _.mates.length,
+          itemCount: controller.mates.length,
           itemBuilder: (context, index) {
-            AppProfile mate = _.mates.values.elementAt(index);
+            AppProfile mate = controller.mates.values.elementAt(index);
             return mate.name.isNotEmpty ? GestureDetector(
               child: ListTile(
-                onTap: () => _.getMateDetails(mate),
+                onTap: () => controller.getMateDetails(mate),
                 leading: Hero(
                   tag: mate.photoUrl,
                   child: FutureBuilder<CachedNetworkImageProvider>(
@@ -55,7 +55,7 @@ class FollowingListPage extends StatelessWidget {
                 title: Text(mate.name),
                 subtitle: Row(
                   children: [
-                    Text(mate.favoriteItems?.length.toString() ?? ""),
+                    if(mate.favoriteItems?.isNotEmpty ?? false) Text(mate.favoriteItems!.length.toString()),
                      Icon(AppFlavour.getAppItemIcon(),
                       color: Colors.blueGrey, size: 20,),
                     Text(mate.mainFeature.tr.capitalize),
