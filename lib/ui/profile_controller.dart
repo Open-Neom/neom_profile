@@ -28,7 +28,7 @@ import 'package:neom_core/domain/model/event.dart';
 import 'package:neom_core/domain/model/external_item.dart';
 import 'package:neom_core/domain/model/facility.dart';
 import 'package:neom_core/domain/model/instrument.dart';
-import 'package:neom_core/domain/model/neom/chamber_preset.dart';
+import 'package:neom_core/domain/model/neom/neom_chamber_preset.dart';
 import 'package:neom_core/domain/model/place.dart';
 import 'package:neom_core/domain/model/post.dart';
 import 'package:neom_core/domain/use_cases/geolocator_service.dart';
@@ -62,7 +62,7 @@ class ProfileController extends GetxController implements ProfileService {
   @override
   String get location => _location.value;
 
-  final RxMap<String, ChamberPreset> totalPresets = <String, ChamberPreset>{}.obs;
+  final RxMap<String, NeomChamberPreset> totalPresets = <String, NeomChamberPreset>{}.obs;
   final RxMap<String, dynamic>  totalMixedItems = <String, dynamic>{}.obs;
 
   final RxList<Post> profilePosts = <Post>[].obs;
@@ -212,7 +212,7 @@ class ProfileController extends GetxController implements ProfileService {
       if(AppConfig.instance.appInUse == AppInUse.c) {
         profile.value.frequencies = await FrequencyFirestore().retrieveFrequencies(profile.value.id);
         for (var freq in profile.value.frequencies!.values) {
-          totalPresets[freq.frequency.toString()] = ChamberPreset.custom(frequency: freq);
+          totalPresets[freq.frequency.toString()] = NeomChamberPreset.custom(frequency: freq);
         }
         totalPresets.addAll(CoreUtilities.getTotalPresets(profile.value.chambers ?? {}));
       } else {
