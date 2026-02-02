@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/utils/app_alerts.dart';
@@ -46,7 +46,7 @@ Widget buildFollowerInfo(context, AppProfile profile) {
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)
             ),
             onTap: () => profile.following!.isNotEmpty
-                ? Get.toNamed(AppRouteConstants.following, arguments: profile.following)
+                ? Sint.toNamed(AppRouteConstants.following, arguments: profile.following)
                 : AppAlerts.showAlert(context, title: AppTranslationConstants.following.tr,
                 message: MessageTranslationConstants.followingMsg.tr),
           ),
@@ -56,7 +56,7 @@ Widget buildFollowerInfo(context, AppProfile profile) {
             child: Text('${profile.followers!.length.toString()} ${AppTranslationConstants.followers.tr}',
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)),
             onTap: () => profile.followers!.isNotEmpty
-                ? Get.toNamed(AppRouteConstants.followers, arguments: profile.followers)
+                ? Sint.toNamed(AppRouteConstants.followers, arguments: profile.followers)
                 : AppAlerts.showAlert(context, title: AppTranslationConstants.followers.tr,
                 message: MessageTranslationConstants.followersMsg.tr),
           ),
@@ -69,8 +69,8 @@ Widget buildFollowerInfo(context, AppProfile profile) {
       //         child: Text('${profile.itemmates!.length.toString()} ${AppTranslationConstants.itemmates.tr}',
       //             style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)),
       //         onTap: () => profile.itemmates!.isNotEmpty
-      //             ? Get.toNamed(AppRouteConstants.mates, arguments: profile.itemmates)
-      //             : AppUtilities.showAlert(context, AppTranslationConstants.itemmates.tr, AppTranslationConstants.itemmatesMsg.tr), //Get.toNamed(GigRouteConstants.SONGMATES, arguments: songmate.songmates),
+      //             ? Sint.toNamed(AppRouteConstants.mates, arguments: profile.itemmates)
+      //             : AppUtilities.showAlert(context, AppTranslationConstants.itemmates.tr, AppTranslationConstants.itemmatesMsg.tr), //Sint.toNamed(GigRouteConstants.SONGMATES, arguments: songmate.songmates),
       //       ),
       //       Text(' | ', style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)
       //       ),
@@ -78,8 +78,8 @@ Widget buildFollowerInfo(context, AppProfile profile) {
       //         child: Text('${profile.eventmates!.length.toString()} ${AppTranslationConstants.eventmates.tr}',
       //             style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)),
       //         onTap: () => profile.eventmates!.isNotEmpty
-      //             ? Get.toNamed(AppRouteConstants.mates, arguments: profile.eventmates)
-      //             : AppUtilities.showAlert(context, AppTranslationConstants.eventmates.tr, AppTranslationConstants.eventmatesMsg.tr), //Get.toNamed(GigRouteConstants.SONGMATES, arguments: songmate.songmates),
+      //             ? Sint.toNamed(AppRouteConstants.mates, arguments: profile.eventmates)
+      //             : AppUtilities.showAlert(context, AppTranslationConstants.eventmates.tr, AppTranslationConstants.eventmatesMsg.tr), //Sint.toNamed(GigRouteConstants.SONGMATES, arguments: songmate.songmates),
       //       ),
       //     ]),
       const Divider()

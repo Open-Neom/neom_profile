@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
@@ -23,7 +23,7 @@ class ProfileEditPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ProfileController>(
+    return SintBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
       builder: (controller) => Scaffold(
         appBar: AppBarChild(title: ProfileTranslationConstants.profileDetails.tr),
@@ -59,7 +59,7 @@ class ProfileEditPage extends StatelessWidget {
                             onTap: () async {
                               await controller.showUpdatePhotoDialog(context);
                               ///DEPRECATED
-                              // Get.toNamed(AppRouteConstants.mediaFullScreen, arguments: [controller.profile.value.photoUrl]);
+                              // Sint.toNamed(AppRouteConstants.mediaFullScreen, arguments: [controller.profile.value.photoUrl]);
                             }
                           ),
                           controller.isLoading.value ? const Center(child: CircularProgressIndicator())
@@ -163,7 +163,7 @@ class ProfileEditPage extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(20.0)),
                                   ),
                                   onPressed: () {
-                                    Get.toNamed(AppRouteConstants.instrumentsFav);
+                                    Sint.toNamed(AppRouteConstants.instrumentsFav);
                                   },
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -332,7 +332,7 @@ class ProfileEditPage extends StatelessWidget {
                         )
                     ),
                     onPressed: () {
-                      Get.toNamed(AppRouteConstants.instrumentsFav);
+                      Sint.toNamed(AppRouteConstants.instrumentsFav);
                     },
                   ),
                 ]

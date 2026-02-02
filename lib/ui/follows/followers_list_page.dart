@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
@@ -16,7 +16,7 @@ class FollowersListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<MateController>(
+    return SintBuilder<MateController>(
       id: AppPageIdConstants.followers,
       init: MateController(),
       builder: (controller) => Scaffold(

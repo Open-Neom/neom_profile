@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/widgets/event_tile.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
@@ -15,7 +15,7 @@ class ProfileEvents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ProfileController>(
+    return SintBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
       // init: ProfileController(),
       builder: (controller) => controller.events.isNotEmpty ?
@@ -26,7 +26,7 @@ class ProfileEvents extends StatelessWidget {
             Event event = controller.events.values.elementAt(index);
             return event.eventDate <= 0 ? const SizedBox.shrink() :
             GestureDetector(
-              onTap: () => Get.toNamed(AppRouteConstants.eventDetails, arguments: [event]),
+              onTap: () => Sint.toNamed(AppRouteConstants.eventDetails, arguments: [event]),
               child: EventTile(event),
             );
           })

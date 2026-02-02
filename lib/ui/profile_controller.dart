@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
@@ -48,11 +48,11 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../utils/constants/profile_translation_constants.dart';
 
-class ProfileController extends GetxController implements ProfileService {
+class ProfileController extends SintController implements ProfileService {
   
-  final userServiceImpl = Get.find<UserService>();
-  final mediaUploadServiceImpl = Get.find<MediaUploadService>();
-  final geoLocatorServiceImpl = Get.find<GeoLocatorService>();
+  final userServiceImpl = Sint.find<UserService>();
+  final mediaUploadServiceImpl = Sint.find<MediaUploadService>();
+  final geoLocatorServiceImpl = Sint.find<GeoLocatorService>();
 
   final Rx<AppProfile> profile = AppProfile().obs;
   final RxBool editStatus = false.obs;
@@ -181,10 +181,10 @@ class ProfileController extends GetxController implements ProfileService {
   void getItemDetails(AppMediaItem appMediaItem) {
     AppConfig.logger.d("getItemDetails for ${appMediaItem.name}");
     if(AppConfig.instance.appInUse != AppInUse.g) {
-      Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
+      Sint.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
     } else {
-      ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.downToUp);
-      Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
+      ///DEPRECATED Sint.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.downToUp);
+      Sint.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
     }
   }
 
@@ -553,7 +553,7 @@ class ProfileController extends GetxController implements ProfileService {
     try {
       if(newProfileType.value != profile.value.type && profile.value.id.isNotEmpty) {
         if(await ProfileFirestore().updateType(profile.value.id, newProfileType.value)) {
-          Get.back();
+          Sint.back();
           AppUtilities.showSnackBar(
               title: ProfileTranslationConstants.updateProfileType.tr,
               message: ProfileTranslationConstants.updateProfileTypeSuccess.tr);
@@ -651,7 +651,7 @@ class ProfileController extends GetxController implements ProfileService {
     try {
       if(newUsageReason.value != profile.value.usageReason && profile.value.id.isNotEmpty) {
         if(await ProfileFirestore().updateUsageReason(profile.value.id, newUsageReason.value)) {
-          Get.back();
+          Sint.back();
           AppUtilities.showSnackBar(
               title: ProfileTranslationConstants.updateProfileType.tr,
               message: ProfileTranslationConstants.updateProfileTypeSuccess.tr);
@@ -754,7 +754,7 @@ class ProfileController extends GetxController implements ProfileService {
     try {
       if(profile.value.id.isNotEmpty) {
         if(await FacilityFirestore().addFacility(profileId: profile.value.id, facilityType: facilityType.value)) {
-          Get.back();
+          Sint.back();
           AppUtilities.showSnackBar(
               title: ProfileTranslationConstants.updateProfile.tr,
               message: ProfileTranslationConstants.facilityAdded.tr);
@@ -857,7 +857,7 @@ class ProfileController extends GetxController implements ProfileService {
     try {
       if(profile.value.id.isNotEmpty) {
         if(await PlaceFirestore().addPlace(placeType: placeType.value, profileId: profile.value.id)) {
-          Get.back();
+          Sint.back();
           AppUtilities.showSnackBar(
               title: ProfileTranslationConstants.updateProfile.tr,
               message: ProfileTranslationConstants.placeAdded.tr);

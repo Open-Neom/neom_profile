@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/ui/widgets/post_tile.dart';
 import 'package:neom_commons/utils/constants/app_assets.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
@@ -14,7 +14,7 @@ class ProfilePosts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ProfileController>(
+    return SintBuilder<ProfileController>(
       id: AppPageIdConstants.profilePosts,
       builder: (controller) {
         if (controller.isLoading.value) {
