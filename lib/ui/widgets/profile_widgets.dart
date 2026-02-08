@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sint/sint.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/utils/app_alerts.dart';
@@ -7,6 +6,7 @@ import 'package:neom_commons/utils/constants/translations/app_translation_consta
 import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
+import 'package:sint/sint.dart';
 
 
 
@@ -34,7 +34,7 @@ Widget buildTitleLabel(BuildContext context, String title, String msg){
   );
 }
 
-Widget buildFollowerInfo(context, AppProfile profile) {
+Widget buildFollowerInfo(BuildContext context, AppProfile profile) {
   return Padding(
     padding: const EdgeInsets.only(top: AppTheme.padding10),
     child: Column(children: [

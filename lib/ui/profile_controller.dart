@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
@@ -45,6 +44,7 @@ import 'package:neom_core/utils/enums/place_type.dart';
 import 'package:neom_core/utils/enums/profile_type.dart';
 import 'package:neom_core/utils/enums/usage_reason.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:sint/sint.dart';
 
 import '../utils/constants/profile_translation_constants.dart';
 
@@ -100,6 +100,16 @@ class ProfileController extends SintController implements ProfileService {
     }
   }
 
+  @override
+  void onClose() {
+    // FIXED: Dispose TextEditingControllers to prevent memory leaks
+    nameController.dispose();
+    aboutMeController.dispose();
+    displayNameController.dispose();
+    bioController.dispose();
+    super.onClose();
+  }
+
   Future<void> setProfileInfo() async {
     profile.value = userServiceImpl.profile;
     profileName = profile.value.name;
@@ -151,6 +161,48 @@ class ProfileController extends SintController implements ProfileService {
     previousInstruments = Map.from(profile.value.instruments ?? {});
     previousMainFeature = profile.value.mainFeature;
     isLoading.value = false;
+  }
+
+  /// Refresh profile data - for pull-to-refresh functionality
+  Future<void> refreshProfile() async {
+    AppConfig.logger.t("Refreshing Profile");
+    try {
+      // Reload profile from Firestore
+      final updatedProfile = await ProfileFirestore().retrieve(profile.value.id);
+      if (updatedProfile.id.isNotEmpty) {
+        profile.value = updatedProfile;
+        userServiceImpl.profile = updatedProfile;
+      }
+
+      // Update location if available
+      if (profile.value.position != null) {
+        _location.value = await geoLocatorServiceImpl.getAddressSimple(profile.value.position!);
+      }
+
+      // Clear and reload activity data
+      profilePosts.clear();
+      events.clear();
+      eventPosts.clear();
+      totalPresets.clear();
+      totalMixedItems.clear();
+
+      await loadProfileActivity();
+
+      AppUtilities.showSnackBar(
+        title: ProfileTranslationConstants.profileDetails.tr,
+        message: 'Profile updated',
+        duration: const Duration(seconds: 2),
+      );
+    } catch (e) {
+      AppConfig.logger.e("Error refreshing profile: $e");
+      AppUtilities.showSnackBar(
+        title: ProfileTranslationConstants.profileDetails.tr,
+        message: 'Failed to refresh profile',
+        duration: const Duration(seconds: 2),
+      );
+    }
+
+    update([AppPageIdConstants.profile]);
   }
 
 

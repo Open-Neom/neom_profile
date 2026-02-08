@@ -1,30 +1,89 @@
-## 1.4.0 - Architectural Enhancements & Service Decoupling
+# Changelog
 
-This release for `neom_profile` introduces significant architectural refinements, primarily focusing on enhancing decoupling, testability, and clarity of service interactions, in line with the broader Open Neom refactoring efforts.
+All notable changes to neom_profile will be documented in this file.
 
-**Key Architectural & Feature Improvements:**
+## [2.0.0] - 2025-02-08
 
-* **Service Decoupling for Core Dependencies:**
-    * **User Service Integration:** The `ProfileController` now interacts with user data and profile management through the `UserService` interface (instead of directly with `UserController`). This promotes the Dependency Inversion Principle (DIP), making the module more robust and testable.
-    * **Geolocation Service Integration:** Location functionalities (like updating profile location) are now handled via the `GeoLocatorService` interface (instead of `GeoLocatorController`), further abstracting external dependencies from the module's core logic.
+### Added
+- **ProfileCacheController** - Complete offline cache for visited profiles
+  - 7-day cache expiration
+  - 50 profile maximum with LRU cleanup
+  - Recent profiles tracking
+  - Cache statistics
+- **Pull-to-refresh** - `refreshProfile()` method for data reload
+- **Library exports** - `neom_profile.dart` for clean imports
+- **Memory management** - TextEditingController disposal in `onClose()`
 
-* **Module-Specific Translations:**
-    * Introduced `ProfileTranslationConstants` to centralize and manage all module-specific translation keys. This ensures that `neom_profile`'s UI text is easily localizable and maintainable, aligning with Open Neom's comprehensive internationalization strategy.
-    * Examples of new translation keys include: `followingMsg`, `followersMsg`, `unfollowMsg`, `updateProfilePicture`, `profileDetails`, `profileInformation`, `aboutMe`, `following`, `followers`, `updateProfile`, `editProfile`, `profileUpdatedMsg`, `thereWasNoChanges`, `updateProfileType`, `updateProfileTypeMsg`, `updateProfileTypeSuccess`, `updateProfileTypeSame`, `facilityType`, `facilityAdded`, `placeType`, `placeAdded`.
+### Changed
+- **SINT framework migration** - Replaced deprecated GetX API
+- **Profile loading** - Optimized activity data loading
+- **Service decoupling** - All controllers use service interfaces
+- **Removed hive_flutter** - Using neom_core's Hive integration
 
-* **Enhanced Profile Management & Display:**
-    * Improved logic for updating profile data (name, about me), including validation for name availability and update frequency.
-    * Refined handling of profile image and cover image updates, leveraging `neom_media_upload` services.
-    * Streamlined the process for updating profile types (e.g., `appArtist`, `facilitator`, `host`), and adding associated facility or place types.
-    * Optimized loading and display of aggregated content (posts, items, events, chamber presets) on the profile page for better performance.
+### Fixed
+- **Memory leaks** - Proper disposal of TextEditingControllers
+- **Profile refresh** - Clear and reload all activity data
+- **Location updates** - Improved geolocation handling
 
-* **Integration with Global Architectural Changes:**
-    * Adopts the updated service injection patterns established in `neom_core`'s recent refactor, ensuring consistent dependency management.
-    * Benefits from the consolidated `CoreConstants` and other global utilities from `neom_commons`.
+### Architecture
+```
+Cache System:
+- ProfileCacheController (singleton)
+- Hive-based storage
+- 7-day expiration per profile
+- 50 profile LRU limit
+- Timestamp tracking for recency
+```
 
-**Overall Benefits of this Release:**
+### Dependencies
+- `neom_core` - Core services and Firestore
+- `neom_commons` - Shared UI components
 
-* **Increased Testability:** Decoupling from concrete controllers allows for easier mocking and unit testing of `ProfileController`'s business logic.
-* **Improved Maintainability:** Clearer separation of concerns makes the module easier to understand, debug, and extend.
-* **Enhanced Flexibility:** The module is now more adaptable to changes in underlying service implementations without requiring modifications to `neom_profile` itself.
-* **Richer User Experience:** Refinements in profile editing and display contribute to a more intuitive and comprehensive user interaction.
+---
+
+## [1.5.2] - Previous Release
+
+### Fixed
+- Minor bug fixes and improvements
+
+---
+
+## [1.4.0] - Earlier Release
+
+### Added
+- ProfileTranslationConstants for localization
+- Profile type management dialogs
+- Facility and place addition
+
+### Changed
+- Service decoupling via interfaces
+- UserService and GeoLocatorService integration
+- Profile image handling via MediaUploadService
+
+### Architecture
+- Dependency Inversion Principle implementation
+- Clean Architecture adherence
+- Improved testability
+
+---
+
+## [1.3.0] - Earlier Release
+
+### Added
+- Followers/following list pages
+- Profile tabs (posts, items, events)
+- Chamber presets tab (Cyberneom)
+
+### Changed
+- Profile editing improvements
+- Content aggregation optimization
+
+---
+
+## [1.2.0] - Initial Features
+
+### Added
+- Profile page display
+- Profile editing
+- Photo and cover upload
+- Location management

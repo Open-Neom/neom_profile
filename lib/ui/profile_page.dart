@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
@@ -8,6 +7,7 @@ import 'package:neom_commons/ui/widgets/app_circular_progress_indicator.dart';
 import 'package:neom_commons/ui/widgets/buttons/position_back_button.dart';
 import 'package:neom_commons/ui/widgets/genres_grid_view.dart';
 import 'package:neom_commons/ui/widgets/images/diagonally_cut_colored_image.dart';
+import 'package:neom_commons/ui/widgets/profile_completion_indicator.dart';
 import 'package:neom_commons/ui/widgets/read_more_container.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
@@ -20,6 +20,7 @@ import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/constants/core_constants.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/enums/verification_level.dart';
+import 'package:sint/sint.dart';
 
 import '../utils/constants/profile_constants.dart';
 import 'profile_controller.dart';
@@ -39,7 +40,12 @@ class ProfilePage extends StatelessWidget {
         height: AppTheme.fullHeight(context),
         decoration: AppTheme.appBoxDecoration,
         child: controller.isLoading.value ? const AppCircularProgressIndicator()
-            : SingleChildScrollView(
+            : RefreshIndicator(
+          onRefresh: () => controller.refreshProfile(),
+          color: AppColor.bondiBlue75,
+          backgroundColor: AppColor.main50,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -76,6 +82,16 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ),
                       buildFollowerInfo(context, controller.profile.value),
+                      // Profile completion indicator
+                      ProfileCompletionIndicator(
+                        profile: controller.profile.value,
+                        onPhotoTap: () => Sint.toNamed(AppRouteConstants.profileEdit),
+                        onCoverTap: () => controller.showUpdateCoverImgDialog(context),
+                        onBioTap: () => Sint.toNamed(AppRouteConstants.profileEdit),
+                        onLocationTap: () => controller.updateLocation(),
+                        onGenresTap: () => Sint.toNamed(AppRouteConstants.profileEdit),
+                        compact: true,
+                      ),
                       AppTheme.heightSpace20,
                       Padding(
                         padding: const EdgeInsets.all(AppTheme.padding20),
@@ -175,6 +191,7 @@ class ProfilePage extends StatelessWidget {
             ),
           ],
           ),
+        ),
         ),
       ),),
     );

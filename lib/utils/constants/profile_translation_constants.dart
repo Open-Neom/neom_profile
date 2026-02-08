@@ -22,4 +22,8 @@ class ProfileTranslationConstants {
   static const String placeType = 'placeType';
   static const String placeAdded = 'placeAdded';
 
+  // Profile member types
+  static const String itemmates = 'Itemmates';
+  static const String eventmates = 'Eventmates';
+
 }
