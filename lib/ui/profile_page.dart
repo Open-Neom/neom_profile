@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
@@ -9,6 +10,7 @@ import 'package:neom_commons/ui/widgets/genres_grid_view.dart';
 import 'package:neom_commons/ui/widgets/images/diagonally_cut_colored_image.dart';
 import 'package:neom_commons/ui/widgets/profile_completion_indicator.dart';
 import 'package:neom_commons/ui/widgets/read_more_container.dart';
+import 'package:neom_commons/ui/widgets/web_content_wrapper.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
@@ -36,8 +38,10 @@ class ProfilePage extends StatelessWidget {
       init: ProfileController(),
       builder: (controller) => Scaffold(
         backgroundColor: AppFlavour.getBackgroundColor(),
-        body: Container(
-        height: AppTheme.fullHeight(context),
+        body: WebContentWrapper(
+        maxWidth: 900,
+        padding: EdgeInsets.zero,
+        child: Container(
         decoration: AppTheme.appBoxDecoration,
         child: controller.isLoading.value ? const AppCircularProgressIndicator()
             : RefreshIndicator(
@@ -172,7 +176,7 @@ class ProfilePage extends StatelessWidget {
                                 labelPadding: const EdgeInsets.symmetric(horizontal: 0.0),
                               ),
                               SizedBox(
-                                height: AppTheme.fullHeight(context)/2.5,
+                                height: kIsWeb ? 600 : AppTheme.fullHeight(context)/2.5,
                                 child: TabBarView(
                                   children: (AppConfig.instance.appInUse == AppInUse.c || AppConfig.instance.appInUse == AppInUse.o)
                                       ? ProfileConstants.neomProfileTabPages : ProfileConstants.profileTabPages,
@@ -193,6 +197,7 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
         ),
+      ),
       ),),
     );
   }

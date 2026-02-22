@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:neom_commons/ui/widgets/post_tile.dart';
+import 'package:neom_commons/ui/widgets/web_responsive_grid.dart';
 import 'package:neom_commons/utils/constants/app_assets.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
@@ -25,24 +26,24 @@ class ProfilePosts extends StatelessWidget {
       id: AppPageIdConstants.profilePosts,
       builder: (controller) {
         if (controller.isLoading.value) {
-          return _buildLoadingGrid();
+          return _buildLoadingGrid(context);
         } else if (controller.profilePosts.isEmpty) {
           return _buildEmptyState();
         } else {
-          return _buildPostsGrid(controller);
+          return _buildPostsGrid(context, controller);
         }
       },
     );
   }
 
-  Widget _buildLoadingGrid() {
+  Widget _buildLoadingGrid(BuildContext context) {
     return GridView.builder(
       padding: EdgeInsets.zero,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 1,
-        crossAxisSpacing: 1,
-        childAspectRatio: 1,
+      gridDelegate: WebResponsiveGrid.responsiveDelegate(context,
+        mobileColumns: 3,
+        tabletColumns: 3,
+        desktopColumns: 4,
+        wideDesktopColumns: 5,
       ),
       itemCount: 9,
       itemBuilder: (context, index) {
@@ -106,7 +107,7 @@ class ProfilePosts extends StatelessWidget {
     );
   }
 
-  Widget _buildPostsGrid(ProfileController controller) {
+  Widget _buildPostsGrid(BuildContext context, ProfileController controller) {
     // Filter out caption and blog posts
     final List<Post> displayPosts = controller.profilePosts
         .where((post) => post.type != PostType.caption && post.type != PostType.blogEntry)
@@ -119,11 +120,11 @@ class ProfilePosts extends StatelessWidget {
     return GridView.builder(
       padding: EdgeInsets.zero,
       physics: const BouncingScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 1,
-        crossAxisSpacing: 1,
-        childAspectRatio: 1,
+      gridDelegate: WebResponsiveGrid.responsiveDelegate(context,
+        mobileColumns: 3,
+        tabletColumns: 3,
+        desktopColumns: 4,
+        wideDesktopColumns: 5,
       ),
       itemCount: displayPosts.length,
       itemBuilder: (context, index) {

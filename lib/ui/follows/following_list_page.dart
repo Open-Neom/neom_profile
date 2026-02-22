@@ -38,7 +38,7 @@ class FollowingListPage extends StatelessWidget {
                 onTap: () => controller.getMateDetails(mate),
                 leading: Hero(
                   tag: mate.photoUrl,
-                  child: FutureBuilder<CachedNetworkImageProvider>(
+                  child: FutureBuilder<ImageProvider>(
                     future: AppUtilities.handleCachedImageProvider(mate.photoUrl),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
