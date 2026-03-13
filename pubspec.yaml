@@ -18,6 +18,10 @@ dependencies:
   neom_commons:
     git:
       url: git@github.com:Open-Neom/neom_commons.git
+  neom_home:
+    path: ../neom_home
+  neom_ytmusic:
+    path: ../neom_ytmusic
 
 dev_dependencies:
   flutter_test:

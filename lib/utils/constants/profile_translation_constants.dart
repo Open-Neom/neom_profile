@@ -22,6 +22,12 @@ class ProfileTranslationConstants {
   static const String placeType = 'placeType';
   static const String placeAdded = 'placeAdded';
 
+  // Custom URL / Slug
+  static const String customUrl = 'customUrl';
+  static const String slugTaken = 'slugTaken';
+  static const String slugInvalid = 'slugInvalid';
+  static const String slugUpdated = 'slugUpdated';
+
   // Profile member types
   static const String itemmates = 'Itemmates';
   static const String eventmates = 'Eventmates';

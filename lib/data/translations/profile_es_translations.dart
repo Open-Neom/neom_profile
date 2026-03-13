@@ -26,6 +26,10 @@ class ProfileEsTranslations {
     ProfileTranslationConstants.updateProfileTypeMsg: 'Elige el tipo de perfil indicado para el uso personalizado de tu cuenta.',
     ProfileTranslationConstants.updateProfileTypeSame: 'El tipo de perfil elegido es el mismo que el anterior',
     ProfileTranslationConstants.updateProfileTypeSuccess: 'El tipo de perfil ha sido actualizado satisfactoriamente.',
+    ProfileTranslationConstants.customUrl: 'URL personalizada',
+    ProfileTranslationConstants.slugTaken: 'Esta URL ya está en uso',
+    ProfileTranslationConstants.slugInvalid: 'Solo letras y números, sin espacios',
+    ProfileTranslationConstants.slugUpdated: 'URL personalizada actualizada',
   };
 
 }

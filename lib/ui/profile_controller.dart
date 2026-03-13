@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:neom_commons/app_flavour.dart';
@@ -13,6 +14,7 @@ import 'package:neom_commons/utils/datetime_utilities.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/data/firestore/app_upload_firestore.dart';
 import 'package:neom_core/data/firestore/event_firestore.dart';
+import 'package:neom_core/data/firestore/nupale_session_firestore.dart';
 import 'package:neom_core/data/firestore/facility_firestore.dart';
 import 'package:neom_core/data/firestore/frequency_firestore.dart';
 import 'package:neom_core/data/firestore/itemlist_firestore.dart';
@@ -26,8 +28,11 @@ import 'package:neom_core/domain/model/app_release_item.dart';
 import 'package:neom_core/domain/model/event.dart';
 import 'package:neom_core/domain/model/external_item.dart';
 import 'package:neom_core/domain/model/facility.dart';
+import 'package:neom_core/domain/model/influence.dart';
 import 'package:neom_core/domain/model/instrument.dart';
 import 'package:neom_core/domain/model/neom/neom_chamber_preset.dart';
+import 'package:neom_core/domain/model/nupale/nupale_session.dart';
+import 'package:neom_core/domain/model/nupale/reading_progress.dart';
 import 'package:neom_core/domain/model/place.dart';
 import 'package:neom_core/domain/model/post.dart';
 import 'package:neom_core/domain/use_cases/geolocator_service.dart';
@@ -51,8 +56,8 @@ import '../utils/constants/profile_translation_constants.dart';
 class ProfileController extends SintController implements ProfileService {
   
   final userServiceImpl = Sint.find<UserService>();
-  final mediaUploadServiceImpl = Sint.find<MediaUploadService>();
-  final geoLocatorServiceImpl = Sint.find<GeoLocatorService>();
+  final MediaUploadService? mediaUploadServiceImpl = Sint.find<MediaUploadService>();
+  final GeoLocatorService? geoLocatorServiceImpl = kIsWeb ? null : Sint.find<GeoLocatorService>();
 
   final Rx<AppProfile> profile = AppProfile().obs;
   final RxBool editStatus = false.obs;
@@ -64,6 +69,7 @@ class ProfileController extends SintController implements ProfileService {
 
   final RxMap<String, NeomChamberPreset> totalPresets = <String, NeomChamberPreset>{}.obs;
   final RxMap<String, dynamic>  totalMixedItems = <String, dynamic>{}.obs;
+  final RxMap<String, ReadingProgress> readingProgressMap = <String, ReadingProgress>{}.obs;
 
   final RxList<Post> profilePosts = <Post>[].obs;
   final RxMap<String, Event> events = <String, Event>{}.obs;
@@ -74,6 +80,7 @@ class ProfileController extends SintController implements ProfileService {
 
   TextEditingController nameController = TextEditingController();
   TextEditingController aboutMeController = TextEditingController();
+  TextEditingController slugController = TextEditingController();
   TextEditingController displayNameController = TextEditingController();
   TextEditingController bioController = TextEditingController();
 
@@ -82,6 +89,7 @@ class ProfileController extends SintController implements ProfileService {
   bool aboutMeValid = true;
   bool isValidName = true;
   Map<String, Instrument> previousInstruments = {};
+  List<Influence> previousInfluences = [];
   String previousMainFeature = '';
   Rx<ProfileType>  newProfileType = ProfileType.general.obs;
   Rx<UsageReason>  newUsageReason = UsageReason.casual.obs;
@@ -105,6 +113,7 @@ class ProfileController extends SintController implements ProfileService {
     // FIXED: Dispose TextEditingControllers to prevent memory leaks
     nameController.dispose();
     aboutMeController.dispose();
+    slugController.dispose();
     displayNameController.dispose();
     bioController.dispose();
     super.onClose();
@@ -116,8 +125,8 @@ class ProfileController extends SintController implements ProfileService {
     profileAboutMe = profile.value.aboutMe;
     newProfileType.value = profile.value.type;
     newUsageReason.value = profile.value.usageReason;
-    if(profile.value.position != null) {
-      _location.value = await geoLocatorServiceImpl.getAddressSimple(profile.value.position!);
+    if(profile.value.position != null && geoLocatorServiceImpl != null) {
+      _location.value = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
     }
 
     if((profile.value.itemlists?.isEmpty ?? true) || profile.value.itemlists?.values.first.type != AppFlavour.getDefaultItemlistType()) {
@@ -125,6 +134,8 @@ class ProfileController extends SintController implements ProfileService {
     }
     aboutMeController.text = profile.value.aboutMe;
     nameController.text = profile.value.name;
+    slugController.text = profile.value.slug;
+    previousInfluences = List.from(profile.value.influences ?? []);
   }
 
   @override
@@ -154,6 +165,7 @@ class ProfileController extends SintController implements ProfileService {
       }
 
       await getTotalItems();
+      await getReadingProgress();
     } catch (e) {
       AppConfig.logger.e(e.toString());
     }
@@ -175,8 +187,8 @@ class ProfileController extends SintController implements ProfileService {
       }
 
       // Update location if available
-      if (profile.value.position != null) {
-        _location.value = await geoLocatorServiceImpl.getAddressSimple(profile.value.position!);
+      if (profile.value.position != null && geoLocatorServiceImpl != null) {
+        _location.value = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
       }
 
       // Clear and reload activity data
@@ -185,6 +197,7 @@ class ProfileController extends SintController implements ProfileService {
       eventPosts.clear();
       totalPresets.clear();
       totalMixedItems.clear();
+      readingProgressMap.clear();
 
       await loadProfileActivity();
 
@@ -233,7 +246,7 @@ class ProfileController extends SintController implements ProfileService {
   void getItemDetails(AppMediaItem appMediaItem) {
     AppConfig.logger.d("getItemDetails for ${appMediaItem.name}");
     if(AppConfig.instance.appInUse != AppInUse.g) {
-      Sint.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
+      Sint.toNamed(AppFlavour.getMainItemDetailsRoute(appMediaItem.id), arguments: [appMediaItem]);
     } else {
       ///DEPRECATED Sint.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.downToUp);
       Sint.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
@@ -293,6 +306,38 @@ class ProfileController extends SintController implements ProfileService {
     update([AppPageIdConstants.profile]);
   }
 
+  Future<void> getReadingProgress() async {
+    AppConfig.logger.d("getReadingProgress for own profile");
+
+    try {
+      final email = userServiceImpl.user.email;
+      if (email.isEmpty) return;
+
+      final sessions = await NupaleSessionFirestore().fetchByReaderEmail(email);
+      if (sessions.isEmpty) return;
+
+      final Map<String, List<NupaleSession>> grouped = {};
+      for (final session in sessions.values) {
+        grouped.putIfAbsent(session.itemId, () => []).add(session);
+      }
+
+      for (final entry in grouped.entries) {
+        final progress = ReadingProgress.fromSessions(entry.key, entry.value);
+        readingProgressMap[entry.key] = progress;
+
+        if (!totalMixedItems.containsKey(entry.key)) {
+          totalMixedItems[entry.key] = progress;
+        }
+      }
+
+      AppConfig.logger.d("${readingProgressMap.length} reading progress entries found");
+    } catch (e) {
+      AppConfig.logger.e("Error getting reading progress: $e");
+    }
+
+    update([AppPageIdConstants.profile]);
+  }
+
   Future<void> getTotalEvents() async {
     AppConfig.logger.t("getTotalEvents");
 
@@ -323,11 +368,11 @@ class ProfileController extends SintController implements ProfileService {
     AppConfig.logger.t("Updating location");
     try {
 
-      Position? newPosition =  await geoLocatorServiceImpl.getCurrentPosition();
+      Position? newPosition = await geoLocatorServiceImpl?.getCurrentPosition();
       if(newPosition != null) {
         if(await ProfileFirestore().updatePosition(profile.value.id, newPosition)){
           profile.value.position = newPosition;
-          _location.value = await geoLocatorServiceImpl.getAddressSimple(profile.value.position!);
+          _location.value = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
         }
         AppConfig.logger.d("Location retrieved and updated successfully for ${_location.value}");
       } else {
@@ -346,10 +391,12 @@ class ProfileController extends SintController implements ProfileService {
 
     bool nameChanged = profileName != nameController.text.trim();
     bool aboutMeChanged = profileAboutMe != aboutMeController.text.trim();
+    bool slugChanged = profile.value.slug != slugController.text.trim();
     bool profileInstrumentsChanged = !CollectionUtilities.mapKeysEquals(previousInstruments, profile.value.instruments ?? {});
     bool mainFeatureChanged = previousMainFeature != profile.value.mainFeature;
+    bool influencesChanged = !_influencesEqual(previousInfluences, profile.value.influences ?? []);
 
-    if(nameChanged || aboutMeChanged || mainFeatureChanged || profileInstrumentsChanged) {
+    if(nameChanged || aboutMeChanged || slugChanged || mainFeatureChanged || profileInstrumentsChanged || influencesChanged) {
       if(nameChanged) {
         profileName = nameController.text.trim();
 
@@ -365,7 +412,6 @@ class ProfileController extends SintController implements ProfileService {
                   title: ProfileTranslationConstants.profileDetails.tr,
                   message: MessageTranslationConstants.profileNameUpdated.tr,
                 );
-
               }
             } else {
               AppUtilities.showSnackBar(
@@ -384,7 +430,37 @@ class ProfileController extends SintController implements ProfileService {
             duration: const Duration(seconds: 5)
           );
         }
+      }
 
+      if(slugChanged) {
+        final newSlug = slugController.text.trim();
+        final validSlug = AppProfile.generateSlug(newSlug);
+        if(validSlug.isEmpty || validSlug.length < 3) {
+          AppUtilities.showSnackBar(
+            title: ProfileTranslationConstants.profileDetails.tr,
+            message: ProfileTranslationConstants.slugInvalid.tr,
+          );
+          return;
+        }
+        if(validSlug != profile.value.slug) {
+          final isAvailable = await ProfileFirestore().isAvailableSlug(validSlug);
+          if(!isAvailable) {
+            AppUtilities.showSnackBar(
+              title: ProfileTranslationConstants.profileDetails.tr,
+              message: ProfileTranslationConstants.slugTaken.tr,
+            );
+            return;
+          }
+          if(await ProfileFirestore().updateSlug(profile.value.id, validSlug)) {
+            userServiceImpl.profile.slug = validSlug;
+            profile.value.slug = validSlug;
+            slugController.text = validSlug;
+            AppUtilities.showSnackBar(
+              title: ProfileTranslationConstants.profileDetails.tr,
+              message: ProfileTranslationConstants.slugUpdated.tr,
+            );
+          }
+        }
       }
 
       if(aboutMeChanged) {
@@ -410,6 +486,14 @@ class ProfileController extends SintController implements ProfileService {
 
       if(profileInstrumentsChanged) previousInstruments = Map.from(profile.value.instruments ?? {});
       if(mainFeatureChanged) previousMainFeature = profile.value.mainFeature;
+
+      if(influencesChanged) {
+        if(await ProfileFirestore().updateInfluences(
+            profile.value.id, profile.value.influences ?? [])) {
+          userServiceImpl.profile.influences = profile.value.influences;
+          previousInfluences = List.from(profile.value.influences ?? []);
+        }
+      }
     } else {
       AppUtilities.showSnackBar(
         title: ProfileTranslationConstants.profileDetails.tr,
@@ -417,8 +501,6 @@ class ProfileController extends SintController implements ProfileService {
       );
       return;
     }
-
-
 
     editStatus.value = false;
     update([AppPageIdConstants.profile, AppPageIdConstants.appDrawer]);
@@ -432,9 +514,10 @@ class ProfileController extends SintController implements ProfileService {
     update([AppPageIdConstants.profile]);
 
     try {
-      await mediaUploadServiceImpl.handleImage(uploadDestination: MediaUploadDestination.profile);
-      if(mediaUploadServiceImpl.getMediaFile().path.isNotEmpty) {
-        String photoUrl = await AppUploadFirestore().uploadMediaFile(mediaUploadServiceImpl.getMediaId(), mediaUploadServiceImpl.getMediaFile(), MediaType.image, MediaUploadDestination.post);
+      if(mediaUploadServiceImpl == null) return;
+      await mediaUploadServiceImpl!.handleImage(uploadDestination: MediaUploadDestination.profile);
+      if(mediaUploadServiceImpl!.getMediaFile().path.isNotEmpty) {
+        String photoUrl = await AppUploadFirestore().uploadMediaFile(mediaUploadServiceImpl!.getMediaId(), mediaUploadServiceImpl!.getMediaFile(), MediaType.image, MediaUploadDestination.post);
 
         if(uploadDestination == MediaUploadDestination.profile) {
           if (await ProfileFirestore().updatePhotoUrl(profile.value.id, photoUrl)) {
@@ -465,7 +548,7 @@ class ProfileController extends SintController implements ProfileService {
         context: context,
         builder: (context){
           return SimpleDialog(
-            backgroundColor: AppColor.getMain(),
+            backgroundColor: AppColor.scaffold,
             title: Text(ProfileTranslationConstants.updateProfilePicture.tr),
             children: <Widget>[
               SimpleDialogOption(
@@ -493,7 +576,7 @@ class ProfileController extends SintController implements ProfileService {
         context: context,
         builder: (context){
           return SimpleDialog(
-            backgroundColor: AppColor.getMain(),
+            backgroundColor: AppColor.scaffold,
             title: Text(CommonTranslationConstants.updateCoverImage.tr),
             children: <Widget>[
               SimpleDialogOption(
@@ -533,7 +616,7 @@ class ProfileController extends SintController implements ProfileService {
     Alert(
         context: context,
         style: AlertStyle(
-          backgroundColor: AppColor.main50,
+          backgroundColor: AppColor.scaffold,
           titleStyle: const TextStyle(fontWeight: FontWeight.bold),
         ),
         title: ProfileTranslationConstants.updateProfileType.tr,
@@ -561,7 +644,7 @@ class ProfileController extends SintController implements ProfileService {
                   iconSize: 20,
                   elevation: 16,
                   style: const TextStyle(color: Colors.white),
-                  dropdownColor: AppColor.main75,
+                  dropdownColor: AppColor.surfaceElevated,
                   underline: Container(
                     height: 1,
                     color: Colors.grey,
@@ -631,7 +714,7 @@ class ProfileController extends SintController implements ProfileService {
     Alert(
         context: context,
         style: AlertStyle(
-          backgroundColor: AppColor.main50,
+          backgroundColor: AppColor.scaffold,
           titleStyle: const TextStyle(fontWeight: FontWeight.bold),
         ),
         title: ProfileTranslationConstants.updateProfileType.tr,
@@ -659,7 +742,7 @@ class ProfileController extends SintController implements ProfileService {
                   iconSize: 20,
                   elevation: 16,
                   style: const TextStyle(color: Colors.white),
-                  dropdownColor: AppColor.main75,
+                  dropdownColor: AppColor.surfaceElevated,
                   underline: Container(
                     height: 1,
                     color: Colors.grey,
@@ -734,7 +817,7 @@ class ProfileController extends SintController implements ProfileService {
     Alert(
         context: context,
         style: AlertStyle(
-          backgroundColor: AppColor.main50,
+          backgroundColor: AppColor.scaffold,
           titleStyle: const TextStyle(fontWeight: FontWeight.bold),
         ),
         title: ProfileTranslationConstants.updateProfileType.tr,
@@ -762,7 +845,7 @@ class ProfileController extends SintController implements ProfileService {
                   iconSize: 20,
                   elevation: 16,
                   style: const TextStyle(color: Colors.white),
-                  dropdownColor: AppColor.main75,
+                  dropdownColor: AppColor.surfaceElevated,
                   underline: Container(
                     height: 1,
                     color: Colors.grey,
@@ -837,7 +920,7 @@ class ProfileController extends SintController implements ProfileService {
     Alert(
         context: context,
         style: AlertStyle(
-          backgroundColor: AppColor.main50,
+          backgroundColor: AppColor.scaffold,
           titleStyle: const TextStyle(fontWeight: FontWeight.bold),
         ),
         title: ProfileTranslationConstants.updateProfileType.tr,
@@ -865,7 +948,7 @@ class ProfileController extends SintController implements ProfileService {
                   iconSize: 20,
                   elevation: 16,
                   style: const TextStyle(color: Colors.white),
-                  dropdownColor: AppColor.main75,
+                  dropdownColor: AppColor.surfaceElevated,
                   underline: Container(
                     height: 1,
                     color: Colors.grey,
@@ -925,6 +1008,29 @@ class ProfileController extends SintController implements ProfileService {
     } catch (e) {
       AppConfig.logger.e(e.toString());
     }
+  }
+
+  // ─── Influences ───
+
+  void addInfluence(Influence influence) {
+    profile.value.influences ??= [];
+    if (profile.value.influences!.any((i) => i.id == influence.id)) return;
+    if (profile.value.influences!.length >= 10) return;
+    profile.value.influences!.add(influence);
+    update([AppPageIdConstants.profile]);
+  }
+
+  void removeInfluence(String influenceId) {
+    profile.value.influences?.removeWhere((i) => i.id == influenceId);
+    update([AppPageIdConstants.profile]);
+  }
+
+  bool _influencesEqual(List<Influence> a, List<Influence> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i].id != b[i].id) return false;
+    }
+    return true;
   }
 
 }

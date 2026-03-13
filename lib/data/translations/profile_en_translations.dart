@@ -26,6 +26,10 @@ class ProfileEnTranslations {
     ProfileTranslationConstants.updateProfileTypeMsg: '',
     ProfileTranslationConstants.updateProfileTypeSame: '',
     ProfileTranslationConstants.updateProfileTypeSuccess: '',
+    ProfileTranslationConstants.customUrl: 'Custom URL',
+    ProfileTranslationConstants.slugTaken: 'This URL is already taken',
+    ProfileTranslationConstants.slugInvalid: 'Only letters and numbers, no spaces',
+    ProfileTranslationConstants.slugUpdated: 'Custom URL updated',
   };
 
 }

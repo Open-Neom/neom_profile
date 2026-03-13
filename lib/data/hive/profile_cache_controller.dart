@@ -53,6 +53,8 @@ class ProfileCacheController {
 
   /// Get a cached profile by ID.
   Future<AppProfile?> getCachedProfile(String profileId) async {
+    AppConfig.logger.d('Getting cached profile: $profileId');
+    
     try {
       final box = await _getBox();
       final key = '${AppHiveConstants.visitedProfilePrefix}$profileId';

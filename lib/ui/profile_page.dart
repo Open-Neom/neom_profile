@@ -1,12 +1,13 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:neom_commons/ui/widgets/custom_image.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/ui/widgets/app_circular_progress_indicator.dart';
 import 'package:neom_commons/ui/widgets/buttons/position_back_button.dart';
 import 'package:neom_commons/ui/widgets/genres_grid_view.dart';
+import 'package:neom_ytmusic/ui/widgets/influences_grid_view.dart';
 import 'package:neom_commons/ui/widgets/images/diagonally_cut_colored_image.dart';
 import 'package:neom_commons/ui/widgets/profile_completion_indicator.dart';
 import 'package:neom_commons/ui/widgets/read_more_container.dart';
@@ -22,10 +23,12 @@ import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/constants/core_constants.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/enums/verification_level.dart';
+import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:sint/sint.dart';
 
 import '../utils/constants/profile_constants.dart';
 import 'profile_controller.dart';
+import 'web/profile_web_page.dart';
 import 'widgets/profile_widgets.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -36,7 +39,11 @@ class ProfilePage extends StatelessWidget {
     return SintBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
       init: ProfileController(),
-      builder: (controller) => Scaffold(
+      builder: (controller) {
+        if (kIsWeb && MediaQuery.of(context).size.width > 900) {
+          return ProfileWebPage(controller: controller);
+        }
+        return Scaffold(
         backgroundColor: AppFlavour.getBackgroundColor(),
         body: WebContentWrapper(
         maxWidth: 900,
@@ -47,7 +54,7 @@ class ProfilePage extends StatelessWidget {
             : RefreshIndicator(
           onRefresh: () => controller.refreshProfile(),
           color: AppColor.bondiBlue75,
-          backgroundColor: AppColor.main50,
+          backgroundColor: AppColor.scaffold,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
@@ -58,7 +65,7 @@ class ProfilePage extends StatelessWidget {
                 GestureDetector(
                   child: DiagonallyCutColoredImage(
                     Image(
-                      image: CachedNetworkImageProvider(controller.profile.value.coverImgUrl.isNotEmpty
+                      image: platformImageProvider(controller.profile.value.coverImgUrl.isNotEmpty
                           ? controller.profile.value.coverImgUrl :controller.profile.value.photoUrl.isNotEmpty
                           ? controller.profile.value.photoUrl : AppProperties.getNoImageUrl(),),
                       width: AppTheme.fullWidth(context),
@@ -67,7 +74,9 @@ class ProfilePage extends StatelessWidget {
                     ),
                     color: AppColor.cutColoredImage,
                     ),
-                  onTap: () async => await controller.showUpdateCoverImgDialog(context),
+                  onTap: () => AuthGuard.protect(context, () async {
+                    await controller.showUpdateCoverImgDialog(context);
+                  }),
                 ),
                 Align(
                   alignment: FractionalOffset.bottomCenter,
@@ -78,7 +87,7 @@ class ProfilePage extends StatelessWidget {
                         tag: controller.profile.value.name,
                         child: GestureDetector(
                           child: CircleAvatar(
-                            backgroundImage: CachedNetworkImageProvider(controller.profile.value.photoUrl.isNotEmpty
+                            backgroundImage: platformImageProvider(controller.profile.value.photoUrl.isNotEmpty
                                 ? controller.profile.value.photoUrl : AppProperties.getAppLogoUrl(),),
                             radius: 75.0,
                           ),
@@ -90,10 +99,11 @@ class ProfilePage extends StatelessWidget {
                       ProfileCompletionIndicator(
                         profile: controller.profile.value,
                         onPhotoTap: () => Sint.toNamed(AppRouteConstants.profileEdit),
-                        onCoverTap: () => controller.showUpdateCoverImgDialog(context),
+                        onCoverTap: () => AuthGuard.protect(context, () => controller.showUpdateCoverImgDialog(context)),
                         onBioTap: () => Sint.toNamed(AppRouteConstants.profileEdit),
-                        onLocationTap: () => controller.updateLocation(),
+                        onLocationTap: () => AuthGuard.protect(context, () => controller.updateLocation()),
                         onGenresTap: () => Sint.toNamed(AppRouteConstants.profileEdit),
+                        onSlugTap: () => Sint.toNamed(AppRouteConstants.profileEdit),
                         compact: true,
                       ),
                       AppTheme.heightSpace20,
@@ -131,6 +141,10 @@ class ProfilePage extends StatelessWidget {
                               alignment: Alignment.centerLeft,
                               fontSize: 12,
                             ) : const SizedBox.shrink(),
+                            if (controller.profile.value.influences?.isNotEmpty ?? false) ...[
+                              const SizedBox(height: 8),
+                              InfluencesGridView(influences: controller.profile.value.influences!),
+                            ],
                             GestureDetector(
                               child: Row(
                                 children: <Widget>[
@@ -145,7 +159,7 @@ class ProfilePage extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              onTap: ()=> controller.updateLocation(),
+                              onTap: () => AuthGuard.protect(context, () => controller.updateLocation()),
                             ),
                             const Divider(),
                             ReadMoreContainer(
@@ -198,7 +212,8 @@ class ProfilePage extends StatelessWidget {
         ),
         ),
       ),
-      ),),
+      ),
+      );},
     );
   }
 }

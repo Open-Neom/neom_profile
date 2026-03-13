@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
@@ -20,7 +19,7 @@ class FollowersListPage extends StatelessWidget {
       id: AppPageIdConstants.followers,
       init: MateController(),
       builder: (controller) => Scaffold(
-          backgroundColor: AppColor.main50,
+          backgroundColor: AppColor.scaffold,
       appBar: AppBarChild(title: AppTranslationConstants.followers.tr),
       body: Container(
         decoration: AppTheme.appBoxDecoration,

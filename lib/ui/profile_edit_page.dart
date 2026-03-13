@@ -1,5 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:neom_commons/ui/widgets/custom_image.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
@@ -10,10 +10,14 @@ import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
 import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
 import 'package:neom_core/app_config.dart';
+import 'package:neom_core/app_properties.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/enums/profile_type.dart';
+import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:sint/sint.dart';
+
+import 'package:neom_ytmusic/ui/widgets/influences_section.dart';
 
 import '../utils/constants/profile_translation_constants.dart';
 import 'profile_controller.dart';
@@ -27,11 +31,13 @@ class ProfileEditPage extends StatelessWidget {
       id: AppPageIdConstants.profile,
       builder: (controller) => Scaffold(
         appBar: AppBarChild(title: ProfileTranslationConstants.profileDetails.tr),
-        backgroundColor: AppColor.main50,
+        backgroundColor: AppColor.scaffold,
         body: SingleChildScrollView(
           child: Container(
             decoration: AppTheme.appBoxDecoration,
-            height: AppTheme.fullHeight(context),
+            constraints: BoxConstraints(
+              minHeight: AppTheme.fullHeight(context),
+            ),
             child: Column(
               children: <Widget>[
                 SizedBox(
@@ -52,22 +58,24 @@ class ProfileEditPage extends StatelessWidget {
                                 shape: BoxShape.circle,
                                 image: DecorationImage(
                                     fit: BoxFit.cover,
-                                    image: CachedNetworkImageProvider(controller.profile.value.photoUrl)
+                                    image: platformImageProvider(controller.profile.value.photoUrl)
                                 ),
                               ),
                             ),
-                            onTap: () async {
+                            onTap: () => AuthGuard.protect(context, () async {
                               await controller.showUpdatePhotoDialog(context);
                               ///DEPRECATED
                               // Sint.toNamed(AppRouteConstants.mediaFullScreen, arguments: [controller.profile.value.photoUrl]);
-                            }
+                            })
                           ),
                           controller.isLoading.value ? const Center(child: CircularProgressIndicator())
                             : Positioned(
                               bottom: AppTheme.padding20,
                               left: 0,
                               child: FloatingActionButton(
-                                onPressed: () async => await controller.showUpdatePhotoDialog(context),
+                                onPressed: () => AuthGuard.protect(context, () async {
+                                await controller.showUpdatePhotoDialog(context);
+                              }),
                                 mini: true,
                                 child: const Icon(Icons.camera_alt),
                               )
@@ -130,6 +138,45 @@ class ProfileEditPage extends StatelessWidget {
                       AppTheme.heightSpace10,
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: AppTheme.padding25),
+                        child: Text(
+                          ProfileTranslationConstants.customUrl.tr,
+                          style: const TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppTheme.padding25),
+                        child: Obx(() => Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${AppProperties.getSiteUrl()}/',
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                            Expanded(
+                              child: TextField(
+                                controller: controller.slugController,
+                                enabled: controller.editStatus.value,
+                                style: const TextStyle(fontSize: 14.0),
+                                decoration: InputDecoration(
+                                  hintText: controller.profile.value.slug.isEmpty
+                                      ? ProfileTranslationConstants.slugInvalid.tr
+                                      : null,
+                                  isDense: true,
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )),
+                      ),
+                      AppTheme.heightSpace10,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppTheme.padding25),
                         child: Text(ProfileTranslationConstants.aboutMe.tr,
                           style: const TextStyle(
                               fontSize: 16.0,
@@ -146,6 +193,14 @@ class ProfileEditPage extends StatelessWidget {
                         ),
                       ),
                       AppTheme.heightSpace20,
+                      // ─── Influences Section ───
+                      Obx(() => InfluencesSection(
+                        influences: controller.profile.value.influences ?? [],
+                        isEditing: controller.editStatus.value,
+                        onAdd: (influence) => AuthGuard.protect(context, () => controller.addInfluence(influence)),
+                        onRemove: (id) => AuthGuard.protect(context, () => controller.removeInfluence(id)),
+                      )),
+                      AppTheme.heightSpace20,
                       Padding(
                           padding: const EdgeInsets.symmetric(horizontal: AppTheme.padding25),
                           child: Column(
@@ -154,7 +209,7 @@ class ProfileEditPage extends StatelessWidget {
                               buildProfileTypeColumn(controller, context) : AppConfig.instance.appInUse != AppInUse.c && controller.profile.value.type != ProfileType.appArtist ? Center(
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColor.main50,
+                                    backgroundColor: AppColor.surfaceBright,
                                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                                     textStyle: const TextStyle(color: Colors.white),
                                     elevation: 5,
@@ -197,14 +252,14 @@ class ProfileEditPage extends StatelessWidget {
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20.0)),
                               ),
-                              onPressed: () async {
+                              onPressed: () => AuthGuard.protect(context, () async {
                                 await controller.updateProfileData();
-                              },
+                              }),
                               child: Text(AppTranslationConstants.save.tr, style: const TextStyle(fontSize: 16.0)),
                             ),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColor.main75,
+                                backgroundColor: AppColor.surfaceElevated,
                                 padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                                 textStyle: const TextStyle(color: Colors.white),
                                 shape: RoundedRectangleBorder(
@@ -245,7 +300,7 @@ class ProfileEditPage extends StatelessWidget {
                           fontSize: 16.0, decoration: TextDecoration.underline
                       )
                   ),
-                  onPressed: () {
+                  onPressed: () => AuthGuard.protect(context, () {
                     if(controller.userServiceImpl.userSubscription == null) {
                       if((controller.profile.value.places?.isEmpty ?? true) && (controller.profile.value.places?.isEmpty ?? true)) {
                         controller.showUpdateProfileType(context);
@@ -262,7 +317,7 @@ class ProfileEditPage extends StatelessWidget {
                         message: MessageTranslationConstants.profileTypeRelatedWithASubscriptionMsg.tr,
                       );
                     }
-                  },
+                  }),
                 ),
               ]
           ),
@@ -354,11 +409,11 @@ class ProfileEditPage extends StatelessWidget {
                             fontSize: 16.0, decoration: TextDecoration.underline
                         )
                     ),
-                    onPressed: () {
+                    onPressed: () => AuthGuard.protect(context, () {
                       if(controller.profile.value.facilities?.isEmpty ?? true) {
                         controller.showAddFacility(context);
                       }
-                    },
+                    }),
                   ),
                 ]
             ),
@@ -379,11 +434,11 @@ class ProfileEditPage extends StatelessWidget {
                             fontSize: 16.0, decoration: TextDecoration.underline
                         )
                     ),
-                    onPressed: () {
+                    onPressed: () => AuthGuard.protect(context, () {
                       if(controller.profile.value.places?.isEmpty ?? true) {
                         controller.showAddPlace(context);
                       }
-                    },
+                    }),
                   ),
                 ]
             ),
