@@ -1,6 +1,9 @@
+import 'dart:convert' show jsonDecode;
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
@@ -12,6 +15,7 @@ import 'package:neom_commons/utils/constants/translations/common_translation_con
 import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
 import 'package:neom_commons/utils/datetime_utilities.dart';
 import 'package:neom_core/app_config.dart';
+import 'package:neom_core/utils/neom_error_logger.dart';
 import 'package:neom_core/data/firestore/app_upload_firestore.dart';
 import 'package:neom_core/data/firestore/event_firestore.dart';
 import 'package:neom_core/data/firestore/nupale_session_firestore.dart';
@@ -103,8 +107,8 @@ class ProfileController extends SintController implements ProfileService {
 
     try {
         setProfileInfo();
-      } catch (e) {
-        AppConfig.logger.e(e);
+      } catch (e, st) {
+        NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'onInit');
     }
   }
 
@@ -166,13 +170,15 @@ class ProfileController extends SintController implements ProfileService {
 
       await getTotalItems();
       await getReadingProgress();
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'loadProfileActivity');
     }
 
     previousInstruments = Map.from(profile.value.instruments ?? {});
     previousMainFeature = profile.value.mainFeature;
     isLoading.value = false;
+    // Notify all builders so they see isLoading == false and render content.
+    update([AppPageIdConstants.profile, AppPageIdConstants.profilePosts]);
   }
 
   /// Refresh profile data - for pull-to-refresh functionality
@@ -206,8 +212,8 @@ class ProfileController extends SintController implements ProfileService {
         message: 'Profile updated',
         duration: const Duration(seconds: 2),
       );
-    } catch (e) {
-      AppConfig.logger.e("Error refreshing profile: $e");
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'refreshProfile');
       AppUtilities.showSnackBar(
         title: ProfileTranslationConstants.profileDetails.tr,
         message: 'Failed to refresh profile',
@@ -331,8 +337,8 @@ class ProfileController extends SintController implements ProfileService {
       }
 
       AppConfig.logger.d("${readingProgressMap.length} reading progress entries found");
-    } catch (e) {
-      AppConfig.logger.e("Error getting reading progress: $e");
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'getReadingProgress');
     }
 
     update([AppPageIdConstants.profile]);
@@ -375,14 +381,68 @@ class ProfileController extends SintController implements ProfileService {
           _location.value = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
         }
         AppConfig.logger.d("Location retrieved and updated successfully for ${_location.value}");
+      } else if (kIsWeb) {
+        // IP-based fallback for web when browser geolocation is denied
+        await _updateLocationFromIp();
       } else {
         AppConfig.logger.d("Location was not updated as access is deniedForever");
       }
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'updateLocation');
     }
 
     update([AppPageIdConstants.profile]);
+  }
+
+  /// Fallback: get approximate location from IP address (web only).
+  Future<void> _updateLocationFromIp() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://ip-api.com/json/?fields=status,city,regionName,country,lat,lon'),
+      ).timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          final city = data['city'] ?? '';
+          final country = data['country'] ?? '';
+          final lat = (data['lat'] as num?)?.toDouble() ?? 0.0;
+          final lon = (data['lon'] as num?)?.toDouble() ?? 0.0;
+
+          String address = '';
+          if (city.isNotEmpty && country.isNotEmpty) {
+            address = '$city, $country';
+          } else if (city.isNotEmpty) {
+            address = city;
+          } else if (country.isNotEmpty) {
+            address = country;
+          }
+
+          if (address.isNotEmpty) {
+            final newPosition = Position(
+              latitude: lat,
+              longitude: lon,
+              timestamp: DateTime.now(),
+              accuracy: 10000, // ~10km accuracy for IP-based
+              altitude: 0,
+              altitudeAccuracy: 0,
+              heading: 0,
+              headingAccuracy: 0,
+              speed: 0,
+              speedAccuracy: 0,
+            );
+
+            if (await ProfileFirestore().updatePosition(profile.value.id, newPosition)) {
+              profile.value.position = newPosition;
+            }
+            _location.value = address;
+            AppConfig.logger.d("Location from IP: $address ($lat, $lon)");
+          }
+        }
+      }
+    } catch (e) {
+      AppConfig.logger.d("IP location fallback failed: $e");
+    }
   }
 
   @override
@@ -516,8 +576,24 @@ class ProfileController extends SintController implements ProfileService {
     try {
       if(mediaUploadServiceImpl == null) return;
       await mediaUploadServiceImpl!.handleImage(uploadDestination: MediaUploadDestination.profile);
-      if(mediaUploadServiceImpl!.getMediaFile().path.isNotEmpty) {
-        String photoUrl = await AppUploadFirestore().uploadMediaFile(mediaUploadServiceImpl!.getMediaId(), mediaUploadServiceImpl!.getMediaFile(), MediaType.image, MediaUploadDestination.post);
+      if(mediaUploadServiceImpl!.mediaFileExists()) {
+        // On web, File I/O doesn't work — use bytes-based upload instead.
+        String photoUrl;
+        if (kIsWeb && mediaUploadServiceImpl!.mediaBytes != null) {
+          photoUrl = await AppUploadFirestore().uploadMediaBytes(
+            mediaUploadServiceImpl!.getMediaId(),
+            mediaUploadServiceImpl!.mediaBytes!,
+            MediaType.image,
+            MediaUploadDestination.post,
+          );
+        } else {
+          photoUrl = await AppUploadFirestore().uploadMediaFile(
+            mediaUploadServiceImpl!.getMediaId(),
+            mediaUploadServiceImpl!.getMediaFile(),
+            MediaType.image,
+            MediaUploadDestination.post,
+          );
+        }
 
         if(uploadDestination == MediaUploadDestination.profile) {
           if (await ProfileFirestore().updatePhotoUrl(profile.value.id, photoUrl)) {
@@ -534,8 +610,8 @@ class ProfileController extends SintController implements ProfileService {
             }
           }
         }
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'handleAndUploadImage');
     }
 
     isLoading.value = false;
@@ -679,8 +755,8 @@ class ProfileController extends SintController implements ProfileService {
   void selectProfileType(ProfileType type) {
     try {
       newProfileType.value = type;
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'selectProfileType');
     }
   }
 
@@ -703,8 +779,8 @@ class ProfileController extends SintController implements ProfileService {
       }
 
 
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'updateProfileType');
     }
   }
 
@@ -777,8 +853,8 @@ class ProfileController extends SintController implements ProfileService {
   void selectUsageReason(UsageReason reason) {
     try {
       newUsageReason.value = reason;
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'selectUsageReason');
     }
   }
 
@@ -800,8 +876,8 @@ class ProfileController extends SintController implements ProfileService {
       }
 
 
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'updateUsageReason');
     }
   }
 
@@ -880,8 +956,8 @@ class ProfileController extends SintController implements ProfileService {
   void selectFacilityType(FacilityType type) {
     try {
       facilityType.value = type;
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'selectFacilityType');
     }
   }
 
@@ -903,8 +979,8 @@ class ProfileController extends SintController implements ProfileService {
       }
 
 
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'updateFacilityType');
     }
   }
 
@@ -983,8 +1059,8 @@ class ProfileController extends SintController implements ProfileService {
   void selectPlaceType(PlaceType type) {
     try {
       placeType.value = type;
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'selectPlaceType');
     }
   }
 
@@ -1005,8 +1081,8 @@ class ProfileController extends SintController implements ProfileService {
             message: ProfileTranslationConstants.updateProfileTypeSame.tr);
       }
 
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'updatePlaceType');
     }
   }
 

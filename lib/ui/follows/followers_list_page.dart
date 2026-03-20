@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/ui/widgets/appbar_child.dart';
+
+import 'package:neom_commons/ui/widgets/custom_image.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
@@ -20,7 +22,7 @@ class FollowersListPage extends StatelessWidget {
       init: MateController(),
       builder: (controller) => Scaffold(
           backgroundColor: AppColor.scaffold,
-      appBar: AppBarChild(title: AppTranslationConstants.followers.tr),
+      appBar: SintAppBar(title: AppTranslationConstants.followers.tr),
       body: Container(
         decoration: AppTheme.appBoxDecoration,
         child: Obx(() =>controller.isLoading.value ?
@@ -34,19 +36,21 @@ class FollowersListPage extends StatelessWidget {
                 onTap: () => controller.getMateDetails(mate),
                 leading: Hero(
                   tag: mate.photoUrl,
-                    child: FutureBuilder<ImageProvider>(
-                      future: AppUtilities.handleCachedImageProvider(mate.photoUrl),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return CircleAvatar(backgroundImage: snapshot.data);
-                        } else {
-                          return const CircleAvatar(
-                              backgroundColor: Colors.transparent,
-                              child: CircularProgressIndicator()
-                          );
-                        }
-                      },
-                    )
+                    child: kIsWeb
+                      ? platformCircleAvatar(imageUrl: mate.photoUrl)
+                      : FutureBuilder<ImageProvider>(
+                          future: AppUtilities.handleCachedImageProvider(mate.photoUrl),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return CircleAvatar(backgroundImage: snapshot.data);
+                            } else {
+                              return const CircleAvatar(
+                                  backgroundColor: Colors.transparent,
+                                  child: CircularProgressIndicator()
+                              );
+                            }
+                          },
+                        )
                 ),
                 title: Text(mate.name),
                 subtitle: Row(

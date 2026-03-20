@@ -3,6 +3,7 @@ import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/utils/deeplink_utilities.dart';
 import 'package:neom_core/app_config.dart';
+import 'package:neom_core/utils/neom_error_logger.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/slug_router.dart';
 import 'package:sint/sint.dart';
@@ -73,8 +74,8 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
       }
 
       _showNotFound();
-    } catch (e) {
-      AppConfig.logger.e("SlugResolver error: $e");
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'resolveSlug');
       _showNotFound();
     }
   }

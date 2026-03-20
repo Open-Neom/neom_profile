@@ -1,9 +1,10 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:neom_commons/ui/widgets/custom_image.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/ui/widgets/appbar_child.dart';
+
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_hero_tag_constants.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
@@ -17,7 +18,6 @@ import 'package:neom_core/utils/enums/profile_type.dart';
 import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:sint/sint.dart';
 
-import 'package:neom_ytmusic/ui/widgets/influences_section.dart';
 
 import '../utils/constants/profile_translation_constants.dart';
 import 'profile_controller.dart';
@@ -30,7 +30,7 @@ class ProfileEditPage extends StatelessWidget {
     return SintBuilder<ProfileController>(
       id: AppPageIdConstants.profile,
       builder: (controller) => Scaffold(
-        appBar: AppBarChild(title: ProfileTranslationConstants.profileDetails.tr),
+        appBar: SintAppBar(title: ProfileTranslationConstants.profileDetails.tr),
         backgroundColor: AppColor.scaffold,
         body: SingleChildScrollView(
           child: Container(
@@ -56,11 +56,19 @@ class ProfileEditPage extends StatelessWidget {
                               height: 150.0,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                image: DecorationImage(
+                                image: kIsWeb ? null : DecorationImage(
                                     fit: BoxFit.cover,
                                     image: platformImageProvider(controller.profile.value.photoUrl)
                                 ),
                               ),
+                              child: kIsWeb
+                                ? ClipOval(
+                                    child: platformNetworkImage(
+                                      imageUrl: controller.profile.value.photoUrl,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : null,
                             ),
                             onTap: () => AuthGuard.protect(context, () async {
                               await controller.showUpdatePhotoDialog(context);
@@ -194,12 +202,24 @@ class ProfileEditPage extends StatelessWidget {
                       ),
                       AppTheme.heightSpace20,
                       // ─── Influences Section ───
-                      Obx(() => InfluencesSection(
-                        influences: controller.profile.value.influences ?? [],
-                        isEditing: controller.editStatus.value,
-                        onAdd: (influence) => AuthGuard.protect(context, () => controller.addInfluence(influence)),
-                        onRemove: (id) => AuthGuard.protect(context, () => controller.removeInfluence(id)),
-                      )),
+                      if (AppConfig.instance.appInUse == AppInUse.g)
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: AppTheme.padding25),
+                          leading: const Icon(Icons.music_note, color: Colors.white),
+                          title: Text(
+                            "Influences".tr,
+                            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                          ),
+                          trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white54),
+                          onTap: () {
+                            Sint.toNamed(AppRouteConstants.influences, arguments: {
+                              'influences': controller.profile.value.influences ?? [],
+                              'isEditing': controller.editStatus.value,
+                              'onAdd': (influence) => AuthGuard.protect(context, () => controller.addInfluence(influence)),
+                              'onRemove': (id) => AuthGuard.protect(context, () => controller.removeInfluence(id)),
+                            });
+                          },
+                        ),
                       AppTheme.heightSpace20,
                       Padding(
                           padding: const EdgeInsets.symmetric(horizontal: AppTheme.padding25),

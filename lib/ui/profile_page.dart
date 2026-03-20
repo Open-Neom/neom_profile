@@ -7,7 +7,6 @@ import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/ui/widgets/app_circular_progress_indicator.dart';
 import 'package:neom_commons/ui/widgets/buttons/position_back_button.dart';
 import 'package:neom_commons/ui/widgets/genres_grid_view.dart';
-import 'package:neom_ytmusic/ui/widgets/influences_grid_view.dart';
 import 'package:neom_commons/ui/widgets/images/diagonally_cut_colored_image.dart';
 import 'package:neom_commons/ui/widgets/profile_completion_indicator.dart';
 import 'package:neom_commons/ui/widgets/read_more_container.dart';
@@ -22,6 +21,8 @@ import 'package:neom_core/app_properties.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/constants/core_constants.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
+import 'package:neom_achievements/data/implementations/achievement_controller.dart';
+import 'package:neom_achievements/ui/widgets/profile_badges_row.dart';
 import 'package:neom_core/utils/enums/verification_level.dart';
 import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:sint/sint.dart';
@@ -64,14 +65,25 @@ class ProfilePage extends StatelessWidget {
               children: <Widget>[
                 GestureDetector(
                   child: DiagonallyCutColoredImage(
-                    Image(
-                      image: platformImageProvider(controller.profile.value.coverImgUrl.isNotEmpty
-                          ? controller.profile.value.coverImgUrl :controller.profile.value.photoUrl.isNotEmpty
-                          ? controller.profile.value.photoUrl : AppProperties.getNoImageUrl(),),
-                      width: AppTheme.fullWidth(context),
-                      height: 225,
-                      fit: BoxFit.cover,
-                    ),
+                    kIsWeb
+                      ? SizedBox(
+                          width: AppTheme.fullWidth(context),
+                          height: 225,
+                          child: platformNetworkImage(
+                            imageUrl: controller.profile.value.coverImgUrl.isNotEmpty
+                                ? controller.profile.value.coverImgUrl : controller.profile.value.photoUrl.isNotEmpty
+                                ? controller.profile.value.photoUrl : AppProperties.getNoImageUrl(),
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Image(
+                          image: platformImageProvider(controller.profile.value.coverImgUrl.isNotEmpty
+                              ? controller.profile.value.coverImgUrl :controller.profile.value.photoUrl.isNotEmpty
+                              ? controller.profile.value.photoUrl : AppProperties.getNoImageUrl(),),
+                          width: AppTheme.fullWidth(context),
+                          height: 225,
+                          fit: BoxFit.cover,
+                        ),
                     color: AppColor.cutColoredImage,
                     ),
                   onTap: () => AuthGuard.protect(context, () async {
@@ -86,9 +98,9 @@ class ProfilePage extends StatelessWidget {
                       Hero(
                         tag: controller.profile.value.name,
                         child: GestureDetector(
-                          child: CircleAvatar(
-                            backgroundImage: platformImageProvider(controller.profile.value.photoUrl.isNotEmpty
-                                ? controller.profile.value.photoUrl : AppProperties.getAppLogoUrl(),),
+                          child: platformCircleAvatar(
+                            imageUrl: controller.profile.value.photoUrl.isNotEmpty
+                                ? controller.profile.value.photoUrl : AppProperties.getAppLogoUrl(),
                             radius: 75.0,
                           ),
                           onTap: () => Sint.toNamed(AppRouteConstants.profileEdit),
@@ -133,6 +145,25 @@ class ProfilePage extends StatelessWidget {
                                     ),
                                 ]
                             ),
+                            // Achievement badges
+                            Builder(builder: (_) {
+                              try {
+                                final ac = Sint.find<AchievementController>();
+                                final badgeIds = ac.unlockedAchievements
+                                    .map((p) => p.achievementId)
+                                    .toList();
+                                if (badgeIds.isNotEmpty) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                    child: ProfileBadgesRow(
+                                      badgeIds: badgeIds,
+                                      onTap: (_) => Sint.toNamed(AppRouteConstants.achievements),
+                                    ),
+                                  );
+                                }
+                              } catch (_) {}
+                              return const SizedBox.shrink();
+                            }),
                             const Divider(),
                             (controller.profile.value.genres?.isNotEmpty ?? false) ?
                             GenresGridView(
@@ -141,9 +172,24 @@ class ProfilePage extends StatelessWidget {
                               alignment: Alignment.centerLeft,
                               fontSize: 12,
                             ) : const SizedBox.shrink(),
-                            if (controller.profile.value.influences?.isNotEmpty ?? false) ...[
+                            if (AppConfig.instance.appInUse == AppInUse.g && (controller.profile.value.influences?.isNotEmpty ?? false)) ...[
                               const SizedBox(height: 8),
-                              InfluencesGridView(influences: controller.profile.value.influences!),
+                              GestureDetector(
+                                onTap: () => Sint.toNamed(AppRouteConstants.influences, arguments: controller.profile.value.influences),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.music_note, color: Colors.white70, size: 20),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        "Influences".tr,
+                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white70),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ],
                             GestureDetector(
                               child: Row(

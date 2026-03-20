@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:neom_core/app_config.dart';
+import 'package:neom_core/utils/neom_error_logger.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
 import 'package:neom_core/utils/constants/app_hive_constants.dart';
 import 'package:neom_core/utils/enums/app_hive_box.dart';
@@ -46,8 +47,8 @@ class ProfileCacheController {
       await _cleanupOldProfiles();
 
       AppConfig.logger.d('Cached profile: ${profile.id}');
-    } catch (e) {
-      AppConfig.logger.e('Error caching profile: $e');
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'cacheProfile');
     }
   }
 
@@ -75,8 +76,8 @@ class ProfileCacheController {
         final profileData = cacheData['profile'] as Map<String, dynamic>;
         return AppProfile.fromJSON(profileData);
       }
-    } catch (e) {
-      AppConfig.logger.e('Error getting cached profile: $e');
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'getCachedProfile');
     }
     return null;
   }
@@ -94,8 +95,8 @@ class ProfileCacheController {
           profiles.add(profile);
         }
       }
-    } catch (e) {
-      AppConfig.logger.e('Error getting all cached profiles: $e');
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'getAllCachedProfiles');
     }
     return profiles;
   }
@@ -105,8 +106,8 @@ class ProfileCacheController {
     try {
       final ids = await _getVisitedIds();
       return ids.take(limit).toList();
-    } catch (e) {
-      AppConfig.logger.e('Error getting recently visited IDs: $e');
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'getRecentlyVisitedIds');
     }
     return [];
   }
@@ -123,8 +124,8 @@ class ProfileCacheController {
       await _saveVisitedIds(ids);
 
       AppConfig.logger.d('Removed cached profile: $profileId');
-    } catch (e) {
-      AppConfig.logger.e('Error removing cached profile: $e');
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'removeCachedProfile');
     }
   }
 
@@ -158,8 +159,8 @@ class ProfileCacheController {
         final ids = jsonDecode(idsJson) as List<dynamic>;
         return ids.cast<String>();
       }
-    } catch (e) {
-      AppConfig.logger.e('Error getting visited IDs: $e');
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'getVisitedIds');
     }
     return [];
   }
@@ -168,8 +169,8 @@ class ProfileCacheController {
     try {
       final box = await _getBox();
       await box.put(AppHiveConstants.visitedProfileIds, jsonEncode(ids));
-    } catch (e) {
-      AppConfig.logger.e('Error saving visited IDs: $e');
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'saveVisitedIds');
     }
   }
 
@@ -196,8 +197,8 @@ class ProfileCacheController {
           await removeCachedProfile(id);
         }
       }
-    } catch (e) {
-      AppConfig.logger.e('Error cleaning up old profiles: $e');
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'cleanupOldProfiles');
     }
   }
 
@@ -209,8 +210,8 @@ class ProfileCacheController {
       final box = await _getBox();
       await box.clear();
       AppConfig.logger.d('Cleared all cached profiles');
-    } catch (e) {
-      AppConfig.logger.e('Error clearing profile cache: $e');
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'clearAll');
     }
   }
 
