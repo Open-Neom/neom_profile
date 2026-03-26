@@ -4,6 +4,7 @@ import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/utils/deeplink_utilities.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/utils/neom_error_logger.dart';
+import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/slug_router.dart';
 import 'package:sint/sint.dart';
@@ -160,6 +161,7 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
         Sint.offAllNamed(AppRouteConstants.root);
         await Future.delayed(const Duration(milliseconds: 150));
         Sint.toNamed(AppRouteConstants.bookPath(match.id, slug: match.slug));
+        await Future.delayed(const Duration(milliseconds: 150));
         Sint.toNamed(AppRouteConstants.readingPath(match.id, slug: match.slug));
 
       case 'event':
@@ -231,7 +233,7 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
         ElevatedButton.icon(
           onPressed: () => Sint.offAllNamed(AppRouteConstants.root),
           icon: const Icon(Icons.home),
-          label: const Text('Ir al inicio'),
+          label: Text(AppTranslationConstants.goHome.tr),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
             foregroundColor: Colors.black87,

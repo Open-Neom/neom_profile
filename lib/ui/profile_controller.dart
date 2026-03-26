@@ -124,13 +124,22 @@ class ProfileController extends SintController implements ProfileService {
   }
 
   Future<void> setProfileInfo() async {
+    AppConfig.logger.w("[ProfileDebug] setProfileInfo CALLED. userService.profile.name='${userServiceImpl.profile.name}', address='${userServiceImpl.profile.address}'");
     profile.value = userServiceImpl.profile;
     profileName = profile.value.name;
     profileAboutMe = profile.value.aboutMe;
     newProfileType.value = profile.value.type;
     newUsageReason.value = profile.value.usageReason;
-    if(profile.value.position != null && geoLocatorServiceImpl != null) {
+    // Use saved address first, recalculate from position only if empty
+    AppConfig.logger.w("[ProfileDebug] address='${profile.value.address}', position=${profile.value.position != null}");
+    if (profile.value.address.isNotEmpty) {
+      _location.value = profile.value.address;
+      AppConfig.logger.d("[ProfileDebug] Using saved address: ${profile.value.address}");
+    } else if (profile.value.position != null && geoLocatorServiceImpl != null) {
       _location.value = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
+      AppConfig.logger.d("[ProfileDebug] Recalculated from position: ${_location.value}");
+    } else {
+      AppConfig.logger.d("[ProfileDebug] No address and no position — showing 'No especificado'");
     }
 
     if((profile.value.itemlists?.isEmpty ?? true) || profile.value.itemlists?.values.first.type != AppFlavour.getDefaultItemlistType()) {
@@ -192,8 +201,10 @@ class ProfileController extends SintController implements ProfileService {
         userServiceImpl.profile = updatedProfile;
       }
 
-      // Update location if available
-      if (profile.value.position != null && geoLocatorServiceImpl != null) {
+      // Update location — use saved address first
+      if (profile.value.address.isNotEmpty) {
+        _location.value = profile.value.address;
+      } else if (profile.value.position != null && geoLocatorServiceImpl != null) {
         _location.value = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
       }
 
@@ -378,7 +389,9 @@ class ProfileController extends SintController implements ProfileService {
       if(newPosition != null) {
         if(await ProfileFirestore().updatePosition(profile.value.id, newPosition)){
           profile.value.position = newPosition;
-          _location.value = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
+          final addr = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
+          profile.value.address = addr;
+          _location.value = addr;
         }
         AppConfig.logger.d("Location retrieved and updated successfully for ${_location.value}");
       } else if (kIsWeb) {
@@ -434,6 +447,11 @@ class ProfileController extends SintController implements ProfileService {
 
             if (await ProfileFirestore().updatePosition(profile.value.id, newPosition)) {
               profile.value.position = newPosition;
+              profile.value.address = address;
+              // Also save the IP-derived address to Firestore since geocoding may fail in updatePosition
+              if (address.isNotEmpty) {
+                await ProfileFirestore().updateAddress(profile.value.id, address);
+              }
             }
             _location.value = address;
             AppConfig.logger.d("Location from IP: $address ($lat, $lon)");
@@ -632,13 +650,13 @@ class ProfileController extends SintController implements ProfileService {
                       CommonTranslationConstants.uploadImage.tr
                   ),
                   onPressed: () async {
-                    Navigator.pop(context);
+                    Sint.pop();
                     await handleAndUploadImage(MediaUploadDestination.profile);
                   }
               ),
               SimpleDialogOption(
                   child: Text(AppTranslationConstants.cancel.tr),
-                  onPressed: () => Navigator.pop(context)
+                  onPressed: () => Sint.pop()
               ),
             ],
           );
@@ -658,13 +676,13 @@ class ProfileController extends SintController implements ProfileService {
               SimpleDialogOption(
                   child: Text(CommonTranslationConstants.uploadImage.tr),
                   onPressed: () async {
-                    Navigator.pop(context);
+                    Sint.pop();
                     await handleAndUploadImage(MediaUploadDestination.cover);
                   }
               ),
               SimpleDialogOption(
                   child: Text(AppTranslationConstants.cancel.tr),
-                  onPressed: () => Navigator.pop(context)
+                  onPressed: () => Sint.pop()
               ),
             ],
           );
@@ -733,7 +751,7 @@ class ProfileController extends SintController implements ProfileService {
           DialogButton(
             color: AppColor.bondiBlue75,
             onPressed: () {
-              Navigator.of(context).pop();
+              Sint.back();
             },
             child: Text(AppTranslationConstants.goBack.tr,
               style: const TextStyle(fontSize: 15),
@@ -831,7 +849,7 @@ class ProfileController extends SintController implements ProfileService {
           DialogButton(
             color: AppColor.bondiBlue75,
             onPressed: () {
-              Navigator.of(context).pop();
+              Sint.back();
             },
             child: Text(AppTranslationConstants.goBack.tr,
               style: const TextStyle(fontSize: 15),
@@ -934,7 +952,7 @@ class ProfileController extends SintController implements ProfileService {
           DialogButton(
             color: AppColor.bondiBlue75,
             onPressed: () {
-              Navigator.of(context).pop();
+              Sint.back();
             },
             child: Text(AppTranslationConstants.goBack.tr,
               style: const TextStyle(fontSize: 15),
@@ -1037,7 +1055,7 @@ class ProfileController extends SintController implements ProfileService {
           DialogButton(
             color: AppColor.bondiBlue75,
             onPressed: () {
-              Navigator.of(context).pop();
+              Sint.back();
             },
             child: Text(AppTranslationConstants.goBack.tr,
               style: const TextStyle(fontSize: 15),
