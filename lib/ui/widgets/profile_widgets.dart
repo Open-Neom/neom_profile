@@ -42,10 +42,10 @@ Widget buildFollowerInfo(BuildContext context, AppProfile profile) {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           GestureDetector(
-            child: Text('${profile.following!.length.toString()} ${AppTranslationConstants.following.tr}',
+            child: Text('${profile.following?.length ?? 0} ${AppTranslationConstants.following.tr}',
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)
             ),
-            onTap: () => profile.following!.isNotEmpty
+            onTap: () => (profile.following?.isNotEmpty ?? false)
                 ? Sint.toNamed(AppRouteConstants.following, arguments: profile.following)
                 : AppAlerts.showAlert(context, title: AppTranslationConstants.following.tr,
                 message: MessageTranslationConstants.followingMsg.tr),
@@ -53,9 +53,9 @@ Widget buildFollowerInfo(BuildContext context, AppProfile profile) {
           Text(' | ', style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)
           ),
           GestureDetector(
-            child: Text('${profile.followers!.length.toString()} ${AppTranslationConstants.followers.tr}',
+            child: Text('${profile.followers?.length ?? 0} ${AppTranslationConstants.followers.tr}',
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppColor.white80)),
-            onTap: () => profile.followers!.isNotEmpty
+            onTap: () => (profile.followers?.isNotEmpty ?? false)
                 ? Sint.toNamed(AppRouteConstants.followers, arguments: profile.followers)
                 : AppAlerts.showAlert(context, title: AppTranslationConstants.followers.tr,
                 message: MessageTranslationConstants.followersMsg.tr),

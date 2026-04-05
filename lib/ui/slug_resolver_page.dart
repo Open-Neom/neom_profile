@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/utils/deeplink_utilities.dart';
 import 'package:neom_core/app_config.dart';
+import 'package:neom_core/domain/model/app_release_item.dart';
 import 'package:neom_core/utils/neom_error_logger.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
@@ -157,12 +159,20 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
         );
 
       case 'item':
-        // Navigate: root → book details → reading
-        Sint.offAllNamed(AppRouteConstants.root);
-        await Future.delayed(const Duration(milliseconds: 150));
-        Sint.toNamed(AppRouteConstants.bookPath(match.id, slug: match.slug));
-        await Future.delayed(const Duration(milliseconds: 150));
-        Sint.toNamed(AppRouteConstants.readingPath(match.id, slug: match.slug));
+        // Navigate using app-aware routing (not all apps have BooksRoutes)
+        final item = match.entity;
+        if (item is AppReleaseItem) {
+          await DeeplinkUtilities.navigateWithHomeBehind(
+            AppFlavour.getMainItemDetailsRoute(match.id, type: item.mediaType, slug: match.slug),
+            arguments: [item],
+          );
+        } else {
+          // Fallback: audio player for Gigmeout/Cyberneom, book for EMXI
+          await DeeplinkUtilities.navigateWithHomeBehind(
+            AppFlavour.getMainItemDetailsRoute(match.id, slug: match.slug),
+            arguments: match.id,
+          );
+        }
 
       case 'event':
         await DeeplinkUtilities.navigateWithHomeBehind(

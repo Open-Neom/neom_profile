@@ -1,13 +1,13 @@
 dependency_overrides:
   sint:
-    path: ../sint
+    path: ../../framework/sint
   neom_core:
-    path: ../neom_core
+    path: ../../main/neom_core
   neom_commons:
-    path: ../neom_commons
+    path: ../../main/neom_commons
   neom_home:
-    path: ../neom_home
+    path: ../../main/neom_home
   neom_ytmusic:
-    path: ../neom_ytmusic
+    path: ../../music/neom_ytmusic
   neom_achievements:
-    path: ../neom_achievements
+    path: ../../creator/neom_achievements
