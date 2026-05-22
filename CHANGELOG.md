@@ -2,6 +2,13 @@
 
 All notable changes to neom_profile will be documented in this file.
 
+## [2.1.0] - 2026-04-16
+
+### Added
+- ProfileWebCard: `showFollowers` parameter (default true) to toggle followers display
+- ProfileController: "SAIA" reserved word validation on name update
+- ProfilePosts: "Share photos and videos" translated to Spanish
+
 ## [2.0.0] - 2025-02-08
 
 ### Added

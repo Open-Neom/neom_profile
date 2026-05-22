@@ -22,6 +22,11 @@ dependencies:
     path: ../neom_home
   neom_achievements:
     path: ../neom_achievements
+  saia_core:
+    path: ../../ai/saia_core
+  neom_forum:
+    path: ../neom_forum
+  cloud_firestore: ^6.2.0
 
 dev_dependencies:
   flutter_test:

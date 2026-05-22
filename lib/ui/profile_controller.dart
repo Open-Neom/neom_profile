@@ -392,6 +392,7 @@ class ProfileController extends SintController implements ProfileService {
           final addr = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
           profile.value.address = addr;
           _location.value = addr;
+          update(); // Notify SintBuilder listeners
         }
         AppConfig.logger.d("Location retrieved and updated successfully for ${_location.value}");
       } else if (kIsWeb) {
@@ -455,6 +456,7 @@ class ProfileController extends SintController implements ProfileService {
             }
             _location.value = address;
             AppConfig.logger.d("Location from IP: $address ($lat, $lon)");
+            update(); // Notify SintBuilder listeners
           }
         }
       }
@@ -480,6 +482,15 @@ class ProfileController extends SintController implements ProfileService {
 
         if(!DateTimeUtilities.isWithinLastSevenDays(profile.value.lastNameUpdate)) {
           if(profileName.length > 3 && profileName.isNotEmpty) {
+            // "SAIA" is a reserved word — cannot be used in any part of the name
+            final lowerName = profileName.toLowerCase();
+            if (lowerName.contains('saia')) {
+              AppUtilities.showSnackBar(
+                title: ProfileTranslationConstants.profileDetails.tr,
+                message: '"SAIA" es una palabra reservada y no puede usarse en tu nombre.',
+              );
+              return;
+            }
             isValidName = await ProfileFirestore().isAvailableName(profileName);
             if(isValidName) {
               if(await ProfileFirestore().updateName(profile.value.id, profileName)) {
@@ -696,13 +707,13 @@ class ProfileController extends SintController implements ProfileService {
     profileTypes.removeWhere((type) => type == ProfileType.broadcaster);
     switch(AppConfig.instance.appInUse) {
       case AppInUse.g:
-        profileTypes.removeWhere((type) => type == ProfileType.band);
+        profileTypes.removeWhere((type) => type == ProfileType.collective);
         profileTypes.removeWhere((type) => type == ProfileType.researcher);
       case AppInUse.e:
-        profileTypes.removeWhere((type) => type == ProfileType.band);
+        profileTypes.removeWhere((type) => type == ProfileType.collective);
         profileTypes.removeWhere((type) => type == ProfileType.researcher);
       case AppInUse.c:
-        profileTypes.removeWhere((type) => type == ProfileType.band);
+        profileTypes.removeWhere((type) => type == ProfileType.collective);
       default:
         break;
     }

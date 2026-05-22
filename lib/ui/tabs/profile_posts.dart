@@ -90,7 +90,7 @@ class ProfilePosts extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Share photos and videos to see them here',
+                  'Comparte fotos y videos para verlos aqui',
                   style: TextStyle(
                     fontSize: 14.0,
                     color: Colors.grey[500],

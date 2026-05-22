@@ -17,7 +17,7 @@ import 'package:sint/sint.dart';
 /// instead of sequential Firestore queries.
 ///
 /// URL patterns handled:
-///   /{slug}                     → Profile / Item / Event / Band / Post (parallel)
+///   /{slug}                     → Profile / Item / Event / Collective / Post (parallel)
 ///   /p/{slug}                   → Profile by slug
 ///   /post/{postId}              → Post details
 ///   /blog/{slugOrId}            → Blog entry
@@ -62,6 +62,19 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
       }
 
       final firstSegment = segments.first.toLowerCase().trim();
+
+      // ─── @username shorthand → direct profile resolution ───
+      if (firstSegment.startsWith('@') && firstSegment.length > 1) {
+        final username = firstSegment.substring(1);
+        AppConfig.logger.i("SlugResolver: @mention '$username' → profile lookup");
+        final match = await SlugRouter.resolveProfile(username);
+        if (match != null) {
+          await _navigateToMatch(match);
+          return;
+        }
+        _showNotFound();
+        return;
+      }
 
       // ─── Prefixed routes (structured URL patterns) ───
 
@@ -179,9 +192,9 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
           AppRouteConstants.eventPath(match.id, slug: match.slug), arguments: match.id,
         );
 
-      case 'band':
+      case 'collective':
         await DeeplinkUtilities.navigateWithHomeBehind(
-          AppRouteConstants.bandPath(match.id, slug: match.slug), arguments: [match.entity],
+          AppRouteConstants.collectivePath(match.id, slug: match.slug), arguments: [match.entity],
         );
 
       case 'post':

@@ -29,8 +29,9 @@ import '../../widgets/profile_widgets.dart';
 class ProfileWebCard extends StatelessWidget {
 
   final ProfileController controller;
+  final bool showFollowers;
 
-  const ProfileWebCard({super.key, required this.controller});
+  const ProfileWebCard({super.key, required this.controller, this.showFollowers = true});
 
   @override
   Widget build(BuildContext context) {
@@ -223,8 +224,10 @@ class ProfileWebCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             // Followers
-            buildFollowerInfo(context, profile),
-            const SizedBox(height: 16),
+            if (showFollowers) ...[
+              buildFollowerInfo(context, profile),
+              const SizedBox(height: 16),
+            ],
             // Bio — editable or read-only
             if (isEditing) ...[
               TextField(
@@ -340,7 +343,7 @@ class ProfileWebCard extends StatelessWidget {
                       icon: const Icon(Icons.check, size: 16),
                       label: Text(AppTranslationConstants.save.tr),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColor.bondiBlue75,
+                        backgroundColor: AppColor.getReleaseShelfColor(),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),

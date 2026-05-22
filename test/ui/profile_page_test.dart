@@ -34,7 +34,7 @@ class MockProfile {
   final int followersCount;
   final int followingCount;
   final int eventsCount;
-  final int bandsCount;
+  final int collectivesCount;
   final double completionPercentage;
 
   const MockProfile({
@@ -47,7 +47,7 @@ class MockProfile {
     this.followersCount = 0,
     this.followingCount = 0,
     this.eventsCount = 0,
-    this.bandsCount = 0,
+    this.collectivesCount = 0,
     this.completionPercentage = 0.0,
   });
 }
@@ -460,7 +460,7 @@ class _ProfileStats extends StatelessWidget {
           _buildStat('followers', 'Followers', profile.followersCount),
           _buildStat('following', 'Following', profile.followingCount),
           _buildStat('events', 'Events', profile.eventsCount),
-          _buildStat('bands', 'Bands', profile.bandsCount),
+          _buildStat('collectives', 'Collectives', profile.collectivesCount),
         ],
       ),
     );
@@ -808,7 +808,7 @@ void main() {
                 followersCount: 1234,
                 followingCount: 567,
                 eventsCount: 15,
-                bandsCount: 3,
+                collectivesCount: 3,
               ),
             ),
           ),
@@ -1132,7 +1132,7 @@ void main() {
                 followersCount: i * 100,
                 followingCount: i * 50,
                 eventsCount: i * 2,
-                bandsCount: i,
+                collectivesCount: i,
                 completionPercentage: i / 30,
               ),
             ),

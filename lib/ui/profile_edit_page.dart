@@ -266,7 +266,7 @@ class ProfileEditPage extends StatelessWidget {
                           children: <Widget>[
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColor.bondiBlue75,
+                                backgroundColor: AppColor.getReleaseShelfColor(),
                                 padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                                 textStyle: const TextStyle(color: Colors.white),
                                 shape: RoundedRectangleBorder(
