@@ -48,11 +48,8 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
   Future<void> _resolveSlug() async {
     try {
       final currentRoute = Sint.currentRoute;
-      final segments = currentRoute
-          .replaceFirst('/', '')
-          .split('/')
-          .where((s) => s.isNotEmpty)
-          .toList();
+      final uri = Uri.parse(currentRoute);
+      final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
 
       AppConfig.logger.d("SlugResolver: resolving route '$currentRoute' → segments: $segments");
 
@@ -105,13 +102,25 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
 
     switch (prefix) {
       case 'p':
-        AppConfig.logger.i("SlugResolver: profile slug '$id'");
-        final match = await SlugRouter.resolveProfile(id);
-        if (match != null) {
-          await _navigateToMatch(match);
-          return true;
-        }
-        _showNotFound();
+        AppConfig.logger.i("SlugResolver: post ID '$id'");
+        await DeeplinkUtilities.navigateWithHomeBehind(
+          AppRouteConstants.postPath(id), arguments: id,
+        );
+        return true;
+
+      case 'collective':
+        AppConfig.logger.i("SlugResolver: collective ID '$id'");
+        await DeeplinkUtilities.navigateWithHomeBehind(
+          AppRouteConstants.collectivePath(id), arguments: [id],
+        );
+        return true;
+
+      case 'playlist':
+        AppConfig.logger.i("SlugResolver: playlist ID '$id'");
+        await DeeplinkUtilities.navigateWithHomeBehind(
+          AppRouteConstants.listItems,
+          arguments: [id, false, true],
+        );
         return true;
 
       case 'post':
