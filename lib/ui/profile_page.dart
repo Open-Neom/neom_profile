@@ -1,16 +1,19 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:neom_commons/ui/widgets/custom_image.dart';
+import 'package:neom_achievements/data/implementations/achievement_controller.dart';
+import 'package:neom_achievements/ui/widgets/profile_badges_row.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/ui/widgets/app_circular_progress_indicator.dart';
 import 'package:neom_commons/ui/widgets/buttons/position_back_button.dart';
+import 'package:neom_commons/ui/widgets/custom_image.dart';
 import 'package:neom_commons/ui/widgets/genres_grid_view.dart';
 import 'package:neom_commons/ui/widgets/images/diagonally_cut_colored_image.dart';
 import 'package:neom_commons/ui/widgets/profile_completion_indicator.dart';
 import 'package:neom_commons/ui/widgets/read_more_container.dart';
 import 'package:neom_commons/ui/widgets/web_content_wrapper.dart';
+import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
@@ -21,14 +24,14 @@ import 'package:neom_core/app_properties.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/constants/core_constants.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
-import 'package:neom_achievements/data/implementations/achievement_controller.dart';
-import 'package:neom_achievements/ui/widgets/profile_badges_row.dart';
 import 'package:neom_core/utils/enums/verification_level.dart';
-import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:sint/sint.dart';
 
 import '../utils/constants/profile_constants.dart';
 import 'profile_controller.dart';
+import 'tabs/profile_calpullia.dart';
+import 'tabs/profile_memorias.dart';
+import 'tabs/profile_posts.dart';
 import 'web/profile_web_page.dart';
 import 'widgets/profile_widgets.dart';
 
@@ -45,17 +48,23 @@ class ProfilePage extends StatelessWidget {
           return ProfileWebPage(controller: controller);
         }
         return Scaffold(
-        backgroundColor: AppFlavour.getBackgroundColor(),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: WebContentWrapper(
         maxWidth: 900,
         padding: EdgeInsets.zero,
         child: Container(
-        decoration: AppTheme.appBoxDecoration,
+        decoration: AppConfig.instance.appInUse == AppInUse.i
+            ? BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor)
+            : AppTheme.appBoxDecoration,
         child: controller.isLoading.value ? const AppCircularProgressIndicator()
             : RefreshIndicator(
           onRefresh: () => controller.refreshProfile(),
-          color: AppColor.bondiBlue75,
-          backgroundColor: AppColor.scaffold,
+          color: AppConfig.instance.appInUse == AppInUse.i
+              ? Theme.of(context).primaryColor
+              : AppColor.bondiBlue75,
+          backgroundColor: AppConfig.instance.appInUse == AppInUse.i
+              ? Theme.of(context).colorScheme.surface
+              : AppColor.scaffold,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
@@ -131,8 +140,10 @@ class ProfilePage extends StatelessWidget {
                                     height: 30,
                                     alignment: Alignment.center,
                                     child: Text(TextUtilities.capitalizeFirstLetter(controller.profile.value.name),
-                                      style: Theme.of(context).textTheme.titleLarge!
-                                          .copyWith(color: Colors.white
+                                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                                        color: AppConfig.instance.appInUse == AppInUse.i
+                                            ? Theme.of(context).colorScheme.onSurface
+                                            : Colors.white,
                                       ),
                                     ),
                                   ),
@@ -165,10 +176,12 @@ class ProfilePage extends StatelessWidget {
                               return const SizedBox.shrink();
                             }),
                             const Divider(),
-                            (controller.profile.value.genres?.isNotEmpty ?? false) ?
+                             (controller.profile.value.genres?.isNotEmpty ?? false) ?
                             GenresGridView(
                               controller.profile.value.genres?.keys.toList() ?? [],
-                              AppColor.white,
+                              AppConfig.instance.appInUse == AppInUse.i
+                                  ? Theme.of(context).colorScheme.onSurface
+                                  : AppColor.white,
                               alignment: Alignment.centerLeft,
                               fontSize: 12,
                             ) : const SizedBox.shrink(),
@@ -180,11 +193,20 @@ class ProfilePage extends StatelessWidget {
                                   padding: const EdgeInsets.symmetric(vertical: 8),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.music_note, color: Colors.white70, size: 20),
+                                      Icon(Icons.music_note,
+                                          color: AppConfig.instance.appInUse == AppInUse.i
+                                              ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)
+                                              : Colors.white70,
+                                          size: 20),
                                       const SizedBox(width: 8),
                                       Text(
                                         "Influences".tr,
-                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white70),
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppConfig.instance.appInUse == AppInUse.i
+                                                ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)
+                                                : Colors.white70),
                                       ),
                                     ],
                                   ),
@@ -194,14 +216,21 @@ class ProfilePage extends StatelessWidget {
                             GestureDetector(
                               child: Row(
                                 children: <Widget>[
-                                  const Icon(Icons.place,
-                                    color: Colors.white,
+                                  Icon(Icons.place,
+                                    color: AppConfig.instance.appInUse == AppInUse.i
+                                        ? Theme.of(context).colorScheme.onSurface
+                                        : Colors.white,
                                     size: 15,
                                   ),
                                   AppTheme.widthSpace5,
                                   Text(controller.location.isNotEmpty ? controller.location.length > CoreConstants.maxLocationNameLength
                                       ? "${controller.location.substring(0, CoreConstants.maxLocationNameLength)}..." : controller.location
                                       : AppTranslationConstants.notSpecified.tr,
+                                    style: TextStyle(
+                                      color: AppConfig.instance.appInUse == AppInUse.i
+                                          ? Theme.of(context).colorScheme.onSurface
+                                          : Colors.white,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -224,13 +253,21 @@ class ProfilePage extends StatelessWidget {
                           child: Obx(() => Column(
                             children: <Widget>[
                               TabBar(
+                                labelColor: AppConfig.instance.appInUse == AppInUse.i
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Colors.white,
+                                unselectedLabelColor: AppConfig.instance.appInUse == AppInUse.i
+                                    ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)
+                                    : Colors.white60,
                                 tabs: [
                                   Tab(text: '${AppConstants.profileTabs.elementAt(0).tr} (${controller.profile.value.posts?.length ?? 0})'),
                                   Tab(text: '${AppConstants.profileTabs.elementAt(1).tr} (${AppConfig.instance.appInUse == AppInUse.c ?
                                   controller.totalPresets.length : (controller.totalMixedItems.length)})'),
                                   Tab(text: '${AppConstants.profileTabs.elementAt(2).tr} (${controller.events.length})'),
                                 ],
-                                indicatorColor: Colors.white,
+                                indicatorColor: AppConfig.instance.appInUse == AppInUse.i
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.white,
                                 labelStyle: const TextStyle(fontSize: 15),
                                 unselectedLabelStyle: const TextStyle(fontSize: 12),
                                 labelPadding: const EdgeInsets.symmetric(horizontal: 0.0),
@@ -238,8 +275,15 @@ class ProfilePage extends StatelessWidget {
                               SizedBox(
                                 height: kIsWeb ? 600 : AppTheme.fullHeight(context)/2.5,
                                 child: TabBarView(
-                                  children: (AppConfig.instance.appInUse == AppInUse.c || AppConfig.instance.appInUse == AppInUse.o)
-                                      ? ProfileConstants.neomProfileTabPages : ProfileConstants.profileTabPages,
+                                  children: AppConfig.instance.appInUse == AppInUse.i
+                                      ? [
+                                          const ProfilePosts(),
+                                          ProfileCalpullia(profileId: controller.profile.value.id),
+                                          const ProfileMemorias(),
+                                        ]
+                                      : (AppConfig.instance.appInUse == AppInUse.c || AppConfig.instance.appInUse == AppInUse.o)
+                                          ? ProfileConstants.neomProfileTabPages
+                                          : ProfileConstants.profileTabPages,
                                 ),
                               ),
                             ],

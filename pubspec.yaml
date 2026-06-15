@@ -26,6 +26,9 @@ dependencies:
     path: ../../ai/saia_core
   neom_forum:
     path: ../neom_forum
+  neom_memory:
+    path: ../../ai/neom_memory
+  hive_flutter: ^1.1.0
   cloud_firestore: ^6.2.0
 
 dev_dependencies:
@@ -34,3 +37,75 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 
 flutter:
+
+dependency_overrides:
+  neom_core:
+    path: ../../main/neom_core
+  neom_commons:
+    path: ../../main/neom_commons
+  neom_auth:
+    path: ../../main/neom_auth
+  neom_ia:
+    path: ../../ai/neom_ia
+  neom_home:
+    path: ../neom_home
+  neom_achievements:
+    path: ../../creator/neom_achievements
+  neom_forum:
+    path: ../neom_forum
+  saia_core:
+    path: ../../ai/saia_core
+  neom_memory:
+    path: ../../ai/neom_memory
+  neom_mates:
+    path: ../neom_mates
+  neom_notifications:
+    path: ../../main/neom_notifications
+  neom_settings:
+    path: ../../main/neom_settings
+  neom_analytics:
+    path: ../../analytics/neom_analytics
+  neom_sound:
+    path: ../../hardware/neom_sound
+  neom_commerce:
+    path: ../../commerce/neom_commerce
+  neom_files:
+    path: ../../ai/neom_files
+  neom_artifacts:
+    path: ../../ai/neom_artifacts
+  neom_docs:
+    path: ../../ai/neom_docs
+  neom_usage:
+    path: ../../analytics/neom_usage
+  neom_ollama:
+    path: ../../ai/neom_ollama
+  neom_posts:
+    path: ../../creator/neom_posts
+  neom_share:
+    path: ../neom_share
+  neom_rc:
+    path: ../../ai/neom_rc
+  neom_tts:
+    path: ../../ai/neom_tts
+  neom_cloud:
+    path: ../../ai/neom_cloud
+  neom_stripe:
+    path: ../../commerce/neom_stripe
+  neom_browser:
+    path: ../../ai/neom_browser
+  neom_cli:
+    path: ../../ai/neom_cli
+  neom_games:
+    path: ../../engage/neom_games
+  neom_learning:
+    path: ../../engage/neom_learning
+  neom_onboarding:
+    path: ../../main/neom_onboarding
+  neom_desktop:
+    path: ../../ai/neom_desktop
+  neom_media_upload:
+    path: ../../creator/neom_media_upload
+  neom_jobs:
+    path: ../../platform/neom_jobs
+  sint:
+    path: ../../framework/sint

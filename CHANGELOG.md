@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased - System updates
+- Actualizaciones de estabilidad y compatibilidad.
+
 All notable changes to neom_profile will be documented in this file.
 
 ## [2.1.0] - 2026-04-16

@@ -200,6 +200,39 @@ class ProfileEditPage extends StatelessWidget {
                           enabled: controller.editStatus.value,
                         ),
                       ),
+                      if (AppConfig.instance.appInUse == AppInUse.i) ...[
+                        AppTheme.heightSpace10,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: AppTheme.padding25),
+                          child: Text(
+                            AppTranslationConstants.address.tr,
+                            style: const TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: AppTheme.padding25),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: controller.addressController,
+                                  enabled: controller.editStatus.value,
+                                  decoration: InputDecoration(
+                                    hintText: AppTranslationConstants.address.tr,
+                                  ),
+                                ),
+                              ),
+                              if (controller.editStatus.value)
+                                IconButton(
+                                  icon: const Icon(Icons.my_location, color: Colors.white70),
+                                  onPressed: () => AuthGuard.protect(context, () => controller.updateLocation()),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
                       AppTheme.heightSpace20,
                       // ─── Influences Section ───
                       if (AppConfig.instance.appInUse == AppInUse.g)

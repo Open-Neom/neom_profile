@@ -1,11 +1,27 @@
 dependency_overrides:
   sint:
     path: ../../framework/sint
+  sint_sentinel:
+    path: ../../framework/sint_sentinel
   neom_core:
     path: ../../main/neom_core
   neom_commons:
     path: ../../main/neom_commons
+  saia_core:
+    path: ../../ai/saia_core
+  neom_memory:
+    path: ../../ai/neom_memory
+  neom_ia:
+    path: ../../ai/neom_ia
+  neom_corpus:
+    path: ../../ai/neom_corpus
+  neom_tts:
+    path: ../../ai/neom_tts
+  neom_sound:
+    path: ../../hardware/neom_sound
   neom_home:
     path: ../../main/neom_home
   neom_achievements:
     path: ../../creator/neom_achievements
+  neom_forum:
+    path: ../neom_forum

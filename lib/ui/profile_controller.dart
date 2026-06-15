@@ -87,6 +87,7 @@ class ProfileController extends SintController implements ProfileService {
   TextEditingController slugController = TextEditingController();
   TextEditingController displayNameController = TextEditingController();
   TextEditingController bioController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
 
   String profileName = "";
   String profileAboutMe = "";
@@ -120,6 +121,7 @@ class ProfileController extends SintController implements ProfileService {
     slugController.dispose();
     displayNameController.dispose();
     bioController.dispose();
+    addressController.dispose();
     super.onClose();
   }
 
@@ -148,6 +150,7 @@ class ProfileController extends SintController implements ProfileService {
     aboutMeController.text = profile.value.aboutMe;
     nameController.text = profile.value.name;
     slugController.text = profile.value.slug;
+    addressController.text = _location.value;
     previousInfluences = List.from(profile.value.influences ?? []);
   }
 
@@ -207,6 +210,7 @@ class ProfileController extends SintController implements ProfileService {
       } else if (profile.value.position != null && geoLocatorServiceImpl != null) {
         _location.value = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
       }
+      addressController.text = _location.value;
 
       // Clear and reload activity data
       profilePosts.clear();
@@ -248,13 +252,19 @@ class ProfileController extends SintController implements ProfileService {
   }
 
 
-  void changeEditStatus(){
-    AppConfig.logger.t("Changing edit status from $editStatus");
+  void changeEditStatus({bool? status}){
+    AppConfig.logger.t("Changing edit status from $editStatus to $status");
 
-    editStatus.value ? editStatus.value = false
-        : editStatus.value = true;
+    if (status != null) {
+      editStatus.value = status;
+    } else {
+      editStatus.value = !editStatus.value;
+    }
 
-    aboutMeController.text.trim();
+    aboutMeController.text = profile.value.aboutMe;
+    nameController.text = profile.value.name;
+    slugController.text = profile.value.slug;
+    addressController.text = _location.value;
     
     update([AppPageIdConstants.profile]);
   }
@@ -392,6 +402,7 @@ class ProfileController extends SintController implements ProfileService {
           final addr = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
           profile.value.address = addr;
           _location.value = addr;
+          addressController.text = addr;
           update(); // Notify SintBuilder listeners
         }
         AppConfig.logger.d("Location retrieved and updated successfully for ${_location.value}");
@@ -455,6 +466,7 @@ class ProfileController extends SintController implements ProfileService {
               }
             }
             _location.value = address;
+            addressController.text = address;
             AppConfig.logger.d("Location from IP: $address ($lat, $lon)");
             update(); // Notify SintBuilder listeners
           }
@@ -475,8 +487,9 @@ class ProfileController extends SintController implements ProfileService {
     bool profileInstrumentsChanged = !CollectionUtilities.mapKeysEquals(previousInstruments, profile.value.instruments ?? {});
     bool mainFeatureChanged = previousMainFeature != profile.value.mainFeature;
     bool influencesChanged = !_influencesEqual(previousInfluences, profile.value.influences ?? []);
+    bool addressChanged = AppConfig.instance.appInUse == AppInUse.i && profile.value.address != addressController.text.trim();
 
-    if(nameChanged || aboutMeChanged || slugChanged || mainFeatureChanged || profileInstrumentsChanged || influencesChanged) {
+    if(nameChanged || aboutMeChanged || slugChanged || mainFeatureChanged || profileInstrumentsChanged || influencesChanged || addressChanged) {
       if(nameChanged) {
         profileName = nameController.text.trim();
 
@@ -581,6 +594,19 @@ class ProfileController extends SintController implements ProfileService {
             profile.value.id, profile.value.influences ?? [])) {
           userServiceImpl.profile.influences = profile.value.influences;
           previousInfluences = List.from(profile.value.influences ?? []);
+        }
+      }
+
+      if(addressChanged && AppConfig.instance.appInUse == AppInUse.i) {
+        final newAddress = addressController.text.trim();
+        if(await ProfileFirestore().updateAddress(profile.value.id, newAddress)) {
+          userServiceImpl.profile.address = newAddress;
+          profile.value.address = newAddress;
+          _location.value = newAddress;
+          AppUtilities.showSnackBar(
+            title: ProfileTranslationConstants.profileDetails.tr,
+            message: ProfileTranslationConstants.profileUpdatedMsg.tr,
+          );
         }
       }
     } else {

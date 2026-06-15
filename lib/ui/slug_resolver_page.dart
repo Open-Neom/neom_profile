@@ -101,6 +101,14 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
     final id = segments[1];
 
     switch (prefix) {
+      case 'invite':
+        // emxi.org/invite/{code} → store the coupon + send to registration so
+        // onboarding auto-applies it (free month / plan trial).
+        AppConfig.logger.i("SlugResolver: invite coupon '$id' → register");
+        DeeplinkUtilities.pendingInviteCoupon = id.trim();
+        Sint.offAllNamed(AppRouteConstants.login);
+        return true;
+
       case 'p':
         AppConfig.logger.i("SlugResolver: post ID '$id'");
         await DeeplinkUtilities.navigateWithHomeBehind(

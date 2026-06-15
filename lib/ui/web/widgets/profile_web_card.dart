@@ -203,26 +203,71 @@ class ProfileWebCard extends StatelessWidget {
               const SizedBox(height: 8),
             ],
             // Location
-            GestureDetector(
-              onTap: () => AuthGuard.protect(context, () => controller.updateLocation()),
-              child: Row(
+            if (isEditing && AppConfig.instance.appInUse == AppInUse.i) ...[
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.place, color: Colors.white70, size: 14),
                   const SizedBox(width: 4),
-                  Text(
-                    controller.location.isNotEmpty
-                        ? controller.location.length > CoreConstants.maxLocationNameLength
-                            ? '${controller.location.substring(0, CoreConstants.maxLocationNameLength)}...'
-                            : controller.location
-                        : AppTranslationConstants.notSpecified.tr,
-                    style: TextStyle(color: AppColor.textSecondary, fontSize: 13),
+                  Expanded(
+                    child: TextField(
+                      controller: controller.addressController,
+                      style: TextStyle(color: AppColor.textSecondary, fontSize: 13),
+                      decoration: InputDecoration(
+                        hintText: AppTranslationConstants.address.tr,
+                        hintStyle: TextStyle(color: AppColor.textSecondary.withValues(alpha: 0.5)),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: AppColor.borderMedium),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: AppColor.borderMedium),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: AppColor.bondiBlue75),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: const Icon(Icons.my_location, color: Colors.white70, size: 16),
+                    onPressed: () => AuthGuard.protect(context, () => controller.updateLocation()),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    tooltip: AppTranslationConstants.location.tr,
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
+            ] else ...[
+              GestureDetector(
+                onTap: () => AppConfig.instance.appInUse == AppInUse.i
+                    ? controller.changeEditStatus(status: true)
+                    : AuthGuard.protect(context, () => controller.updateLocation()),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.place, color: Colors.white70, size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      controller.location.isNotEmpty
+                          ? controller.location.length > CoreConstants.maxLocationNameLength
+                              ? '${controller.location.substring(0, CoreConstants.maxLocationNameLength)}...'
+                              : controller.location
+                          : AppTranslationConstants.notSpecified.tr,
+                      style: TextStyle(color: AppColor.textSecondary, fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             // Followers
             if (showFollowers) ...[
               buildFollowerInfo(context, profile),
@@ -392,10 +437,12 @@ class ProfileWebCard extends StatelessWidget {
                 await controller.handleAndUploadImage(MediaUploadDestination.profile);
               }),
               onCoverTap: () => AuthGuard.protect(context, () => controller.showUpdateCoverImgDialog(context)),
-              onBioTap: () => controller.changeEditStatus(),
-              onLocationTap: () => AuthGuard.protect(context, () => controller.updateLocation()),
-              onGenresTap: () => controller.changeEditStatus(),
-              onSlugTap: () => controller.changeEditStatus(),
+              onBioTap: () => controller.changeEditStatus(status: true),
+              onLocationTap: () => AppConfig.instance.appInUse == AppInUse.i
+                  ? controller.changeEditStatus(status: true)
+                  : AuthGuard.protect(context, () => controller.updateLocation()),
+              onGenresTap: () => controller.changeEditStatus(status: true),
+              onSlugTap: () => controller.changeEditStatus(status: true),
               compact: true,
             ),
           ],
