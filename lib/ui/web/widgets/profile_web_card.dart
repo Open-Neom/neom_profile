@@ -134,7 +134,9 @@ class ProfileWebCard extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      TextUtilities.capitalizeFirstLetter(profile.name),
+                      profile.name.trim().isNotEmpty
+                          ? TextUtilities.capitalizeFirstLetter(profile.name)
+                          : 'Usuario',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -149,6 +151,16 @@ class ProfileWebCard extends StatelessWidget {
                   ],
                 ],
               ),
+              if (profile.slug.trim().isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  '@${profile.slug}',
+                  style: TextStyle(
+                    color: AppColor.textSecondary,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ],
             // Achievement badges
             Builder(builder: (_) {
