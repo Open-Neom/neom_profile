@@ -8,7 +8,11 @@ import 'package:neom_core/domain/model/app_release_item.dart';
 import 'package:neom_core/utils/neom_error_logger.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/slug_router.dart';
+import 'package:neom_core/data/firestore/itemlist_firestore.dart';
+import 'package:neom_core/data/firestore/app_release_item_firestore.dart';
+import 'package:neom_core/domain/use_cases/audio_player_invoker_service.dart';
 import 'package:sint/sint.dart';
 
 /// Resolves vanity URLs and shared links to their content.
@@ -73,8 +77,77 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
         return;
       }
 
-      // ─── Prefixed routes (structured URL patterns) ───
+      // ─── 3 segments (artistSlug/a/albumSlug) → Album resolution ───
+      if (segments.length == 3 && segments[1].toLowerCase() == 'a') {
+        final artistSlug = segments[0];
+        final albumSlug = segments[2];
+        final fullSlug = '$artistSlug/a/$albumSlug';
+        AppConfig.logger.i("SlugResolver: Album slug '$fullSlug' → Itemlist lookup");
+        
+        final itemlist = await ItemlistFirestore().getBySlug(fullSlug);
+        if (itemlist != null && itemlist.id.isNotEmpty) {
+          if (AppConfig.instance.appInUse == AppInUse.g) {
+            Sint.offAllNamed(AppRouteConstants.root);
+            Future.delayed(const Duration(milliseconds: 300), () async {
+              try {
+                final List<AppReleaseItem> releaseItems = itemlist.appReleaseItems ?? [];
+                if (releaseItems.isNotEmpty) {
+                  Sint.find<AudioPlayerInvokerService>().init(
+                    releaseItems: releaseItems,
+                    index: 0,
+                    playItem: true,
+                  );
+                }
+              } catch (e) {
+                AppConfig.logger.e("Error playing album from deep link: $e");
+              }
+            });
+          } else {
+            await DeeplinkUtilities.navigateWithHomeBehind(
+              AppRouteConstants.listItems,
+              arguments: [itemlist.id, false, true],
+            );
+          }
+          return;
+        }
+      }
 
+      // ─── 2 segments (artistSlug/songSlug) → Track resolution ───
+      if (segments.length == 2) {
+        final prefixes = {'invite', 'p', 'collective', 'playlist', 'post', 'blog', 'e', 'shop', 'item'};
+        if (!prefixes.contains(firstSegment)) {
+          final artistSlug = segments[0];
+          final trackSlug = segments[1];
+          final fullSlug = '$artistSlug/$trackSlug';
+          AppConfig.logger.i("SlugResolver: Song slug '$fullSlug' → Release lookup");
+          
+          final item = await AppReleaseItemFirestore().getBySlug(fullSlug);
+          if (item != null && item.id.isNotEmpty) {
+            if (AppConfig.instance.appInUse == AppInUse.g) {
+              Sint.offAllNamed(AppRouteConstants.root);
+              Future.delayed(const Duration(milliseconds: 300), () async {
+                try {
+                  Sint.find<AudioPlayerInvokerService>().init(
+                    releaseItems: [item],
+                    index: 0,
+                    playItem: true,
+                  );
+                } catch (e) {
+                  AppConfig.logger.e("Error playing song from deep link: $e");
+                }
+              });
+            } else {
+              await DeeplinkUtilities.navigateWithHomeBehind(
+                AppFlavour.getMainItemDetailsRoute(item.id, type: item.mediaType, slug: item.slug),
+                arguments: [item],
+              );
+            }
+            return;
+          }
+        }
+      }
+
+      // ─── Prefixed routes (structured URL patterns) ───
       if (await _handlePrefixedRoute(firstSegment, segments)) return;
 
       // ─── Vanity slugs (single segment, no prefix) ───

@@ -1,5 +1,8 @@
 # Changelog
 
+## [2.0.0-unreleased] - 2026-07-21
+- Refactor and compatibility updates for slug_resolver_page.dart.
+
 ## Unreleased - System updates
 - Actualizaciones de estabilidad y compatibilidad.
 
