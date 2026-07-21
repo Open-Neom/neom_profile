@@ -139,7 +139,10 @@ class ProfilePage extends StatelessWidget {
                                   Container(
                                     height: 30,
                                     alignment: Alignment.center,
-                                    child: Text(TextUtilities.capitalizeFirstLetter(controller.profile.value.name),
+                                    child: Text(
+                                      controller.profile.value.name.trim().isNotEmpty
+                                          ? TextUtilities.capitalizeFirstLetter(controller.profile.value.name)
+                                          : 'Usuario',
                                       style: Theme.of(context).textTheme.titleLarge!.copyWith(
                                         color: AppConfig.instance.appInUse == AppInUse.i
                                             ? Theme.of(context).colorScheme.onSurface
@@ -156,6 +159,18 @@ class ProfilePage extends StatelessWidget {
                                     ),
                                 ]
                             ),
+                            if (controller.profile.value.slug.trim().isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                '@${controller.profile.value.slug}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppConfig.instance.appInUse == AppInUse.i
+                                      ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)
+                                      : Colors.white70,
+                                ),
+                              ),
+                            ],
                             // Achievement badges
                             Builder(builder: (_) {
                               try {
