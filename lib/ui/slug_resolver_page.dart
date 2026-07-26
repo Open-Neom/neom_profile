@@ -114,7 +114,7 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
 
       // ─── 2 segments (artistSlug/songSlug) → Track resolution ───
       if (segments.length == 2) {
-        final prefixes = {'invite', 'p', 'collective', 'playlist', 'post', 'blog', 'e', 'shop', 'item'};
+        final prefixes = {'invite', 'p', 'collective', 'playlist', 'post', 'blog', 'e', 'shop', 'item', 'book', 'reading'};
         if (!prefixes.contains(firstSegment)) {
           final artistSlug = segments[0];
           final trackSlug = segments[1];
@@ -243,6 +243,28 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
         AppConfig.logger.i("SlugResolver: item ID '$id'");
         await DeeplinkUtilities.navigateWithHomeBehind(
           AppRouteConstants.itemPath(id), arguments: id,
+        );
+        return true;
+
+      case 'book':
+        AppConfig.logger.i("SlugResolver: book '$id'");
+        final bookItem = await AppReleaseItemFirestore().getBySlug(id);
+        final bookId = (bookItem != null && bookItem.id.isNotEmpty) ? bookItem.id : id;
+        final bookSlug = (bookItem != null && bookItem.slug.isNotEmpty) ? bookItem.slug : id;
+        await DeeplinkUtilities.navigateWithHomeBehind(
+          AppRouteConstants.bookPath(bookId, slug: bookSlug),
+          arguments: bookItem != null ? [bookItem] : [id],
+        );
+        return true;
+
+      case 'reading':
+        AppConfig.logger.i("SlugResolver: reading '$id'");
+        final readItem = await AppReleaseItemFirestore().getBySlug(id);
+        final readId = (readItem != null && readItem.id.isNotEmpty) ? readItem.id : id;
+        final readSlug = (readItem != null && readItem.slug.isNotEmpty) ? readItem.slug : id;
+        await DeeplinkUtilities.navigateWithHomeBehind(
+          AppRouteConstants.readingPath(readId, slug: readSlug),
+          arguments: readItem != null ? [readItem, true] : [readId, true],
         );
         return true;
 
