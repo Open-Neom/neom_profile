@@ -77,8 +77,6 @@ dependency_overrides:
     path: ../../ai/neom_docs
   neom_usage:
     path: ../../analytics/neom_usage
-  neom_ollama:
-    path: ../../ai/neom_ollama
   neom_posts:
     path: ../../creator/neom_posts
   neom_share:
