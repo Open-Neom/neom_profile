@@ -650,7 +650,12 @@ class ProfileController extends SintController implements ProfileService {
           );
         }
 
-        if(uploadDestination == MediaUploadDestination.profile) {
+        if (photoUrl.isEmpty) {
+          // Do not persist an empty photoUrl into profile/user documents.
+          AppConfig.logger.e('Profile image upload returned empty URL — aborting update');
+          AppUtilities.showSnackBar(
+              message: AppTranslationConstants.uploadErrorTryLater);
+        } else if(uploadDestination == MediaUploadDestination.profile) {
           if (await ProfileFirestore().updatePhotoUrl(profile.value.id, photoUrl)) {
             if (await UserFirestore().updatePhotoUrl(userServiceImpl.user.id, photoUrl)) {
               userServiceImpl.user.photoUrl = photoUrl;
