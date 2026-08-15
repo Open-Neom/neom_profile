@@ -10,6 +10,7 @@ import 'package:neom_commons/utils/constants/translations/app_translation_consta
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/slug_router.dart';
+import 'package:neom_core/data/firestore/collective_firestore.dart';
 import 'package:neom_core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_core/data/firestore/app_release_item_firestore.dart';
 import 'package:neom_core/domain/use_cases/audio_player_invoker_service.dart';
@@ -114,7 +115,7 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
 
       // ─── 2 segments (artistSlug/songSlug) → Track resolution ───
       if (segments.length == 2) {
-        final prefixes = {'invite', 'p', 'collective', 'playlist', 'post', 'blog', 'e', 'shop', 'item', 'book', 'reading'};
+        final prefixes = {'invite', 'p', 'u', 'user', 'profile', 'c', 'collective', 'playlist', 'post', 'blog', 'e', 'shop', 'item', 'book', 'b', 'reading', 'r', 'song', 's'};
         if (!prefixes.contains(firstSegment)) {
           final artistSlug = segments[0];
           final trackSlug = segments[1];
@@ -182,17 +183,37 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
         Sint.offAllNamed(AppRouteConstants.login);
         return true;
 
+      case 'u':
+      case 'user':
+      case 'profile':
+        AppConfig.logger.i("SlugResolver: profile '$id'");
+        final profileMatch = await SlugRouter.resolveProfile(id);
+        if (profileMatch != null) {
+          await _navigateToMatch(profileMatch);
+          return true;
+        }
+        await DeeplinkUtilities.navigateWithHomeBehind(
+          AppRouteConstants.profilePath(id), arguments: id,
+        );
+        return true;
+
       case 'p':
+      case 'post':
         AppConfig.logger.i("SlugResolver: post ID '$id'");
         await DeeplinkUtilities.navigateWithHomeBehind(
           AppRouteConstants.postPath(id), arguments: id,
         );
         return true;
 
+      case 'c':
       case 'collective':
         AppConfig.logger.i("SlugResolver: collective ID '$id'");
+        final colItem = await CollectiveFirestore().getBySlug(id);
+        final colId = (colItem != null && colItem.id.isNotEmpty) ? colItem.id : id;
+        final colSlug = (colItem != null && colItem.slug.isNotEmpty) ? colItem.slug : id;
         await DeeplinkUtilities.navigateWithHomeBehind(
-          AppRouteConstants.collectivePath(id), arguments: [id],
+          AppRouteConstants.collectivePath(colId, slug: colSlug),
+          arguments: colItem != null ? [colItem] : [colId],
         );
         return true;
 
@@ -246,6 +267,7 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
         );
         return true;
 
+      case 'b':
       case 'book':
         AppConfig.logger.i("SlugResolver: book '$id'");
         final bookItem = await AppReleaseItemFirestore().getBySlug(id);
@@ -257,6 +279,7 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
         );
         return true;
 
+      case 'r':
       case 'reading':
         AppConfig.logger.i("SlugResolver: reading '$id'");
         final readItem = await AppReleaseItemFirestore().getBySlug(id);
@@ -267,6 +290,19 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
           arguments: readItem != null ? [readItem, true] : [readId, true],
         );
         return true;
+
+      case 's':
+      case 'song':
+        AppConfig.logger.i("SlugResolver: song '$id'");
+        final songItem = await AppReleaseItemFirestore().getBySlug(id);
+        if (songItem != null && songItem.id.isNotEmpty) {
+          await DeeplinkUtilities.navigateWithHomeBehind(
+            AppFlavour.getMainItemDetailsRoute(songItem.id, type: songItem.mediaType, slug: songItem.slug),
+            arguments: [songItem],
+          );
+          return true;
+        }
+        return false;
 
       default:
         return false;
@@ -280,7 +316,8 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
     switch (match.type) {
       case 'profile':
         await DeeplinkUtilities.navigateWithHomeBehind(
-          AppRouteConstants.matePath(match.id, slug: match.slug),
+          AppRouteConstants.profilePath(match.id, slug: match.slug),
+          arguments: match.entity ?? match.id,
         );
 
       case 'item':
