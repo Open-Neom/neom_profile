@@ -19,15 +19,20 @@ dependencies:
     git:
       url: git@github.com:Open-Neom/neom_commons.git
   neom_home:
-    path: ../neom_home
+    git:
+      url: git@github.com:Open-Neom/neom_home.git
   neom_achievements:
-    path: ../neom_achievements
+    git:
+      url: git@github.com:Open-Neom/neom_achievements.git
   saia_core:
-    path: ../../ai/saia_core
+    git:
+      url: git@github.com:Open-Neom/saia_core.git
   neom_forum:
-    path: ../neom_forum
+    git:
+      url: git@github.com:Open-Neom/neom_forum.git
   neom_memory:
-    path: ../../ai/neom_memory
+    git:
+      url: git@github.com:Open-Neom/neom_memory.git
   hive_flutter: ^1.1.0
   cloud_firestore: ^6.2.0
 
@@ -40,70 +45,104 @@ flutter:
 
 dependency_overrides:
   neom_core:
-    path: ../../main/neom_core
+    git:
+      url: git@github.com:Open-Neom/neom_core.git
   neom_commons:
-    path: ../../main/neom_commons
+    git:
+      url: git@github.com:Open-Neom/neom_commons.git
   neom_auth:
-    path: ../../main/neom_auth
+    git:
+      url: git@github.com:Open-Neom/neom_auth.git
   neom_ia:
-    path: ../../ai/neom_ia
+    git:
+      url: git@github.com:Open-Neom/neom_ia.git
   neom_home:
-    path: ../neom_home
+    git:
+      url: git@github.com:Open-Neom/neom_home.git
   neom_achievements:
-    path: ../../creator/neom_achievements
+    git:
+      url: git@github.com:Open-Neom/neom_achievements.git
   neom_forum:
-    path: ../neom_forum
+    git:
+      url: git@github.com:Open-Neom/neom_forum.git
   saia_core:
-    path: ../../ai/saia_core
+    git:
+      url: git@github.com:Open-Neom/saia_core.git
   neom_memory:
-    path: ../../ai/neom_memory
+    git:
+      url: git@github.com:Open-Neom/neom_memory.git
   neom_mates:
-    path: ../neom_mates
+    git:
+      url: git@github.com:Cyberneom/neom_mates.git
   neom_notifications:
-    path: ../../main/neom_notifications
+    git:
+      url: git@github.com:emmanuel-montoya/neom_notifications.git
   neom_settings:
-    path: ../../main/neom_settings
+    git:
+      url: git@github.com:Open-Neom/neom_settings.git
   neom_analytics:
-    path: ../../analytics/neom_analytics
+    git:
+      url: git@github.com:Cyberneom/neom_analytics.git
   neom_sound:
-    path: ../../hardware/neom_sound
+    git:
+      url: git@github.com:Cyberneom/neom_sound.git
   neom_commerce:
-    path: ../../commerce/neom_commerce
+    git:
+      url: git@github.com:emmanuel-montoya/neom_commerce.git
   neom_files:
-    path: ../../ai/neom_files
+    git:
+      url: git@github.com:Open-Neom/neom_files.git
   neom_artifacts:
-    path: ../../ai/neom_artifacts
+    git:
+      url: git@github.com:Open-Neom/neom_artifacts.git
   neom_docs:
-    path: ../../ai/neom_docs
+    git:
+      url: git@github.com:Open-Neom/neom_docs.git
   neom_usage:
-    path: ../../analytics/neom_usage
+    git:
+      url: git@github.com:Cyberneom/neom_usage.git
   neom_posts:
-    path: ../../creator/neom_posts
+    git:
+      url: git@github.com:Cyberneom/neom_posts.git
   neom_share:
-    path: ../neom_share
+    git:
+      url: git@github.com:Open-Neom/neom_share.git
   neom_rc:
-    path: ../../ai/neom_rc
+    git:
+      url: git@github.com:Open-Neom/neom_rc.git
   neom_tts:
-    path: ../../ai/neom_tts
+    git:
+      url: git@github.com:Open-Neom/neom_tts.git
   neom_cloud:
-    path: ../../ai/neom_cloud
+    git:
+      url: git@github.com:Cyberneom/neom_cloud.git
   neom_stripe:
-    path: ../../commerce/neom_stripe
+    git:
+      url: git@github.com:Cyberneom/neom_stripe.git
   neom_browser:
-    path: ../../ai/neom_browser
+    git:
+      url: git@github.com:Open-Neom/neom_browser.git
   neom_cli:
-    path: ../../ai/neom_cli
+    git:
+      url: git@github.com:Open-Neom/neom_cli.git
   neom_games:
-    path: ../../engage/neom_games
+    git:
+      url: git@github.com:Cyberneom/neom_games.git
   neom_learning:
-    path: ../../engage/neom_learning
+    git:
+      url: git@github.com:Open-Neom/neom_learning.git
   neom_onboarding:
-    path: ../../main/neom_onboarding
+    git:
+      url: git@github.com:Open-Neom/neom_onboarding.git
   neom_desktop:
-    path: ../../ai/neom_desktop
+    git:
+      url: git@github.com:Open-Neom/neom_desktop.git
   neom_media_upload:
-    path: ../../creator/neom_media_upload
+    git:
+      url: git@github.com:Open-Neom/neom_media_upload.git
   neom_jobs:
-    path: ../../platform/neom_jobs
+    git:
+      url: git@github.com:emmanuel-montoya/neom_jobs.git
   sint:
-    path: ../../framework/sint
+    git:
+      url: git@github.com:Open-Neom/sint.git
