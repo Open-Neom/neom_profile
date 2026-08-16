@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:neom_forum/neom_forum.dart';
+import 'package:sint/sint.dart';
 
 class ProfileCalpullia extends StatefulWidget {
   final String profileId;
@@ -74,10 +75,21 @@ class _ProfileCalpulliaState extends State<ProfileCalpullia> {
           separatorBuilder: (context, index) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final thread = ForumThread.fromSnapshot(docs[index]);
+            // Use the viewer's real forum tier (from subscription), not a
+            // hardcoded 5/true that would bypass tier gating.
+            int userTier = 1;
+            bool isRecognized = false;
+            try {
+              final forum = Sint.find<ForumController>();
+              userTier = forum.userTier < 1 ? 1 : forum.userTier;
+              isRecognized = forum.isRecognized;
+            } catch (_) {
+              // ForumController not registered — safest defaults.
+            }
             return ForumThreadCard(
               thread: thread,
-              userTier: 5,
-              isRecognized: true,
+              userTier: userTier,
+              isRecognized: isRecognized,
               onTap: () => setState(() => _activeThreadId = thread.id),
             );
           },
