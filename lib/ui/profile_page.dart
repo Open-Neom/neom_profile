@@ -142,7 +142,9 @@ class ProfilePage extends StatelessWidget {
                                     child: Text(
                                       controller.profile.value.name.trim().isNotEmpty
                                           ? TextUtilities.capitalizeFirstLetter(controller.profile.value.name)
-                                          : 'Usuario',
+                                          : (controller.userServiceImpl.user.name.trim().isNotEmpty
+                                              ? TextUtilities.capitalizeFirstLetter(controller.userServiceImpl.user.name)
+                                              : 'Usuario'),
                                       style: Theme.of(context).textTheme.titleLarge!.copyWith(
                                         color: AppConfig.instance.appInUse == AppInUse.i
                                             ? Theme.of(context).colorScheme.onSurface
