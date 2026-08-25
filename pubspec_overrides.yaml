@@ -7,16 +7,6 @@ dependency_overrides:
     path: ../../main/neom_core
   neom_commons:
     path: ../../main/neom_commons
-  saia_core:
-    path: ../../ai/saia_core
-  neom_memory:
-    path: ../../ai/neom_memory
-  neom_ia:
-    path: ../../ai/neom_ia
-  neom_corpus:
-    path: ../../ai/neom_corpus
-  neom_tts:
-    path: ../../ai/neom_tts
   neom_sound:
     path: ../../hardware/neom_sound
   neom_home:
