@@ -14,6 +14,7 @@ import 'package:neom_core/data/firestore/collective_firestore.dart';
 import 'package:neom_core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_core/data/firestore/app_release_item_firestore.dart';
 import 'package:neom_core/domain/use_cases/audio_player_invoker_service.dart';
+import 'package:neom_core/domain/model/item_list.dart';
 import 'package:sint/sint.dart';
 
 /// Resolves vanity URLs and shared links to their content.
@@ -40,7 +41,6 @@ class SlugResolverPage extends StatefulWidget {
 }
 
 class _SlugResolverPageState extends State<SlugResolverPage> {
-
   bool _isLoading = true;
   bool _notFound = false;
 
@@ -56,7 +56,9 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
       final uri = Uri.parse(currentRoute);
       final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
 
-      AppConfig.logger.d("SlugResolver: resolving route '$currentRoute' → segments: $segments");
+      AppConfig.logger.d(
+        "SlugResolver: resolving route '$currentRoute' → segments: $segments",
+      );
 
       if (segments.isEmpty) {
         _showNotFound();
@@ -68,7 +70,9 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
       // ─── @username shorthand → direct profile resolution ───
       if (firstSegment.startsWith('@') && firstSegment.length > 1) {
         final username = firstSegment.substring(1);
-        AppConfig.logger.i("SlugResolver: @mention '$username' → profile lookup");
+        AppConfig.logger.i(
+          "SlugResolver: @mention '$username' → profile lookup",
+        );
         final match = await SlugRouter.resolveProfile(username);
         if (match != null) {
           await _navigateToMatch(match);
@@ -78,71 +82,122 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
         return;
       }
 
-      // ─── 3 segments (artistSlug/a/albumSlug) → Album resolution ───
-      if (segments.length == 3 && segments[1].toLowerCase() == 'a') {
-        final artistSlug = segments[0];
-        final albumSlug = segments[2];
-        final fullSlug = '$artistSlug/a/$albumSlug';
-        AppConfig.logger.i("SlugResolver: Album slug '$fullSlug' → Itemlist lookup");
-        
-        final itemlist = await ItemlistFirestore().getBySlug(fullSlug);
-        if (itemlist != null && itemlist.id.isNotEmpty) {
-          if (AppConfig.instance.appInUse == AppInUse.g) {
-            Sint.offAllNamed(AppRouteConstants.root);
-            Future.delayed(const Duration(milliseconds: 300), () async {
-              try {
-                final List<AppReleaseItem> releaseItems = itemlist.appReleaseItems ?? [];
-                if (releaseItems.isNotEmpty) {
-                  Sint.find<AudioPlayerInvokerService>().init(
-                    releaseItems: releaseItems,
-                    index: 0,
-                    playItem: true,
-                  );
-                }
-              } catch (e) {
-                AppConfig.logger.e("Error playing album from deep link: $e");
-              }
-            });
-          } else {
-            await DeeplinkUtilities.navigateWithHomeBehind(
-              AppRouteConstants.listItems,
-              arguments: [itemlist.id, false, true],
-            );
-          }
+      // ─── /a/{ownerSlug}/{slug} → Release ───
+      // `a` is the ecosystem-wide prefix for audio/artist addresses. The pair
+      // is unique by domain rule, so no disambiguation is needed here.
+      if (firstSegment == AppRouteConstants.releasePrefix &&
+          segments.length == 3) {
+        final ownerSlug = segments[1].toLowerCase();
+        final releaseSlug = segments[2].toLowerCase();
+        AppConfig.logger.i(
+          "SlugResolver: release '/a/$ownerSlug/$releaseSlug'",
+        );
+
+        final item = await AppReleaseItemFirestore().getByOwnerAndSlug(
+          ownerSlug,
+          releaseSlug,
+        );
+        if (item != null && item.id.isNotEmpty) {
+          await _openRelease(item);
           return;
         }
+        _showNotFound();
+        return;
+      }
+
+      // ─── /a/{ownerSlug} → Artist ───
+      // The band's page when one exists, otherwise the artist's own profile.
+      // Artists that exist only as a name on releases have no page yet.
+      if (firstSegment == AppRouteConstants.releasePrefix &&
+          segments.length == 2) {
+        final ownerSlug = segments[1].toLowerCase();
+        AppConfig.logger.i("SlugResolver: artist '/a/$ownerSlug'");
+
+        final collective = await CollectiveFirestore().getBySlug(ownerSlug);
+        if (collective != null && collective.id.isNotEmpty) {
+          await DeeplinkUtilities.navigateWithHomeBehind(
+            AppRouteConstants.collectivePath(
+              collective.id,
+              slug: collective.slug,
+            ),
+            arguments: [collective],
+          );
+          return;
+        }
+
+        final profileMatch = await SlugRouter.resolveProfile(ownerSlug);
+        if (profileMatch != null) {
+          await _navigateToMatch(profileMatch);
+          return;
+        }
+
+        _showNotFound();
+        return;
+      }
+
+      // ─── /{kind}/{ownerSlug}/{slug} → Itemlist ───
+      // The kind names itself: /album/novus-irae/letimum, /ep/…, /podcast/…
+      // Prefixes come from ItemlistType, so a new kind works without changes.
+      final itemlistType = AppRouteConstants.itemlistTypeFromPrefix(
+        firstSegment,
+      );
+      if (itemlistType != null && segments.length == 3) {
+        final ownerSlug = segments[1].toLowerCase();
+        final listSlug = segments[2].toLowerCase();
+        AppConfig.logger.i(
+          "SlugResolver: ${itemlistType.name} "
+          "'/$firstSegment/$ownerSlug/$listSlug'",
+        );
+
+        final itemlist = await ItemlistFirestore().getByOwnerAndSlug(
+          ownerSlug,
+          listSlug,
+        );
+        if (itemlist != null && itemlist.id.isNotEmpty) {
+          await _openItemlist(itemlist);
+          return;
+        }
+        _showNotFound();
+        return;
       }
 
       // ─── 2 segments (artistSlug/songSlug) → Track resolution ───
       if (segments.length == 2) {
-        final prefixes = {'invite', 'p', 'u', 'user', 'profile', 'c', 'collective', 'playlist', 'post', 'blog', 'e', 'shop', 'item', 'book', 'b', 'reading', 'r', 'song', 's'};
+        // Itemlist kinds come from the enum so a new one is reserved
+        // automatically; the rest are the fixed structural prefixes.
+        final prefixes = {
+          'a',
+          'invite',
+          'p',
+          'u',
+          'user',
+          'profile',
+          'c',
+          'collective',
+          'post',
+          'blog',
+          'e',
+          'shop',
+          'item',
+          'book',
+          'b',
+          'reading',
+          'r',
+          'song',
+          's',
+          ...AppRouteConstants.itemlistPrefixes,
+        };
         if (!prefixes.contains(firstSegment)) {
           final artistSlug = segments[0];
           final trackSlug = segments[1];
           final fullSlug = '$artistSlug/$trackSlug';
-          AppConfig.logger.i("SlugResolver: Song slug '$fullSlug' → Release lookup");
-          
+          AppConfig.logger.i(
+            "SlugResolver: Song slug '$fullSlug' → Release lookup",
+          );
+
           final item = await AppReleaseItemFirestore().getBySlug(fullSlug);
           if (item != null && item.id.isNotEmpty) {
-            if (AppConfig.instance.appInUse == AppInUse.g) {
-              Sint.offAllNamed(AppRouteConstants.root);
-              Future.delayed(const Duration(milliseconds: 300), () async {
-                try {
-                  Sint.find<AudioPlayerInvokerService>().init(
-                    releaseItems: [item],
-                    index: 0,
-                    playItem: true,
-                  );
-                } catch (e) {
-                  AppConfig.logger.e("Error playing song from deep link: $e");
-                }
-              });
-            } else {
-              await DeeplinkUtilities.navigateWithHomeBehind(
-                AppFlavour.getMainItemDetailsRoute(item.id, type: item.mediaType, slug: item.slug),
-                arguments: [item],
-              );
-            }
+            await _openRelease(item);
             return;
           }
         }
@@ -162,17 +217,28 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
 
       _showNotFound();
     } catch (e, st) {
-      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'resolveSlug');
+      NeomErrorLogger.recordError(
+        e,
+        st,
+        module: 'neom_profile',
+        operation: 'resolveSlug',
+      );
       _showNotFound();
     }
   }
 
   /// Handle prefixed routes (/p/, /blog/, /e/, /shop/, /item/).
   /// Returns true if a route was matched and handled.
-  Future<bool> _handlePrefixedRoute(String prefix, List<String> segments) async {
+  Future<bool> _handlePrefixedRoute(
+    String prefix,
+    List<String> segments,
+  ) async {
     if (segments.length < 2) return false;
 
     final id = segments[1];
+    // Some legacy EMXI book slugs use `owner/slug`. Keep the complete value
+    // for book/reader resolution instead of silently discarding the tail.
+    final legacyContentId = segments.skip(1).join('/');
 
     switch (prefix) {
       case 'invite':
@@ -193,7 +259,8 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
           return true;
         }
         await DeeplinkUtilities.navigateWithHomeBehind(
-          AppRouteConstants.profilePath(id), arguments: id,
+          AppRouteConstants.matePath(id),
+          arguments: id,
         );
         return true;
 
@@ -201,7 +268,8 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
       case 'post':
         AppConfig.logger.i("SlugResolver: post ID '$id'");
         await DeeplinkUtilities.navigateWithHomeBehind(
-          AppRouteConstants.postPath(id), arguments: id,
+          AppRouteConstants.postPath(id),
+          arguments: id,
         );
         return true;
 
@@ -209,8 +277,12 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
       case 'collective':
         AppConfig.logger.i("SlugResolver: collective ID '$id'");
         final colItem = await CollectiveFirestore().getBySlug(id);
-        final colId = (colItem != null && colItem.id.isNotEmpty) ? colItem.id : id;
-        final colSlug = (colItem != null && colItem.slug.isNotEmpty) ? colItem.slug : id;
+        final colId = (colItem != null && colItem.id.isNotEmpty)
+            ? colItem.id
+            : id;
+        final colSlug = (colItem != null && colItem.slug.isNotEmpty)
+            ? colItem.slug
+            : id;
         await DeeplinkUtilities.navigateWithHomeBehind(
           AppRouteConstants.collectivePath(colId, slug: colSlug),
           arguments: colItem != null ? [colItem] : [colId],
@@ -225,20 +297,14 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
         );
         return true;
 
-      case 'post':
-        AppConfig.logger.i("SlugResolver: post ID '$id'");
-        await DeeplinkUtilities.navigateWithHomeBehind(
-          AppRouteConstants.postPath(id), arguments: id,
-        );
-        return true;
-
       case 'blog':
         AppConfig.logger.i("SlugResolver: blog '$id'");
         final match = await SlugRouter.resolveBlog(id);
         if (match != null) {
           final blogEntry = match.entity;
           await DeeplinkUtilities.navigateWithHomeBehind(
-            AppRouteConstants.blogEntryPath(match.id, slug: match.slug), arguments: [blogEntry],
+            AppRouteConstants.blogEntryPath(match.id, slug: match.slug),
+            arguments: [blogEntry],
           );
           return true;
         }
@@ -248,7 +314,8 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
       case 'e':
         AppConfig.logger.i("SlugResolver: event ID '$id'");
         await DeeplinkUtilities.navigateWithHomeBehind(
-          AppRouteConstants.eventPath(id), arguments: id,
+          AppRouteConstants.eventPath(id),
+          arguments: id,
         );
         return true;
 
@@ -263,31 +330,47 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
       case 'item':
         AppConfig.logger.i("SlugResolver: item ID '$id'");
         await DeeplinkUtilities.navigateWithHomeBehind(
-          AppRouteConstants.itemPath(id), arguments: id,
+          AppRouteConstants.itemPath(id),
+          arguments: id,
         );
         return true;
 
       case 'b':
       case 'book':
-        AppConfig.logger.i("SlugResolver: book '$id'");
-        final bookItem = await AppReleaseItemFirestore().getBySlug(id);
-        final bookId = (bookItem != null && bookItem.id.isNotEmpty) ? bookItem.id : id;
-        final bookSlug = (bookItem != null && bookItem.slug.isNotEmpty) ? bookItem.slug : id;
+        AppConfig.logger.i("SlugResolver: book '$legacyContentId'");
+        final bookItem = await AppReleaseItemFirestore().findByIdOrSlug(
+          legacyContentId,
+        );
+        final bookId = (bookItem != null && bookItem.id.isNotEmpty)
+            ? bookItem.id
+            : legacyContentId;
+        final bookSlug = (bookItem != null && bookItem.slug.isNotEmpty)
+            ? bookItem.slug
+            : legacyContentId;
         await DeeplinkUtilities.navigateWithHomeBehind(
           AppRouteConstants.bookPath(bookId, slug: bookSlug),
-          arguments: bookItem != null ? [bookItem] : [id],
+          // A failed lookup must fall through to the destination controller's
+          // route-param fetch. Passing a String here is invalid because the
+          // details controller expects an AppReleaseItem argument.
+          arguments: bookItem != null ? [bookItem] : null,
         );
         return true;
 
       case 'r':
       case 'reading':
-        AppConfig.logger.i("SlugResolver: reading '$id'");
-        final readItem = await AppReleaseItemFirestore().getBySlug(id);
-        final readId = (readItem != null && readItem.id.isNotEmpty) ? readItem.id : id;
-        final readSlug = (readItem != null && readItem.slug.isNotEmpty) ? readItem.slug : id;
+        AppConfig.logger.i("SlugResolver: reading '$legacyContentId'");
+        final readItem = await AppReleaseItemFirestore().findByIdOrSlug(
+          legacyContentId,
+        );
+        final readId = (readItem != null && readItem.id.isNotEmpty)
+            ? readItem.id
+            : legacyContentId;
+        final readSlug = (readItem != null && readItem.slug.isNotEmpty)
+            ? readItem.slug
+            : legacyContentId;
         await DeeplinkUtilities.navigateWithHomeBehind(
           AppRouteConstants.readingPath(readId, slug: readSlug),
-          arguments: readItem != null ? [readItem, true] : [readId, true],
+          arguments: readItem != null ? [readItem, true] : null,
         );
         return true;
 
@@ -297,7 +380,11 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
         final songItem = await AppReleaseItemFirestore().getBySlug(id);
         if (songItem != null && songItem.id.isNotEmpty) {
           await DeeplinkUtilities.navigateWithHomeBehind(
-            AppFlavour.getMainItemDetailsRoute(songItem.id, type: songItem.mediaType, slug: songItem.slug),
+            AppFlavour.getMainItemDetailsRoute(
+              songItem.id,
+              type: songItem.mediaType,
+              slug: songItem.slug,
+            ),
             arguments: [songItem],
           );
           return true;
@@ -310,13 +397,69 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
   }
 
   /// Navigate based on a resolved SlugMatch.
+  /// Opens an album/EP/podcast: Gigmeout plays it, others show the list.
+  Future<void> _openItemlist(Itemlist itemlist) async {
+    final releaseItems = itemlist.appReleaseItems ?? [];
+
+    if (AppConfig.instance.appInUse == AppInUse.g && releaseItems.isNotEmpty) {
+      Sint.offAllNamed(AppRouteConstants.root);
+      Future.delayed(const Duration(milliseconds: 300), () {
+        try {
+          Sint.find<AudioPlayerInvokerService>().init(
+            releaseItems: releaseItems,
+            index: 0,
+            playItem: true,
+          );
+        } catch (e) {
+          AppConfig.logger.e("Error playing itemlist from deep link: $e");
+        }
+      });
+      return;
+    }
+
+    await DeeplinkUtilities.navigateWithHomeBehind(
+      AppRouteConstants.listItems,
+      arguments: [itemlist.id, false, true],
+    );
+  }
+
+  /// Opens a release: Gigmeout plays it, the other apps show its detail page.
+  Future<void> _openRelease(AppReleaseItem item) async {
+    if (AppConfig.instance.appInUse == AppInUse.g) {
+      Sint.offAllNamed(AppRouteConstants.root);
+      Future.delayed(const Duration(milliseconds: 300), () {
+        try {
+          Sint.find<AudioPlayerInvokerService>().init(
+            releaseItems: [item],
+            index: 0,
+            playItem: true,
+          );
+        } catch (e) {
+          AppConfig.logger.e("Error playing release from deep link: $e");
+        }
+      });
+      return;
+    }
+
+    await DeeplinkUtilities.navigateWithHomeBehind(
+      AppFlavour.getMainItemDetailsRoute(
+        item.id,
+        type: item.mediaType,
+        slug: item.slug,
+      ),
+      arguments: [item],
+    );
+  }
+
   Future<void> _navigateToMatch(SlugMatch match) async {
-    AppConfig.logger.i("SlugResolver: found ${match.type} '${match.id}' slug: '${match.slug}'");
+    AppConfig.logger.i(
+      "SlugResolver: found ${match.type} '${match.id}' slug: '${match.slug}'",
+    );
 
     switch (match.type) {
       case 'profile':
         await DeeplinkUtilities.navigateWithHomeBehind(
-          AppRouteConstants.profilePath(match.id, slug: match.slug),
+          AppRouteConstants.matePath(match.id, slug: match.slug),
           arguments: match.entity ?? match.id,
         );
 
@@ -325,7 +468,11 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
         final item = match.entity;
         if (item is AppReleaseItem) {
           await DeeplinkUtilities.navigateWithHomeBehind(
-            AppFlavour.getMainItemDetailsRoute(match.id, type: item.mediaType, slug: match.slug),
+            AppFlavour.getMainItemDetailsRoute(
+              match.id,
+              type: item.mediaType,
+              slug: match.slug,
+            ),
             arguments: [item],
           );
         } else {
@@ -338,17 +485,20 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
 
       case 'event':
         await DeeplinkUtilities.navigateWithHomeBehind(
-          AppRouteConstants.eventPath(match.id, slug: match.slug), arguments: match.id,
+          AppRouteConstants.eventPath(match.id, slug: match.slug),
+          arguments: match.id,
         );
 
       case 'collective':
         await DeeplinkUtilities.navigateWithHomeBehind(
-          AppRouteConstants.collectivePath(match.id, slug: match.slug), arguments: [match.entity],
+          AppRouteConstants.collectivePath(match.id, slug: match.slug),
+          arguments: [match.entity],
         );
 
       case 'post':
         await DeeplinkUtilities.navigateWithHomeBehind(
-          AppRouteConstants.postPath(match.id, slug: match.slug), arguments: match.id,
+          AppRouteConstants.postPath(match.id, slug: match.slug),
+          arguments: match.id,
         );
 
       default:
@@ -375,8 +525,8 @@ class _SlugResolverPageState extends State<SlugResolverPage> {
           child: _isLoading
               ? const CircularProgressIndicator(color: Colors.white)
               : _notFound
-                  ? _buildNotFoundView()
-                  : const SizedBox.shrink(),
+              ? _buildNotFoundView()
+              : const SizedBox.shrink(),
         ),
       ),
     );
