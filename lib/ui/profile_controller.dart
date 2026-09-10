@@ -52,6 +52,8 @@ import 'package:neom_core/utils/enums/media_upload_destination.dart';
 import 'package:neom_core/utils/enums/place_type.dart';
 import 'package:neom_core/utils/enums/profile_type.dart';
 import 'package:neom_core/utils/enums/usage_reason.dart';
+import 'package:neom_core/data/implementations/geolocator_controller.dart';
+import 'package:neom_core/utils/position_utilities.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sint/sint.dart';
 
@@ -61,12 +63,20 @@ class ProfileController extends SintController implements ProfileService {
   
   final userServiceImpl = Sint.find<UserService>();
   final MediaUploadService? mediaUploadServiceImpl = Sint.find<MediaUploadService>();
-  final GeoLocatorService? geoLocatorServiceImpl = kIsWeb ? null : Sint.find<GeoLocatorService>();
+  final GeoLocatorService? geoLocatorServiceImpl = Sint.isRegistered<GeoLocatorService>()
+      ? Sint.find<GeoLocatorService>()
+      : null;
+
+  GeoLocatorService get _geoLocator =>
+      geoLocatorServiceImpl ??
+      (Sint.isRegistered<GeoLocatorService>() ? Sint.find<GeoLocatorService>() : null) ??
+      GeoLocatorController();
 
   final Rx<AppProfile> profile = AppProfile().obs;
   final RxBool editStatus = false.obs;
   final RxString _location = "".obs;
   final RxBool isLoading = true.obs;
+  final RxBool isUpdatingLocation = false.obs;
 
   @override
   String get location => _location.value;
@@ -137,8 +147,8 @@ class ProfileController extends SintController implements ProfileService {
     if (profile.value.address.isNotEmpty) {
       _location.value = profile.value.address;
       AppConfig.logger.d("[ProfileDebug] Using saved address: ${profile.value.address}");
-    } else if (profile.value.position != null && geoLocatorServiceImpl != null) {
-      _location.value = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
+    } else if (profile.value.position != null) {
+      _location.value = await _geoLocator.getAddressSimple(profile.value.position!);
       AppConfig.logger.d("[ProfileDebug] Recalculated from position: ${_location.value}");
     } else {
       AppConfig.logger.d("[ProfileDebug] No address and no position — showing 'No especificado'");
@@ -207,8 +217,8 @@ class ProfileController extends SintController implements ProfileService {
       // Update location — use saved address first
       if (profile.value.address.isNotEmpty) {
         _location.value = profile.value.address;
-      } else if (profile.value.position != null && geoLocatorServiceImpl != null) {
-        _location.value = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
+      } else if (profile.value.position != null) {
+        _location.value = await _geoLocator.getAddressSimple(profile.value.position!);
       }
       addressController.text = _location.value;
 
@@ -393,46 +403,62 @@ class ProfileController extends SintController implements ProfileService {
   @override
   Future<void> updateLocation() async {
     AppConfig.logger.t("Updating location");
-    try {
+    if (isUpdatingLocation.value) return;
+    isUpdatingLocation.value = true;
+    update([AppPageIdConstants.profile]);
 
-      Position? newPosition = await geoLocatorServiceImpl?.getCurrentPosition();
-      if(newPosition != null) {
-        if(await ProfileFirestore().updatePosition(profile.value.id, newPosition)){
+    try {
+      Position? newPosition = await _geoLocator.getCurrentPosition();
+      if (newPosition != null) {
+        String addr = await _geoLocator.getAddressSimple(newPosition);
+        if (addr.isEmpty) {
+          addr = await PositionUtilities.getFormattedAddressFromPosition(newPosition);
+        }
+
+        if (await ProfileFirestore().updatePosition(profile.value.id, newPosition)) {
           profile.value.position = newPosition;
-          final addr = await geoLocatorServiceImpl!.getAddressSimple(profile.value.position!);
-          profile.value.address = addr;
-          _location.value = addr;
-          addressController.text = addr;
+          if (addr.isNotEmpty) {
+            profile.value.address = addr;
+            _location.value = addr;
+            addressController.text = addr;
+            await ProfileFirestore().updateAddress(profile.value.id, addr);
+          }
+          userServiceImpl.profile = profile.value;
           update(); // Notify SintBuilder listeners
+          AppUtilities.showSnackBar(
+            title: AppTranslationConstants.location.tr,
+            message: addr.isNotEmpty ? addr : AppTranslationConstants.location.tr,
+          );
         }
         AppConfig.logger.d("Location retrieved and updated successfully for ${_location.value}");
       } else if (kIsWeb) {
-        // IP-based fallback for web when browser geolocation is denied
+        // IP-based fallback for web when browser geolocation is denied or unavailable
         await _updateLocationFromIp();
       } else {
         AppConfig.logger.d("Location was not updated as access is deniedForever");
       }
     } catch (e, st) {
       NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'updateLocation');
+    } finally {
+      isUpdatingLocation.value = false;
+      update([AppPageIdConstants.profile]);
     }
-
-    update([AppPageIdConstants.profile]);
   }
 
   /// Fallback: get approximate location from IP address (web only).
   Future<void> _updateLocationFromIp() async {
     try {
       final response = await http.get(
-        Uri.parse('http://ip-api.com/json/?fields=status,city,regionName,country,lat,lon'),
+        Uri.parse('https://ipwho.is/'),
       ).timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data['status'] == 'success') {
-          final city = data['city'] ?? '';
-          final country = data['country'] ?? '';
-          final lat = (data['lat'] as num?)?.toDouble() ?? 0.0;
-          final lon = (data['lon'] as num?)?.toDouble() ?? 0.0;
+        if (data['success'] == true) {
+          final city = data['city']?.toString() ?? '';
+          final country = data['country']?.toString() ?? '';
+          final lat = (data['latitude'] as num?)?.toDouble() ?? 0.0;
+          final lon = (data['longitude'] as num?)?.toDouble() ?? 0.0;
 
           String address = '';
           if (city.isNotEmpty && country.isNotEmpty) {
@@ -460,15 +486,17 @@ class ProfileController extends SintController implements ProfileService {
             if (await ProfileFirestore().updatePosition(profile.value.id, newPosition)) {
               profile.value.position = newPosition;
               profile.value.address = address;
-              // Also save the IP-derived address to Firestore since geocoding may fail in updatePosition
-              if (address.isNotEmpty) {
-                await ProfileFirestore().updateAddress(profile.value.id, address);
-              }
+              await ProfileFirestore().updateAddress(profile.value.id, address);
+              userServiceImpl.profile = profile.value;
             }
             _location.value = address;
             addressController.text = address;
             AppConfig.logger.d("Location from IP: $address ($lat, $lon)");
             update(); // Notify SintBuilder listeners
+            AppUtilities.showSnackBar(
+              title: AppTranslationConstants.location.tr,
+              message: address,
+            );
           }
         }
       }

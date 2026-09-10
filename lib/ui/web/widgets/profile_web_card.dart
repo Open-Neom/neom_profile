@@ -215,7 +215,7 @@ class ProfileWebCard extends StatelessWidget {
               const SizedBox(height: 8),
             ],
             // Location
-            if (isEditing && AppConfig.instance.appInUse == AppInUse.i) ...[
+            if (isEditing) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -247,7 +247,13 @@ class ProfileWebCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   IconButton(
-                    icon: const Icon(Icons.my_location, color: Colors.white70, size: 16),
+                    icon: Obx(() => controller.isUpdatingLocation.value
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColor.bondiBlue75),
+                          )
+                        : const Icon(Icons.my_location, color: Colors.white70, size: 16)),
                     onPressed: () => AuthGuard.protect(context, () => controller.updateLocation()),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -257,27 +263,58 @@ class ProfileWebCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
             ] else ...[
-              GestureDetector(
-                onTap: () => AppConfig.instance.appInUse == AppInUse.i
-                    ? controller.changeEditStatus(status: true)
-                    : AuthGuard.protect(context, () => controller.updateLocation()),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.place, color: Colors.white70, size: 14),
-                    const SizedBox(width: 4),
-                    Text(
-                      controller.location.isNotEmpty
-                          ? controller.location.length > CoreConstants.maxLocationNameLength
-                              ? '${controller.location.substring(0, CoreConstants.maxLocationNameLength)}...'
-                              : controller.location
-                          : AppTranslationConstants.notSpecified.tr,
-                      style: TextStyle(color: AppColor.textSecondary, fontSize: 13),
+              Obx(() {
+                final loc = controller.location;
+                final isUpdating = controller.isUpdatingLocation.value;
+                return MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: isUpdating
+                        ? null
+                        : () => AuthGuard.protect(context, () => controller.updateLocation()),
+                    child: Tooltip(
+                      message: loc.isNotEmpty ? loc : AppTranslationConstants.location.tr,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isUpdating)
+                            const Padding(
+                              padding: EdgeInsets.only(right: 6),
+                              child: SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColor.bondiBlue75,
+                                ),
+                              ),
+                            )
+                          else
+                            const Icon(Icons.place, color: Colors.white70, size: 14),
+                          const SizedBox(width: 4),
+                          Text(
+                            loc.isNotEmpty
+                                ? loc.length > CoreConstants.maxLocationNameLength
+                                    ? '${loc.substring(0, CoreConstants.maxLocationNameLength)}...'
+                                    : loc
+                                : AppTranslationConstants.notSpecified.tr,
+                            style: TextStyle(
+                              color: loc.isNotEmpty
+                                  ? AppColor.textSecondary
+                                  : AppColor.bondiBlue75,
+                              fontSize: 13,
+                              decoration: loc.isEmpty
+                                  ? TextDecoration.underline
+                                  : TextDecoration.none,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              }),
               const SizedBox(height: 12),
             ],
             // Followers
