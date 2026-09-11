@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert' show jsonDecode;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -112,20 +113,44 @@ class ProfileController extends SintController implements ProfileService {
   Rx<FacilityType>  facilityType = FacilityType.general.obs;
   Rx<PlaceType>  placeType = PlaceType.general.obs;
 
+  StreamSubscription<String>? _postRemovedSubscription;
+
   @override
   void onInit() {
     super.onInit();
     AppConfig.logger.t("Profile Controller");
 
     try {
-        setProfileInfo();
-      } catch (e, st) {
-        NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'onInit');
+      setProfileInfo();
+      _postRemovedSubscription = userServiceImpl.postRemovedStream.listen((postId) {
+        handlePostRemoved(postId);
+      });
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_profile', operation: 'onInit');
+    }
+  }
+
+  void handlePostRemoved(String postId) {
+    bool changed = false;
+    if (profile.value.posts != null && profile.value.posts!.contains(postId)) {
+      profile.value.posts!.removeWhere((id) => id == postId);
+      changed = true;
+    }
+    final postIndex = profilePosts.indexWhere((p) => p.id == postId);
+    if (postIndex != -1) {
+      profilePosts.removeAt(postIndex);
+      postCount = profilePosts.length;
+      changed = true;
+    }
+    if (changed) {
+      profile.refresh();
+      update([AppPageIdConstants.profile, AppPageIdConstants.profilePosts]);
     }
   }
 
   @override
   void onClose() {
+    _postRemovedSubscription?.cancel();
     // FIXED: Dispose TextEditingControllers to prevent memory leaks
     nameController.dispose();
     aboutMeController.dispose();
