@@ -45,6 +45,7 @@ import 'package:neom_core/domain/use_cases/profile_service.dart';
 import 'package:neom_core/domain/use_cases/user_service.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/core_utilities.dart';
+import 'package:neom_core/utils/post_utilities.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/enums/facilitator_type.dart';
 import 'package:neom_core/utils/enums/media_type.dart';
@@ -292,7 +293,8 @@ class ProfileController extends SintController implements ProfileService {
 
   Future<void> getProfilePosts() async {
     AppConfig.logger.d("getProfilePosts");
-    profilePosts.value = await PostFirestore().getProfilePosts(profile.value.id);
+    final rawPosts = await PostFirestore().getProfilePosts(profile.value.id);
+    profilePosts.value = PostUtilities.deduplicatePosts(rawPosts);
 
     for (var post in profilePosts) {
       Event event = Event();
